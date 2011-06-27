@@ -6,6 +6,7 @@ Scene::Scene(Uniform *camera) : new_object_id(0), camera(camera) {
 Scene::~Scene() {
     std::map<int,Object*>::iterator it;
     for(it=objects.begin();it!=objects.end();it++) {
+        it->second->destroy();
         delete it->second;
     }
     objects.clear();
