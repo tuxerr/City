@@ -33,6 +33,12 @@ void Object::update_vertices_buffer(void *data,int size,unsigned int part_number
     }
 }
 
+void Object::vertices_buffer_link(unsigned int src_part,unsigned int dest_part) {
+    if(src_part<parts.size() && dest_part<parts.size()) {
+        parts[dest_part].vbo=parts[src_part].vbo;
+    }
+}
+
 void Object::update_lines_index_buffer(void *data,int size,unsigned int part_number) {
     if(part_number<parts.size()) {
         if(!parts[part_number].ibo_lines.iscreated())
