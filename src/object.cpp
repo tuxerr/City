@@ -10,6 +10,18 @@ Object::Object() :
     modelview.identity();
 }
 
+void Object::destroy() {
+    // destroy all subparts VBOs
+    for(std::vector<ObjectPart>::iterator it=parts.begin();it!=parts.end();it++) {
+        it->vbo.destroy();
+        it->ibo_lines.destroy();
+        it->ibo_triangles.destroy();
+        it->ibo_quads.destroy();
+        it->cbo.destroy();
+        it->tbo.destroy();
+    }
+}
+
 int Object::new_part() {
     ObjectPart part = 
     {

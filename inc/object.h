@@ -19,6 +19,7 @@ typedef struct ObjectPart {
 class Object {
 public:
     Object();
+    void destroy();
     int new_part();
     void update_vertices_buffer(void *data,int size,unsigned int part_number=0);
     void vertices_buffer_link(unsigned int src_part,unsigned int dest_part);

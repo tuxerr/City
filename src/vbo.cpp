@@ -19,8 +19,10 @@ void VBO::create() {
 }
 
 void VBO::destroy() {
-    glDeleteBuffers(1,&vbo);
-    created=false;
+    if(created) {
+        glDeleteBuffers(1,&vbo);
+        created=false;
+    }
 }
 
 void VBO::bind() {
