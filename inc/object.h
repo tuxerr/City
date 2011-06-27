@@ -11,14 +11,21 @@
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
+typedef struct ObjectPart {
+    VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo,tbo;
+    /* reflection stuff */
+} ObjectPart;
+
 class Object {
 public:
     Object();
-    void update_vertices_buffer(void *data,int size);
-    void update_lines_index_buffer(void *data,int size);
-    void update_triangles_index_buffer(void *data,int size);
-    void update_quads_index_buffer(void *data,int size);
-    void update_color_buffer(void *data,int size);
+    int new_part();
+    void update_vertices_buffer(void *data,int size,unsigned int part_number=0);
+    void update_lines_index_buffer(void *data,int size,unsigned int part_number=0);
+    void update_triangles_index_buffer(void *data,int size,unsigned int part_number=0);
+    void update_quads_index_buffer(void *data,int size,unsigned int part_number=0);
+    void update_color_buffer(void *data,int size,unsigned int part_number=0);
+    void update_texture_buffer(void *data,int size,unsigned int part_number=0);
     void enable_color(bool color);
     void set_enable_draw(bool draw);
     bool enable_draw();
@@ -33,7 +40,7 @@ public:
     Vec3<float> position();
     
 private:
-    VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo;
+    std::vector<ObjectPart> parts;
     bool ena_colors;
     bool ena_draw;
     GLenum obj_draw_mode;

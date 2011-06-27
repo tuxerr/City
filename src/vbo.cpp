@@ -2,17 +2,31 @@
 
 VBO::VBO(GLenum target,GLenum mode,int element_size,GLenum element_type)  : 
     vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0), vbo_element_size(element_size),
-    vbo_element_type(element_type)
+    vbo_element_type(element_type), created(false)
 {
-    glGenBuffers(1,&vbo);
 }
 
 VBO::~VBO() {
+}
+
+bool VBO::iscreated() {
+    return created;
+}
+
+void VBO::create() {
+    glGenBuffers(1,&vbo);
+    created=true;
+}
+
+void VBO::destroy() {
     glDeleteBuffers(1,&vbo);
+    created=false;
 }
 
 void VBO::bind() {
-    glBindBuffer(vbo_type,vbo);
+    if(created) {
+        glBindBuffer(vbo_type,vbo);
+    }
 }
 
 void VBO::unbind() {
@@ -20,7 +34,11 @@ void VBO::unbind() {
 }
 
 GLuint VBO::id() {
-    return vbo;
+    if(created) {
+        return vbo;
+    } else {
+        return 0;
+    }
 }
 
 int VBO::size() {
@@ -36,6 +54,9 @@ GLenum VBO::element_type() {
 }
  
 void VBO::update(void *data,int size) {
+    if(!created) {
+        return;
+    }
     bind();
     if(size>vbo_capacity) {
         // resizing the VBO
@@ -57,6 +78,10 @@ void VBO::update(void *data,int size) {
 
 void VBO::print_contents() {
     std::cout<<"Printing VBO contents"<<std::endl;
+    if(!created) {
+        std::cout<<"VBO isn't allocated"<<std::endl;
+        return;
+    }
 
     if(vbo_element_type==GL_FLOAT) {
         float *map_vbo=(float*)glMapBuffer(GL_ARRAY_BUFFER,GL_READ_ONLY);

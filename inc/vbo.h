@@ -9,6 +9,9 @@ class VBO {
 public:
     VBO(GLenum target,GLenum mode,int element_size,GLenum element_type);
     ~VBO();
+    void create();
+    bool iscreated();
+    void destroy();
     void bind();
     void unbind();
     GLuint id();
@@ -26,6 +29,7 @@ private:
     GLsizei vbo_capacity;
     GLint vbo_element_size;
     GLenum vbo_element_type;
+    bool created;
 };
 
 #endif

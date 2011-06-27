@@ -12,10 +12,7 @@ using namespace std;
 
 int main(int argc,char *argv[]) {
     Display disp(1024,768,false);     disp.init();     
-    // loading default program
     disp.new_program("shaders/default.vert","shaders/default.frag");
-
-    // loading red program
     disp.new_program("shaders/default.vert","shaders/red.frag","redfrag");
 
     Uniform *modelview=disp.new_uniform("modelview",UNIFORM_MAT4);
@@ -31,8 +28,6 @@ int main(int argc,char *argv[]) {
     disp.link_program_to_uniform("redfrag",projection);
     disp.link_program_to_uniform("redfrag",color);
     disp.set_modelview_uniform(modelview);
-
-
 
     Scene sce(camera);
     sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
@@ -60,10 +55,13 @@ int main(int argc,char *argv[]) {
     float v3[] = {0,0,0, 0,0,1};
     float c3[] = {1,1,1,1,1,1};
 
+    float v4[] = {0,0,1, 0,2,1};
+    float c4[] = {1,1,1,1,1,0};
+
     o1->update_vertices_buffer(v1,sizeof(v1));
     o1->update_color_buffer(c1,sizeof(c1));
-	o1->set_program("redfrag");
-
+    o1->set_program("redfrag");
+        
     o2->update_vertices_buffer(v2,sizeof(v2));
     o2->update_color_buffer(c2,sizeof(c2));
     o2->set_program("redfrag");
@@ -71,6 +69,10 @@ int main(int argc,char *argv[]) {
     o3->update_vertices_buffer(v3,sizeof(v3));
     o3->update_color_buffer(c3,sizeof(c3));
     o3->set_program("redfrag");
+
+    o3->new_part();
+    o3->update_vertices_buffer(v4,sizeof(v4),1);
+    o3->update_color_buffer(c4,sizeof(c4),1);
 
     timer.init();
     Vec3<float> color_val(1.0,1.0,1.0);
