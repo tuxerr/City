@@ -40,43 +40,52 @@ void ObjFile::load_in_object(Object *o) {
     while(!file.eof()) {
         string start;
         file>>start;
+        if(start=="") {
+            file.get();
+        }
+
+        char line[200]; file.getline(line,200);
+        stringstream sstr(stringstream::in | stringstream::out);
+        sstr<<line;
+
         if(start=="v") {
             float coord;
             
-            file>>coord;
+            sstr>>coord;
             vertices.push_back(coord);
-            file>>coord;
+            sstr>>coord;
             vertices.push_back(coord);
-            file>>coord;
+            sstr>>coord;
             vertices.push_back(coord);
             
         } else if(start=="vn") {
             float coord;
             
-            file>>coord;
+            sstr>>coord;
             normals.push_back(coord);
-            file>>coord;
+            sstr>>coord;
             normals.push_back(coord);
-            file>>coord;
+            sstr>>coord;
             normals.push_back(coord);
             
         } else if(start=="vt") {
             float coord;
             
-            file>>coord;
-            texcoord.push_back(coord);
-            file>>coord;
-            texcoord.push_back(coord);
-            file>>coord;
+            sstr>>coord;
             texcoord.push_back(coord);
 
+            sstr>>coord;
+            texcoord.push_back(coord);
+
+            coord=0;
+            sstr>>coord;
+            texcoord.push_back(coord);
         } else if(start=="f") {
             string str[4];
             ObjData data[4];
-            file>>str[0]>>str[1]>>str[2];
-            if(file.peek()!='\n') {
-                file>>str[3];
-            }
+            
+            sstr>>str[0]>>str[1]>>str[2]>>str[3];
+            cout<<str[0]<<" ! "<<str[1]<<" ! "<<str[2]<<" ! "<<str[3]<<endl;
 
             for(int i=0;i<4;i++) { // load data structure
                 data[i]=parse_face_string(str[i]);
@@ -135,7 +144,6 @@ void ObjFile::load_in_object(Object *o) {
                 line_index.push_back(vert_indexes[data[2]]);
                 line_index.push_back(vert_indexes[data[0]]);
             }
-
         } else if(start=="usemtl") {
             if(first_mtl) {
                 first_mtl=false;
@@ -143,7 +151,6 @@ void ObjFile::load_in_object(Object *o) {
                 save_current_data_in_object(o,act_part);
                 act_part=o->new_part();
             }
-
         }
     }
     save_current_data_in_object(o,act_part);

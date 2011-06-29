@@ -34,10 +34,9 @@ int main(int argc,char *argv[]) {
     
     Object *o1=sce.new_object();
 
-    ObjFile spaceship("data/M60.obj");
+    ObjFile spaceship("data/spaceship.obj");
     spaceship.load_in_object(o1);
-    o1->scale(0.03,0.03,0.03);
-    o1->set_draw_mode(GL_LINES);
+    o1->set_draw_mode(GL_TRIANGLES);
 
     timer.init();
     Vec3<float> color_val(1.0,1.0,1.0);
