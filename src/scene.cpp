@@ -1,15 +1,18 @@
 #include "scene.h"
 
-Scene::Scene(Uniform *camera) : new_object_id(0), camera(camera) {
+Scene::Scene(Display *disp,Uniform *camera,Uniform *modelview) : disp(disp), camera(camera), modelview(modelview) {
 }
 
 Scene::~Scene() {
-    std::map<int,Object*>::iterator it;
+    std::set<Object*>::iterator it;
     for(it=objects.begin();it!=objects.end();it++) {
-        it->second->destroy();
-        delete it->second;
+        delete_object(*it);
     }
     objects.clear();
+}
+
+void Scene::new_draw() {
+    disp->new_draw();
 }
 
 void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
@@ -45,24 +48,37 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
 
 Object* Scene::new_object() {
     Object *o=new Object();
-    objects.insert(std::pair<int,Object*>(new_object_id,o));
-    new_object_id++;
+    objects.insert(o);
     return o;
 }
 
-Object* Scene::get_object(int id) {
-    if(objects.find(id)!=objects.end()) {
-        // id is a valid object identifier
-        return (objects.find(id))->second;
-    } else {
-        return NULL;
+void Scene::delete_object(Object *o) {
+    if(o!=NULL) {
+        o->destroy();
+        delete o;
+    }
+    objects.erase(o);
+}
+
+void Scene::draw_scene() {
+    std::set<Object*>::iterator it;
+    for(it=objects.begin();it!=objects.end();it++) {
+        draw_object(*it);
     }
 }
 
-void Scene::delete_object(int id) {
-    Object *obj=get_object(id);
-    if(obj!=NULL) {
-        delete obj;
+void Scene::draw_object(Object *o) {
+    if(o->enable_draw()) {
+        std::string program_name=o->get_program();
+        // if the object's shader doesn't exist, use default one.
+        Program *program=disp->get_program(program_name);
+
+        modelview->set_value(o->modelview_matrix());
+
+        program->use();
+
+        o->draw();
+
+        program->unuse();
     }
-    objects.erase(id);
 }

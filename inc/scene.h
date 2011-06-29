@@ -2,24 +2,28 @@
 #define DEF_SCENE
 
 #include <iostream>
-#include <map>
+#include <set>
 #include <string>
+#include "display.h"
 #include "object.h"
 #include "vec3.h"
 
 class Scene {
 public:
-    Scene(Uniform *camera);
+    Scene(Display *disp,Uniform *camera,Uniform *modelview);
     ~Scene();
+    void new_draw();
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis);
     Object* new_object();
-    Object* get_object(int id);
-    void delete_object(int id);
-    std::map<int,Object*> objects;
+    void delete_object(Object *o);
+    void draw_scene();
+    void draw_object(Object *o);
 
 private:
-    int new_object_id;
+    std::set<Object*> objects;
+    Display *disp;
     Uniform *camera;
+    Uniform *modelview;
 };
 
 #endif

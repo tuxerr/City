@@ -85,7 +85,6 @@ void ObjFile::load_in_object(Object *o) {
             ObjData data[4];
             
             sstr>>str[0]>>str[1]>>str[2]>>str[3];
-            cout<<str[0]<<" ! "<<str[1]<<" ! "<<str[2]<<" ! "<<str[3]<<endl;
 
             for(int i=0;i<4;i++) { // load data structure
                 data[i]=parse_face_string(str[i]);

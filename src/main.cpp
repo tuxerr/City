@@ -22,9 +22,8 @@ int main(int argc,char *argv[]) {
     disp.link_program_to_uniform("default",modelview);
     disp.link_program_to_uniform("default",camera);
     disp.link_program_to_uniform("default",projection);
-    disp.set_modelview_uniform(modelview);
 
-    Scene sce(camera);
+    Scene sce(&disp,camera,modelview);
     sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
 
     disp.perspective(70,1,100,projection);
@@ -46,11 +45,12 @@ int main(int argc,char *argv[]) {
             color_val=Vec3<float>(0,0,0);
         }
         
-        disp.new_draw();
+        sce.new_draw();
 
         o1->rotate(0.2,0,0,1);
 
-        disp.draw_scene(sce);
+        sce.draw_scene();
+
         c.refresh();
         disp.refresh();
         timer.wait();
