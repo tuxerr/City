@@ -12,7 +12,7 @@
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 typedef struct ObjectPart {
-    VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo,tbo;
+    VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo,tbo,nbo;
     /* reflection stuff */
 } ObjectPart;
 
@@ -22,6 +22,7 @@ public:
     void destroy();
     int new_part();
     void update_vertices_buffer(void *data,int size,unsigned int part_number=0);
+    void update_normals_buffer(void *data,int size,unsigned int part_number=0);
     void vertices_buffer_link(unsigned int src_part,unsigned int dest_part);
     void update_lines_index_buffer(void *data,int size,unsigned int part_number=0);
     void update_triangles_index_buffer(void *data,int size,unsigned int part_number=0);

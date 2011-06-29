@@ -2,6 +2,7 @@
 
 in vec3 in_Vertex;
 in vec3 in_Color;
+in vec3 in_Normal;
 
 uniform mat4 projection;
 uniform mat4 modelview;

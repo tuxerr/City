@@ -43,10 +43,11 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
     camera->set_value(cam);
 }
 
-int Scene::new_object() {
-    objects.insert(std::pair<int,Object*>(new_object_id,new Object()));
+Object* Scene::new_object() {
+    Object *o=new Object();
+    objects.insert(std::pair<int,Object*>(new_object_id,o));
     new_object_id++;
-    return (new_object_id-1);
+    return o;
 }
 
 Object* Scene::get_object(int id) {

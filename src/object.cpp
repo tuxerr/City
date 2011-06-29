@@ -30,6 +30,7 @@ int Object::new_part() {
         VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT),
         VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT),
         VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT),
+        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT),
         VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT) 
     };
 
@@ -42,6 +43,14 @@ void Object::update_vertices_buffer(void *data,int size,unsigned int part_number
         if(!parts[part_number].vbo.iscreated())
             parts[part_number].vbo.create();
         parts[part_number].vbo.update(data,size);
+    }
+}
+
+void Object::update_normals_buffer(void *data,int size,unsigned int part_number) {
+    if(part_number<parts.size()) {
+        if(!parts[part_number].nbo.iscreated())
+            parts[part_number].nbo.create();
+        parts[part_number].nbo.update(data,size);
     }
 }
 
@@ -130,6 +139,12 @@ void Object::draw() {
             it->cbo.bind();
             glEnableVertexAttribArray(SHADER_COLOR_ATTRIB);
             glVertexAttribPointer(SHADER_COLOR_ATTRIB,it->cbo.element_size(),it->cbo.element_type(),GL_FALSE,0,0);
+        }
+
+        if(it->nbo.size()>0) {
+            it->nbo.bind();
+            glEnableVertexAttribArray(SHADER_NORMAL_ATTRIB);
+            glVertexAttribPointer(SHADER_NORMAL_ATTRIB,it->nbo.element_size(),it->nbo.element_type(),GL_FALSE,0,0);
         }
 
         if(obj_draw_mode==GL_LINES && it->ibo_lines.size()>0) {

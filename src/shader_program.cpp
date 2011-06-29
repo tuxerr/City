@@ -27,6 +27,7 @@ void Program::load_shaders(const char *vertex_shader_path,const char *fragment_s
     glBindAttribLocation(program_id,SHADER_VERTEX_ATTRIB,"in_Vertex");
     glBindAttribLocation(program_id,SHADER_COLOR_ATTRIB,"in_Color");
     glBindAttribLocation(program_id,SHADER_TEXTURE_ATTRIB,"in_TexCoord");
+    glBindAttribLocation(program_id,SHADER_NORMAL_ATTRIB,"in_Normal");
 
     glLinkProgram(program_id);
 

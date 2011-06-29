@@ -7,6 +7,7 @@
 #include "building.h"
 #include "scene.h"
 #include "uniform.h"
+#include "objfile.h"
 
 using namespace std;
 
@@ -37,42 +38,10 @@ int main(int argc,char *argv[]) {
     Timer timer;
     Controls c;
     
-    int v1_id=sce.new_object();
-    Object *o1=sce.get_object(v1_id);
+    Object *o1=sce.new_object();
 
-    int v2_id=sce.new_object();
-    Object *o2=sce.get_object(v2_id);
-
-    int v3_id=sce.new_object();
-    Object *o3=sce.get_object(v3_id);
-
-    float v1[] = {0,0,0, 1,0,0};
-    float c1[] = {1.0, 0.0, 0.0, 1,0,0};
-
-    float v2[] = {0,0,0, 0,1,0};
-    float c2[] = {0.0, 1.0, 0.0, 0,1,0};
-
-    float v3[] = {0,0,0, 0,0,1};
-    float c3[] = {1,1,1,1,1,1};
-
-    float v4[] = {0,0,1, 0,2,1};
-    float c4[] = {1,1,1,1,1,0};
-
-    o1->update_vertices_buffer(v1,sizeof(v1));
-    o1->update_color_buffer(c1,sizeof(c1));
-    o1->set_program("redfrag");
-        
-    o2->update_vertices_buffer(v2,sizeof(v2));
-    o2->update_color_buffer(c2,sizeof(c2));
-    o2->set_program("redfrag");
-
-    o3->update_vertices_buffer(v3,sizeof(v3));
-    o3->update_color_buffer(c3,sizeof(c3));
-    o3->set_program("redfrag");
-
-    o3->new_part();
-    o3->update_vertices_buffer(v4,sizeof(v4),1);
-    o3->update_color_buffer(c4,sizeof(c4),1);
+    ObjFile spaceship("data/spaceship.obj");
+    spaceship.load_in_object(o1);
 
     timer.init();
     Vec3<float> color_val(1.0,1.0,1.0);
@@ -85,6 +54,8 @@ int main(int argc,char *argv[]) {
         disp.new_draw();
 
         color->set_value(color_val);
+
+        o1->rotate(0.2,0,0,1);
 
         disp.draw_scene(sce);
         c.refresh();
