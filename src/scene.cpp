@@ -60,6 +60,19 @@ void Scene::delete_object(Object *o) {
     objects.erase(o);
 }
 
+Light* Scene::new_light() {
+    Light *l=new Light();
+    lights.insert(l);
+    return l;
+}
+
+void Scene::delete_light(Light* l) {
+    if(l!=NULL) {
+        delete l;
+    }
+    objects.erase(l);
+}
+
 void Scene::draw_scene() {
     std::set<Object*>::iterator it;
     for(it=objects.begin();it!=objects.end();it++) {

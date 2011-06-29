@@ -6,6 +6,7 @@
 #include <string>
 #include "display.h"
 #include "object.h"
+#include "light.h"
 #include "vec3.h"
 
 class Scene {
@@ -21,6 +22,7 @@ public:
 
 private:
     std::set<Object*> objects;
+    std::set<Light*> lights;
     Display *disp;
     Uniform *camera;
     Uniform *modelview;
