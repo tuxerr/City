@@ -64,11 +64,11 @@ void ObjFile::load_in_object(Object *o) {
             float coord;
             
             file>>coord;
-            normals.push_back(coord);
+            texcoord.push_back(coord);
             file>>coord;
-            normals.push_back(coord);
+            texcoord.push_back(coord);
             file>>coord;
-            normals.push_back(coord);
+            texcoord.push_back(coord);
 
         } else if(start=="f") {
             string str[4];
@@ -143,6 +143,7 @@ void ObjFile::load_in_object(Object *o) {
                 save_current_data_in_object(o,act_part);
                 act_part=o->new_part();
             }
+
         }
     }
     save_current_data_in_object(o,act_part);
