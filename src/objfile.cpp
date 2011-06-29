@@ -147,6 +147,7 @@ void ObjFile::load_in_object(Object *o) {
         }
     }
     save_current_data_in_object(o,act_part);
+    cout<<"Total OpenGL vertices in the .obj : "<<total_vertices<<endl;
 }
 
 ObjData ObjFile::parse_face_string(string substr) {
