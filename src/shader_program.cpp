@@ -110,6 +110,12 @@ void Program::subscribe_to_uniform(Uniform *uni) {
     uni->add_subscriber(&(uniforms[uni]),program_id);
 }
 
+void Program::subscribe_to_uniformblock(UniformBlock *uni) {
+    glUniformBlockBinding(id(),
+                          glGetUniformBlockIndex(id(),uni->get_name().c_str()),
+                          uni->get_attach_point());
+}
+
 void Program::use() {
     glUseProgram(program_id);
     std::map<Uniform*,bool>::iterator uni_it=uniforms.begin();

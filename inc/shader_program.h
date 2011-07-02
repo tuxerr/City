@@ -9,6 +9,7 @@
 #include <string.h>
 #include "matrix4.h"
 #include "uniform.h"
+#include "uniformblock.h"
 
 enum Shader_Attribs {
     SHADER_VERTEX_ATTRIB, SHADER_COLOR_ATTRIB, SHADER_TEXTURE_ATTRIB, SHADER_NORMAL_ATTRIB
@@ -20,6 +21,7 @@ public:
     void load_shaders(const char *vertex_shader_path,const char *fragment_shader_path);
     GLuint compile_shader(const char *path,GLenum shader_type);
     void subscribe_to_uniform(Uniform *uni);
+    void subscribe_to_uniformblock(UniformBlock *uni);
     void use();
     void unuse();
     GLuint id();

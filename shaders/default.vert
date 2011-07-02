@@ -5,9 +5,11 @@ in vec3 in_Color;
 in vec3 in_Normal;
 in vec3 in_TexCoord;
 
-uniform mat4 projection;
-uniform mat4 modelview;
-uniform mat4 camera;
+uniform GlobalMatrices {
+    mat4 projection;
+    mat4 modelview;
+    mat4 camera;
+};
 
 out vec3 color;
 

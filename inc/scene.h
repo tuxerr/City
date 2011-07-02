@@ -19,6 +19,8 @@ public:
     void delete_object(Object *o);
     void draw_scene();
     void draw_object(Object *o);
+    Light *new_light(Vec3<float> pos,Vec3<float> color=Vec3<float>(1,1,1) ,float intensity=1);
+    void delete_light(Light* l);
 
 private:
     std::set<Object*> objects;

@@ -9,9 +9,14 @@ Display::~Display() {
     // destructing all shader programs.
     programs.clear();
 
-    std::vector<Uniform*>::iterator it=uniforms.begin();
-    for(;it!=uniforms.end();it++) {
-        delete (*it);
+    std::set<Uniform*>::iterator itu=uniforms.begin();
+    for(;itu!=uniforms.end();itu++) {
+        delete (*itu);
+    }
+
+    std::set<UniformBlock*>::iterator itub=uniformblocks.begin();
+    for(;itub!=uniformblocks.end();itub++) {
+        delete (*itub);
     }
 
     SDL_Quit();
@@ -65,7 +70,13 @@ Program *Display::get_program(std::string name) {
 
 Uniform* Display::new_uniform(std::string uniform_name,Uniform_Type type) {
     Uniform *uni=new Uniform(uniform_name,type);
-    uniforms.push_back(uni);
+    uniforms.insert(uni);
+    return uni;
+}
+
+UniformBlock* Display::new_uniformblock(std::string uniformblock_name,int size) {
+    UniformBlock *uni=new UniformBlock(uniformblock_name,size,uniformblocks.size());
+    uniformblocks.insert(uni);
     return uni;
 }
 
@@ -73,6 +84,15 @@ void Display::link_program_to_uniform(std::string program_name,Uniform *uni) {
     if(programs.find(program_name)!=programs.end()) {
       // subscribe the program to the uniform
         programs[program_name].subscribe_to_uniform(uni);
+    } else {
+	std::cout<<"Program "<<program_name<<" does not exist"<<std::endl;
+    }
+}
+
+void Display::link_program_to_uniformblock(std::string program_name,UniformBlock *uni) {
+    if(programs.find(program_name)!=programs.end()) {
+      // subscribe the program to the uniform
+        programs[program_name].subscribe_to_uniformblock(uni);
     } else {
 	std::cout<<"Program "<<program_name<<" does not exist"<<std::endl;
     }

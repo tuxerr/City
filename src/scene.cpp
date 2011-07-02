@@ -17,7 +17,6 @@ void Scene::new_draw() {
 
 void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
     Matrix4 cam;
-    cam.clear();
 
     Vec3<float> look=direction-pos;
     Vec3<float> normal=look*axis;
@@ -26,7 +25,7 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
     normal.normalize();
     new_axis.normalize();
     look.normalize();
-    
+
     cam.val[0] = normal.x;
     cam.val[1] = normal.y;
     cam.val[2] = normal.z;
@@ -60,8 +59,8 @@ void Scene::delete_object(Object *o) {
     objects.erase(o);
 }
 
-Light* Scene::new_light() {
-    Light *l=new Light();
+Light* Scene::new_light(Vec3<float> pos,Vec3<float> color,float intensity) {
+    Light *l=new Light(pos,intensity,color);
     lights.insert(l);
     return l;
 }
@@ -70,7 +69,7 @@ void Scene::delete_light(Light* l) {
     if(l!=NULL) {
         delete l;
     }
-    objects.erase(l);
+    lights.erase(l);
 }
 
 void Scene::draw_scene() {

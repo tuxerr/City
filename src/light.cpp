@@ -4,13 +4,13 @@ Light::Light(Vec3<float> pos,float intensity,Vec3<float> color) : pos(pos), colo
 }
 
 void Light::set_pos(Vec3<float> pos) {
-    this.pos=pos;
+    this->pos=pos;
 }
 
 void Light::set_color(Vec3<float> color) {
-    this.color=color;
+    this->color=color;
 }
 
-void Light::set_intensity(Vec3<float> intensity) {
-    this.intensity=intensity;
+void Light::set_intensity(float intensity) {
+    this->intensity=intensity;
 }

@@ -6,7 +6,7 @@
 
 class Light {
 public:
-    Light(Vec3<float> pos,float intensity,Vec3<float> color=Vec3<float>(1,1,1));
+    Light(Vec3<float> pos,float intensity,Vec3<float> color);
     void set_pos(Vec3<float> pos);
     void set_color(Vec3<float> color);
     void set_intensity(float intensity);

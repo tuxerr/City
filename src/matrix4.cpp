@@ -1,23 +1,29 @@
 #include "matrix4.h"
 
 Matrix4::Matrix4() {
-    val.resize(16);
-    val.assign(16,0);
+    clear();
 }
 
-Matrix4::Matrix4(float *val) : val(val,val+16) {
+Matrix4::Matrix4(float *val) {
+    for(int i=0;i<16;i++) {
+        this->val[i]=val[i];
+    }
 }
 
 Matrix4::Matrix4(const Matrix4 &mat) {
-    val=mat.val;
+    for(int i=0;i<16;i++) {
+        this->val[i]=mat.val[i];
+    }
 }
 
 void Matrix4::clear() {
-    val.assign(16,0);
+    for(int i=0;i<16;i++) {
+        val[i]=0;
+    }
 }
 
 void Matrix4::identity() {
-    val.assign(16,0);
+    clear();
     val[0]=1;
     val[5]=1;
     val[10]=1;
@@ -25,7 +31,6 @@ void Matrix4::identity() {
 }
 
 void Matrix4::print() {
-    std::cout<<val.size()<<std::endl;
     std::cout<<val[0]<<" "<<val[1]<<" "<<val[2]<<" "<<val[3]<<"\n"
              <<val[4]<<" "<<val[5]<<" "<<val[6]<<" "<<val[7]<<"\n"
              <<val[8]<<" "<<val[9]<<" "<<val[10]<<" "<<val[11]<<"\n"
@@ -34,7 +39,7 @@ void Matrix4::print() {
 }
 
 float *Matrix4::adress() {
-    return &(*(val.begin()));
+    return val;
 }
 
 Matrix4 Matrix4::operator*(const Matrix4 &mat) {
@@ -55,7 +60,7 @@ void Matrix4::translate(float x,float y,float z) {
     t.val[3]=x;
     t.val[7]=y;
     t.val[11]=z;
-    *this=Matrix4(&val[0])*t;
+    *this=Matrix4(val)*t;
 }
 
 void Matrix4::scale(float x,float y,float z) {
@@ -64,7 +69,7 @@ void Matrix4::scale(float x,float y,float z) {
     s.val[0]=x;
     s.val[5]=y;
     s.val[10]=z;
-    *this=Matrix4(&val[0])*s;
+    *this=Matrix4(val)*s;
 }
 
 
@@ -90,5 +95,5 @@ void Matrix4::rotate(float angle,float x, float y, float z) {
 
     rot.val[15]= 1.0;
 
-    *this=Matrix4(&val[0])*rot;
+    *this=Matrix4(val)*rot;
 }

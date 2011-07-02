@@ -4,11 +4,12 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <vector>
+#include <set>
 #include <SDL/SDL.h>
 #include <GL/glew.h>
 #include "shader_program.h"
 #include "uniform.h"
+#include "uniformblock.h"
 #include "matrix4.h"
 
 #define TITLE "City"
@@ -22,7 +23,9 @@ public:
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
     Program *get_program(std::string name);
     Uniform* new_uniform(std::string uniform_name,Uniform_Type type);
+    UniformBlock* new_uniformblock(std::string uniform_name,int size);
     void link_program_to_uniform(std::string program_name,Uniform *uni);
+    void link_program_to_uniformblock(std::string program_name,UniformBlock *uni);
     void new_draw();
     void refresh();
 
@@ -31,7 +34,8 @@ private:
     int height;
     bool fullscreen;
     std::map<std::string, Program> programs;
-    std::vector<Uniform*> uniforms;
+    std::set<Uniform*> uniforms;
+    std::set<UniformBlock*> uniformblocks;
     Matrix4 projection;
 };
 

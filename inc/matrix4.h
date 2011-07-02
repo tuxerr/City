@@ -22,7 +22,7 @@ public:
     void scale(float x, float y, float z);
     void rotate(float angle,float x, float y, float z);
 
-    std::vector<float> val;
+    float val[16];
 };
 
 #endif

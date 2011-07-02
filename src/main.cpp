@@ -7,13 +7,17 @@
 #include "building.h"
 #include "scene.h"
 #include "uniform.h"
+#include "uniformblock.h"
 #include "objfile.h"
+#include "matrix4.h"
 
 using namespace std;
 
 int main(int argc,char *argv[]) {
     Display disp(1024,768,false);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
+
+    UniformBlock *matrices=disp.new_uniform("");
 
     Uniform *modelview=disp.new_uniform("modelview",UNIFORM_MAT4);
     Uniform *camera=disp.new_uniform("camera",UNIFORM_MAT4);
