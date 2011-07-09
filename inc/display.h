@@ -19,7 +19,7 @@ public:
     Display(int width=800,int height=600,bool fullscreen=false);
     ~Display();
     void init();
-    void perspective(float angle,float near,float far,UniformBlock *matrices,Uniform *projection);
+    void perspective(float angle,float near,float far,UniformBlock *matrices);
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
     Program *get_program(std::string name);
     Uniform* new_uniform(std::string uniform_name,Uniform_Type type);

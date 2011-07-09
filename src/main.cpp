@@ -17,19 +17,13 @@ int main(int argc,char *argv[]) {
     Display disp(1024,768,false);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
 
-    UniformBlock *matrices=disp.new_uniformblock("Global",sizeof(Matrix4)*3);
-    Uniform *camera=disp.new_uniform("camera",UNIFORM_MAT4);
-    Uniform *projection=disp.new_uniform("projection",UNIFORM_MAT4);
-    Uniform *modelview=disp.new_uniform("modelview",UNIFORM_MAT4);
+    UniformBlock *matrices=disp.new_uniformblock("GlobalMatrices",sizeof(Matrix4)*3);
     disp.link_program_to_uniformblock("default",matrices);
-    disp.link_program_to_uniform("default",camera);
-    disp.link_program_to_uniform("default",projection);
-    disp.link_program_to_uniform("default",modelview);
 
-    Scene sce(&disp,matrices,camera,modelview);
+    Scene sce(&disp,matrices);
     sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
 
-    disp.perspective(70,1,100,matrices,projection);
+    disp.perspective(70,1,100,matrices);
 
     Timer timer;
     Controls c;
