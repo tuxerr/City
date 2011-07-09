@@ -19,26 +19,42 @@ Display::~Display() {
         delete (*itub);
     }
 
+    SDL_GL_DeleteContext(glcontext);
+    SDL_DestroyWindow(screen);
     SDL_Quit();
 }
 
 void Display::init() {
-    SDL_Init(SDL_INIT_VIDEO);
+
+    if(SDL_Init(SDL_INIT_VIDEO)<0) {
+        std::cout<<"Error during SDL init : "<<SDL_GetError()<<std::endl;
+        exit(1);
+    }
     
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
     if(fullscreen) {
-        SDL_SetVideoMode(width,height,32,SDL_OPENGL | SDL_FULLSCREEN);
+        screen=SDL_CreateWindow(TITLE,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
+                                width,height,SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | 
+                                SDL_WINDOW_FULLSCREEN);
     } else {
-        SDL_SetVideoMode(width,height,32,SDL_OPENGL);
+        screen=SDL_CreateWindow(TITLE,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
+                                width,height,SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     }
 
-    SDL_WM_SetCaption(TITLE,NULL);
-    
+    glcontext = SDL_GL_CreateContext(screen);
+
+    SDL_GL_SetSwapInterval(1);
+
     glewInit();
     
     glEnable(GL_DEPTH_TEST);
 }
 
-void Display::perspective(float angle,float near,float far,Uniform *perspective) {
+void Display::perspective(float angle,float near,float far,UniformBlock *matrices,Uniform *projection) {
     Matrix4 tmp;
     float f = 1.0 / tan(angle * M_PI / 360); 
     tmp.val[0]=f/((float)width/height);
@@ -47,7 +63,9 @@ void Display::perspective(float angle,float near,float far,Uniform *perspective)
     tmp.val[11]=2*far*near/(near-far);
     tmp.val[14]=-1;
 
-    perspective->set_value(tmp);
+    projection->set_value(tmp);
+    tmp.transpose();
+    matrices->set_data(&tmp,sizeof(tmp),0);
 }
 
 void Display::new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name) {
@@ -75,7 +93,7 @@ Uniform* Display::new_uniform(std::string uniform_name,Uniform_Type type) {
 }
 
 UniformBlock* Display::new_uniformblock(std::string uniformblock_name,int size) {
-    UniformBlock *uni=new UniformBlock(uniformblock_name,size,uniformblocks.size());
+    UniformBlock *uni=new UniformBlock(uniformblock_name,size,uniformblocks.size()+1);
     uniformblocks.insert(uni);
     return uni;
 }
@@ -103,5 +121,5 @@ void Display::new_draw() {
 }
 
 void Display::refresh() {
-    SDL_GL_SwapBuffers();
+    SDL_GL_SwapWindow(screen);
 }

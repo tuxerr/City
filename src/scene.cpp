@@ -1,6 +1,6 @@
 #include "scene.h"
 
-Scene::Scene(Display *disp,Uniform *camera,Uniform *modelview) : disp(disp), camera(camera), modelview(modelview) {
+Scene::Scene(Display *disp,UniformBlock *matrices,Uniform *camera,Uniform *modelview) : disp(disp), matrices(matrices), camera(camera), modelview(modelview) {
 }
 
 Scene::~Scene() {
@@ -42,6 +42,7 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
 
     cam.translate(-pos.x,-pos.y,-pos.z);
 
+    matrices->set_data(&cam,sizeof(cam),2*sizeof(Matrix4));
     camera->set_value(cam);
 }
 
@@ -85,6 +86,7 @@ void Scene::draw_object(Object *o) {
         // if the object's shader doesn't exist, use default one.
         Program *program=disp->get_program(program_name);
 
+        matrices->set_data(&(o->modelview_matrix()),sizeof(o->modelview_matrix()),sizeof(Matrix4));
         modelview->set_value(o->modelview_matrix());
 
         program->use();

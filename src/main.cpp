@@ -17,20 +17,19 @@ int main(int argc,char *argv[]) {
     Display disp(1024,768,false);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
 
-    UniformBlock *matrices=disp.new_uniform("");
-
-    Uniform *modelview=disp.new_uniform("modelview",UNIFORM_MAT4);
+    UniformBlock *matrices=disp.new_uniformblock("Global",sizeof(Matrix4)*3);
     Uniform *camera=disp.new_uniform("camera",UNIFORM_MAT4);
     Uniform *projection=disp.new_uniform("projection",UNIFORM_MAT4);
-
-    disp.link_program_to_uniform("default",modelview);
+    Uniform *modelview=disp.new_uniform("modelview",UNIFORM_MAT4);
+    disp.link_program_to_uniformblock("default",matrices);
     disp.link_program_to_uniform("default",camera);
     disp.link_program_to_uniform("default",projection);
+    disp.link_program_to_uniform("default",modelview);
 
-    Scene sce(&disp,camera,modelview);
+    Scene sce(&disp,matrices,camera,modelview);
     sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
 
-    disp.perspective(70,1,100,projection);
+    disp.perspective(70,1,100,matrices,projection);
 
     Timer timer;
     Controls c;
@@ -42,13 +41,7 @@ int main(int argc,char *argv[]) {
     o1->set_draw_mode(GL_TRIANGLES);
 
     timer.init();
-    Vec3<float> color_val(1.0,1.0,1.0);
     while(!c.quit) {
-        color_val=color_val+Vec3<float>(0.01,0.01,0.01);
-        if(color_val.norm()>1) {
-            color_val=Vec3<float>(0,0,0);
-        }
-        
         sce.new_draw();
 
         o1->rotate(0.2,0,0,1);

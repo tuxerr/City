@@ -1,5 +1,11 @@
 #include "matrix4.h"
 
+void switchvals(float &v1,float &v2) {
+    float tmp=v1;
+    v1=v2;
+    v2=tmp;
+}
+
 Matrix4::Matrix4() {
     clear();
 }
@@ -70,6 +76,15 @@ void Matrix4::scale(float x,float y,float z) {
     s.val[5]=y;
     s.val[10]=z;
     *this=Matrix4(val)*s;
+}
+
+void Matrix4::transpose() {
+    switchvals(val[1],val[4]);
+    switchvals(val[2],val[8]);
+    switchvals(val[3],val[12]);
+    switchvals(val[7],val[13]);
+    switchvals(val[11],val[14]);
+    switchvals(val[6],val[9]);
 }
 
 

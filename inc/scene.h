@@ -11,7 +11,7 @@
 
 class Scene {
 public:
-    Scene(Display *disp,Uniform *camera,Uniform *modelview);
+    Scene(Display *disp,UniformBlock *matrices,Uniform *camera,Uniform *modelview);
     ~Scene();
     void new_draw();
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis);
@@ -26,6 +26,7 @@ private:
     std::set<Object*> objects;
     std::set<Light*> lights;
     Display *disp;
+    UniformBlock *matrices;
     Uniform *camera;
     Uniform *modelview;
 };

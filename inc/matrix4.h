@@ -17,6 +17,7 @@ public:
     float get_val(int i);
     void set_val(int i,float f);
     float* adress();
+    void transpose();
     Matrix4 operator*(const Matrix4 &mat);
     void translate(float x, float y, float z);
     void scale(float x, float y, float z);
