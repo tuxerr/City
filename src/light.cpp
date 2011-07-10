@@ -4,16 +4,6 @@ Light::Light(UniformBlock *uniform,Vec3<float> pos,float intensity,Vec3<float> c
     uniform(uniform), pos(pos), color(color), direction(Vec3<float>(0,0,0)), intensity(intensity), linear_dissipation(-1), max_illu_angle(-1), illu_angle(-1) {
 }
 
-Light& operator=(const Light& l) {
-    pos=l.pos;
-    color=l.color;
-    direction=l.direction;
-    intensity=l.intensity;
-    linear_dissipation=l.linear_dissipation;
-    max_illu_angle=l.max_illu_angle;
-    illu_angle=l.illu_angle;
-}
-
 void Light::set_pos(Vec3<float> pos) {
     this->pos=pos;
     uniform->set_data(&pos,sizeof(pos),0);
@@ -49,6 +39,7 @@ void Light::set_linear_dissipation(float lin_dissipation) {
 
 void Light::set_uniform(UniformBlock *uniform) {
     this->uniform=uniform;
+    uniform->set_data(&pos,uniform_size(),0);
 }
 
 static int Light::uniform_size() {
