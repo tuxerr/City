@@ -4,6 +4,7 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include <sstream>
 #include "display.h"
 #include "object.h"
 #include "light.h"

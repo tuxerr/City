@@ -111,14 +111,20 @@ void Program::subscribe_to_uniform(Uniform *uni) {
 }
 
 void Program::subscribe_to_uniformblock(UniformBlock *uni) {
-    glUniformBlockBinding(id(),
-                          glGetUniformBlockIndex(id(),uni->get_name().c_str()),
-                          uni->get_attach_point());
-    if(glGetError()==GL_INVALID_VALUE) {
-        std::cout<<"Error while binding block uniform "<<uni->get_name()<<"(program "<<id()
-                 <<") to attach point "<<uni->get_attach_point()<<std::endl;
+    GLuint loc = glGetUniformBlockIndex(id(),uni->get_name().c_str());
+    if(loc==GL_INVALID_INDEX) {
+        std::cout<<"Uniform "<<uni->get_name()<<" does not exist in program "<<id()<<std::endl;
+    } else {
+        glUniformBlockBinding(id(), loc, uni->get_attach_point());
+        if(glGetError()==GL_INVALID_VALUE) {
+            std::cout<<"Error while binding block uniform "<<uni->get_name()<<"(program "<<id()
+                     <<") to attach point "<<uni->get_attach_point()<<std::endl;
+        } else {
+            uni->bind_to_attach_point();      
+            std::cout<<"Uniform "<<uni->get_name()<<" has been bound to attachpoint "<<uni->get_attach_point()<<std::endl;
+        }
+
     }
-    uni->bind_to_attach_point();
 }
 
 void Program::use() {

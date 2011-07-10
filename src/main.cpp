@@ -17,21 +17,11 @@ int main(int argc,char *argv[]) {
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
 
-
     UniformBlock *matrices=disp.new_uniformblock("GlobalMatrices",sizeof(Matrix4)*3);
     disp.link_program_to_uniformblock("default",matrices);
     disp.link_program_to_uniformblock("phong",matrices);
 
-    Uniform *lights_number=disp.new_uniform("light_number",UNIFORM_INT);
-    disp.link_program_to_uniform("phong",lights_number);
-
-    UniformBlock *lights[MAX_LIGHTS];
-    for(int i=0;i<MAX_LIGHTS) {
-        lights[i]=disp.new_uniformblock("lights["+i+"]",sizeof(Light::uniform_size()));
-        disp.link_program_to_uniformblock("phong",lights[i]);
-    }
-
-    Scene sce(&disp,matrices,lights,lights_number);
+    Scene sce(&disp,matrices);
     sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
 
     disp.perspective(70,1,100,matrices);
@@ -40,16 +30,26 @@ int main(int argc,char *argv[]) {
     Controls c;
     
     Object *o1=sce.new_object();
-
     ObjFile spaceship("data/spaceship.obj");
+    
+    Light *l1=sce.new_light(Vec3<float>(0,2,2),Vec3<float>(1,0,1));
+    l1->set_color(Vec3<float>(1,0,1));
+
     spaceship.load_in_object(o1);
     o1->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    o1->set_program("phong");
 
+    int i=0;
     timer.init();
     while(!c.quit) {
         sce.new_draw();
 
+        i++;
         o1->rotate(0.2,0,0,1);
+
+        if(i==100) {
+
+        }
 
         sce.draw_scene();
 

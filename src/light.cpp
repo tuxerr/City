@@ -1,7 +1,8 @@
 #include "light.h"
 
 Light::Light(UniformBlock *uniform,Vec3<float> pos,float intensity,Vec3<float> color) : 
-    uniform(uniform), pos(pos), color(color), direction(Vec3<float>(0,0,0)), intensity(intensity), linear_dissipation(-1), max_illu_angle(-1), illu_angle(-1) {
+    pos(pos), color(color), direction(Vec3<float>(0,0,0)), intensity(intensity), linear_dissipation(-1), max_illu_angle(-1), illu_angle(-1) {
+    set_uniform(uniform);
 }
 
 void Light::set_pos(Vec3<float> pos) {
@@ -42,6 +43,6 @@ void Light::set_uniform(UniformBlock *uniform) {
     uniform->set_data(&pos,uniform_size(),0);
 }
 
-static int Light::uniform_size() {
+int Light::uniform_size() {
     return sizeof(Vec3<float>)*3+sizeof(float)*4;
 }

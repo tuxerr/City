@@ -30,7 +30,7 @@ void ObjFile::load_in_object(Object *o) {
         return;
     }
 
-    o->set_draw_mode(GL_TRIANGLES);
+    o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     reset();
 
     int act_part=0;

@@ -3,7 +3,7 @@
 Object::Object() : 
     ena_colors(true),
     ena_draw(true),
-    obj_draw_mode(GL_LINES),
+    obj_draw_mode(OBJECT_DRAW_LINES),
     program_name("default")
 {
     new_part();                 // create part 0.
@@ -147,17 +147,17 @@ void Object::draw() {
             glVertexAttribPointer(SHADER_NORMAL_ATTRIB,it->nbo.element_size(),it->nbo.element_type(),GL_FALSE,0,0);
         }
 
-        if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && it->ibo_lines.size()>0) {
+        if(obj_draw_mode==OBJECT_DRAW_LINES && it->ibo_lines.size()>0) {
             it->ibo_lines.bind();
-            glDrawElements(GL_TRIANGLES,it->ibo_lines.size()/it->ibo_lines.element_size(),it->ibo_lines.element_type(),0);
+            glDrawElements(GL_LINES,it->ibo_lines.size()/it->ibo_lines.element_size(),it->ibo_lines.element_type(),0);
 
-        } else if(obj_draw_mode==OBJECT_DRAW_LINES && it->ibo_quads.size()>0) {
+        } else if(obj_draw_mode==OBJECT_DRAW_QUADS && it->ibo_quads.size()>0) {
             it->ibo_quads.bind();
-            glDrawElements(GL_LINES,it->ibo_quads.size()/it->ibo_quads.element_size(),it->ibo_quads.element_type(),0);
+            glDrawElements(GL_QUADS,it->ibo_quads.size()/it->ibo_quads.element_size(),it->ibo_quads.element_type(),0);
 
-        } else if(obj_draw_mode==OBJECT_DRAW_QUADS && it->ibo_triangles.size()>0) {
+        } else if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && it->ibo_triangles.size()>0) {
             it->ibo_triangles.bind();
-            glDrawElements(GL_QUADS,it->ibo_triangles.size()/it->ibo_triangles.element_size(),it->ibo_triangles.element_type(),0);
+            glDrawElements(GL_TRIANGLES,it->ibo_triangles.size()/it->ibo_triangles.element_size(),it->ibo_triangles.element_type(),0);
 
         } else {
             // draw using standard index if nothing else has been found

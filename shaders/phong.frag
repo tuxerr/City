@@ -1,8 +1,10 @@
-#version 140
+#version 330
 
-smooth in pos;
-smooth in normal;
+layout(std140) uniform;
+
 in vec3 color;
+smooth in vec4 pos;
+smooth in vec4 normal;
 
 uniform Light {
    vec3 origin;
@@ -14,8 +16,12 @@ uniform Light {
    float illu_angle;
 } lights[16];
 
-uniform int light_number;
+uniform int lightnumber;
 
 void main(void) {
-     gl_FragColor=vec4(color,1.0);
-}
+     if(lightnumber == 0) {
+          gl_FragColor=vec4(color,1);
+     } else {
+          gl_FragColor=vec4(1,0,0,1);
+     }
+}       

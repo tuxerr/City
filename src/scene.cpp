@@ -4,14 +4,18 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
     }
-    if(disp.has_program("phong")) {
-        *lights_number=disp.new_uniform("light_number",UNIFORM_INT);
-        disp.link_program_to_uniform("phong",lights_number);
-        
+    if(disp->has_program("phong")) {
+        uniform_light_number=disp->new_uniform("lightnumber",UNIFORM_INT);
+        disp->link_program_to_uniform("phong",uniform_light_number);
+
         for(int i=0;i<MAX_LIGHTS;i++) {
-            uniform_lights[i]=disp.new_uniformblock("lights["+i+"]",sizeof(Light::uniform_size()));
-            disp.link_program_to_uniformblock("phong",lights[i]);
+            std::stringstream uniform_name;
+            uniform_name<<"Light["<<i<<"]";
+            uniform_lights[i]=disp->new_uniformblock(uniform_name.str(),Light::uniform_size());
+            disp->link_program_to_uniformblock("phong",uniform_lights[i]);
         }
+
+        uniform_light_number->set_value(light_number);
     }
 }
 
@@ -83,25 +87,32 @@ Light* Scene::new_light(Vec3<float> pos,Vec3<float> color,float intensity) {
         if(lights[i]==NULL) {
             Light *l=new Light(uniform_lights[i],pos,intensity,color);
             lights[i]=l;
+            light_number++;
+            uniform_light_number->set_value(light_number);
             return l;            
         }
     }
     
-    if(!created) {
-        std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
-        return NULL;
-    }
+    std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+    return NULL;
 }
 
 void Scene::delete_light(Light* l) {
     if(l!=NULL) {
         for(int i=0;i<MAX_LIGHTS;i++) {
             if(lights[i]==l) {
-                lights[i]=NULL;
+                for(int j=i;j<MAX_LIGHTS-1;j++) {
+                    lights[j]=lights[j+1];
+                    if(lights[j]!=NULL) {
+                        lights[j]->set_uniform(uniform_lights[j]);
+                    }
+                }
+                lights[MAX_LIGHTS-1]=NULL;
             }
         }
         delete l;
-        uniform_light_number--;
+        light_number--;
+        uniform_light_number->set_value(light_number);
     }
 }
 

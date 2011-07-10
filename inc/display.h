@@ -22,6 +22,7 @@ public:
     void perspective(float angle,float near,float far,UniformBlock *matrices);
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
     bool has_program(std::string name);
+    Program *get_program(std::string name);
     Uniform* new_uniform(std::string uniform_name,Uniform_Type type);
     UniformBlock* new_uniformblock(std::string uniform_name,int size);
     void link_program_to_uniform(std::string program_name,Uniform *uni);

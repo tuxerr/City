@@ -3,7 +3,6 @@
 UniformBlock::UniformBlock(std::string name,int size,int attachpoint) : 
     name(name), size(size), iscreated(false), attachpoint(attachpoint)
 {
-    std::cout<<"Created new uniformblock "<<name<<"("<<size<<") with attach "<<attachpoint<<std::endl;
     create();
 }
 
@@ -40,6 +39,7 @@ GLuint UniformBlock::get_ubo() {
 }
 
 void UniformBlock::set_data(void *data,int size,int offset) {
+    std::cout<<"Sending "<<size<<" bytes to "<<attachpoint<<std::endl;
     if(iscreated) {
         glBindBuffer(GL_UNIFORM_BUFFER,ubo);
         glBufferSubData(GL_UNIFORM_BUFFER,offset,size,data);

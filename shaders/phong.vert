@@ -7,19 +7,19 @@ in vec3 in_Color;
 in vec3 in_Normal;
 in vec3 in_TexCoord;
 
+out vec3 color;
+smooth out vec4 pos;
+smooth out vec4 normal;
+
 uniform GlobalMatrices {
     mat4 projection;
     mat4 modelview;
     mat4 camera;
 };
 
-out vec3 color;
-smooth out pos;
-smooth out normal;
-
 void main() {
     pos=modelview*vec4(in_Vertex,1.0);
-    normal=in_Normal;
+    normal=vec4(in_Normal,1.0);
     color=in_Color;
 
     gl_Position = projection*camera*pos;

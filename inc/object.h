@@ -16,7 +16,7 @@ typedef struct ObjectPart {
     /* reflection stuff */
 } ObjectPart;
 
-typedef enum Draw_Modes {
+typedef enum Object_Draw_Modes {
     OBJECT_DRAW_TRIANGLES = GL_TRIANGLES, OBJECT_DRAW_LINES = GL_LINES, OBJECT_DRAW_QUADS = GL_QUADS
 } Object_Draw_Modes;
 
@@ -50,7 +50,7 @@ private:
     std::vector<ObjectPart> parts;
     bool ena_colors;
     bool ena_draw;
-    GLenum obj_draw_mode;
+    Object_Draw_Modes obj_draw_mode;
     Matrix4 modelview;
     Vec3<float> pos;
     std::string program_name;
