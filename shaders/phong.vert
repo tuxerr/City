@@ -14,8 +14,13 @@ uniform GlobalMatrices {
 };
 
 out vec3 color;
+smooth out pos;
+smooth out normal;
 
 void main() {
-    gl_Position = projection*camera*modelview*vec4(in_Vertex,1.0);
+    pos=modelview*vec4(in_Vertex,1.0);
+    normal=in_Normal;
     color=in_Color;
+
+    gl_Position = projection*camera*pos;
 }

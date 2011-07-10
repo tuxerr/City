@@ -112,7 +112,7 @@ bool Object::enable_draw() {
     return ena_draw;
 }
 
-void Object::set_draw_mode(GLenum draw_mode) {
+void Object::set_draw_mode(Object_Draw_Modes draw_mode) {
     obj_draw_mode=draw_mode;
 }
 
@@ -147,17 +147,17 @@ void Object::draw() {
             glVertexAttribPointer(SHADER_NORMAL_ATTRIB,it->nbo.element_size(),it->nbo.element_type(),GL_FALSE,0,0);
         }
 
-        if(obj_draw_mode==GL_LINES && it->ibo_lines.size()>0) {
+        if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && it->ibo_lines.size()>0) {
             it->ibo_lines.bind();
-            glDrawElements(obj_draw_mode,it->ibo_lines.size()/it->ibo_lines.element_size(),it->ibo_lines.element_type(),0);
+            glDrawElements(GL_TRIANGLES,it->ibo_lines.size()/it->ibo_lines.element_size(),it->ibo_lines.element_type(),0);
 
-        } else if(obj_draw_mode==GL_QUADS && it->ibo_quads.size()>0) {
+        } else if(obj_draw_mode==OBJECT_DRAW_LINES && it->ibo_quads.size()>0) {
             it->ibo_quads.bind();
-            glDrawElements(obj_draw_mode,it->ibo_quads.size()/it->ibo_quads.element_size(),it->ibo_quads.element_type(),0);
+            glDrawElements(GL_LINES,it->ibo_quads.size()/it->ibo_quads.element_size(),it->ibo_quads.element_type(),0);
 
-        } else if(obj_draw_mode==GL_TRIANGLES && it->ibo_triangles.size()>0) {
+        } else if(obj_draw_mode==OBJECT_DRAW_QUADS && it->ibo_triangles.size()>0) {
             it->ibo_triangles.bind();
-            glDrawElements(obj_draw_mode,it->ibo_triangles.size()/it->ibo_triangles.element_size(),it->ibo_triangles.element_type(),0);
+            glDrawElements(GL_QUADS,it->ibo_triangles.size()/it->ibo_triangles.element_size(),it->ibo_triangles.element_type(),0);
 
         } else {
             // draw using standard index if nothing else has been found

@@ -16,6 +16,10 @@ typedef struct ObjectPart {
     /* reflection stuff */
 } ObjectPart;
 
+typedef enum Draw_Modes {
+    OBJECT_DRAW_TRIANGLES = GL_TRIANGLES, OBJECT_DRAW_LINES = GL_LINES, OBJECT_DRAW_QUADS = GL_QUADS
+} Object_Draw_Modes;
+
 class Object {
 public:
     Object();
@@ -32,7 +36,7 @@ public:
     void enable_color(bool color);
     void set_enable_draw(bool draw);
     bool enable_draw();
-    void set_draw_mode(GLenum draw_mode);
+    void set_draw_mode(Object_Draw_Modes draw_mode);
     Matrix4 &modelview_matrix();
     std::string get_program();
     void set_program(std::string name);

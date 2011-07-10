@@ -9,6 +9,8 @@
 #include "light.h"
 #include "vec3.h"
 
+#define MAX_LIGHTS 16
+
 class Scene {
 public:
     Scene(Display *disp,UniformBlock *matrices);
@@ -24,9 +26,12 @@ public:
 
 private:
     std::set<Object*> objects;
-    std::set<Light*> lights;
+    Light* lights[MAX_LIGHTS];
+    int light_number;
     Display *disp;
     UniformBlock *matrices;
+    UniformBlock *uniform_lights[MAX_LIGHTS];
+    Uniform *uniform_light_number;
 };
 
 #endif

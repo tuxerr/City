@@ -77,11 +77,11 @@ void Display::new_program(const char *vertex_shader_path,const char *fragment_sh
     programs[name].load_shaders(vertex_shader_path,fragment_shader_path);
 }
 
-Program *Display::get_program(std::string name) {
+bool Display::has_program(std::string name) {
     if(programs.find(name)==programs.end()) {
-        return &programs[name];
+        return false;
     } else {
-        return &programs["default"];
+        return true;
     }
 }
 

@@ -1,6 +1,18 @@
 #include "scene.h"
 
-Scene::Scene(Display *disp,UniformBlock *matrices) : disp(disp), matrices(matrices) {
+Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp), matrices(matrices) {
+    for(int i=0;i<MAX_LIGHTS;i++) {
+        lights[i]=NULL;
+    }
+    if(disp.has_program("phong")) {
+        *lights_number=disp.new_uniform("light_number",UNIFORM_INT);
+        disp.link_program_to_uniform("phong",lights_number);
+        
+        for(int i=0;i<MAX_LIGHTS;i++) {
+            uniform_lights[i]=disp.new_uniformblock("lights["+i+"]",sizeof(Light::uniform_size()));
+            disp.link_program_to_uniformblock("phong",lights[i]);
+        }
+    }
 }
 
 Scene::~Scene() {
@@ -9,6 +21,12 @@ Scene::~Scene() {
         delete_object(*it);
     }
     objects.clear();
+
+    for(int i=0;i<MAX_LIGHTS;i++) {
+        if(lights[i]!=NULL) {
+            delete lights[i];
+        }
+    }
 }
 
 void Scene::new_draw() {
@@ -61,16 +79,30 @@ void Scene::delete_object(Object *o) {
 }
 
 Light* Scene::new_light(Vec3<float> pos,Vec3<float> color,float intensity) {
-    Light *l=new Light(pos,intensity,color);
-    lights.insert(l);
-    return l;
+    for(int i=0;i<MAX_LIGHTS;i++) {
+        if(lights[i]==NULL) {
+            Light *l=new Light(uniform_lights[i],pos,intensity,color);
+            lights[i]=l;
+            return l;            
+        }
+    }
+    
+    if(!created) {
+        std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+        return NULL;
+    }
 }
 
 void Scene::delete_light(Light* l) {
     if(l!=NULL) {
+        for(int i=0;i<MAX_LIGHTS;i++) {
+            if(lights[i]==l) {
+                lights[i]=NULL;
+            }
+        }
         delete l;
+        uniform_light_number--;
     }
-    lights.erase(l);
 }
 
 void Scene::draw_scene() {
