@@ -32,8 +32,7 @@ int main(int argc,char *argv[]) {
     Object *o1=sce.new_object();
     ObjFile spaceship("data/spaceship.obj");
     
-    Light *l1=sce.new_light(Vec3<float>(0,2,2),Vec3<float>(1,0,1));
-    l1->set_color(Vec3<float>(1,0,1));
+    Light *l1=sce.new_light(Vec3<float>(1,0,0),Vec3<float>(1,0,1));
 
     spaceship.load_in_object(o1);
     o1->set_draw_mode(OBJECT_DRAW_TRIANGLES);
@@ -46,10 +45,6 @@ int main(int argc,char *argv[]) {
 
         i++;
         o1->rotate(0.2,0,0,1);
-
-        if(i==100) {
-
-        }
 
         sce.draw_scene();
 

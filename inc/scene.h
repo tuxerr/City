@@ -10,7 +10,7 @@
 #include "light.h"
 #include "vec3.h"
 
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 8
 
 class Scene {
 public:
