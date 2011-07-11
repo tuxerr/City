@@ -16,7 +16,7 @@
 
 class Display{
 public:
-    Display(int width=800,int height=600,bool fullscreen=false);
+    Display(int width=800,int height=600,bool fullscreen=false,bool aa=true);
     ~Display();
     void init();
     void perspective(float angle,float near,float far,UniformBlock *matrices);
@@ -36,6 +36,7 @@ private:
     int width;
     int height;
     bool fullscreen;
+    bool antialiasing;
     std::map<std::string, Program> programs;
     std::set<Uniform*> uniforms;
     std::set<UniformBlock*> uniformblocks;

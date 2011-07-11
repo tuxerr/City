@@ -1,7 +1,7 @@
 #include "display.h"
 
-Display::Display(int width,int height,bool fullscreen) : 
-    width(width), height(height), fullscreen(fullscreen)
+Display::Display(int width,int height,bool fullscreen,bool aa) : 
+    width(width), height(height), fullscreen(fullscreen), antialiasing(aa)
 {
 }
 
@@ -33,8 +33,14 @@ void Display::init() {
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+    if(antialiasing) {
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    }
 
     if(fullscreen) {
         screen=SDL_CreateWindow(TITLE,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,

@@ -20,17 +20,20 @@ uniform int lightnumber;
 
 vec4 spotlight(int lightID) {
      vec4 globalcolor = (vec4(color,1.0)+vec4(Lights[lightID].color,1.0))*0.5;
-     vec4 point_to_light = (vec4(Lights[lightID].origin,1.0)-pos);
-     vec4 norm_normal = normalize(normal);
 
-     float diffuse_mult_factor = dot(normalize(point_to_light),norm_normal);
-     float specular_mult_factor = abs(normalize(dot(normalize(-pos),reflect(point_to_light,norm_normal))));
+     vec3 light_ray = Lights[lightID].origin-pos.xyz;
+     vec3 norm_normal = normalize(normal.xyz);
+     vec3 reflected_ray = reflect(-normalize(light_ray),norm_normal);
+     vec3 eye_ray = -pos.xyz;
 
-     vec4 diffuse = diffuse_mult_factor*globalcolor*0.35;
+     float diffuse_mult_factor = dot(normalize(light_ray),norm_normal);
+     float specular_mult_factor = max(dot(normalize(eye_ray),reflected_ray),0.0);
+
+     vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
      vec4 ambiant = globalcolor*0.25;
-     vec4 specular = pow(specular_mult_factor,10)*globalcolor*0.2;
+     vec4 specular = pow(specular_mult_factor,50)*1.5*globalcolor;
 
-    return ambiant+diffuse+specular;
+     return ambiant+diffuse+specular;
 }
 
 void main(void) {

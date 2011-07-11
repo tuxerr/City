@@ -18,9 +18,11 @@ uniform GlobalMatrices {
 };
 
 void main() {
-    pos=modelview*vec4(in_Vertex,1.0);
-    normal=vec4(in_Normal,1.0);
+     mat4 real_modelview = camera*modelview;
+     mat4 normal_matrix = transpose(inverse(real_modelview));
+    pos=real_modelview*vec4(in_Vertex,1.0);
+    normal=normal_matrix*vec4(in_Normal,1.0);
     color=in_Color;
 
-    gl_Position = projection*camera*pos;
+    gl_Position = projection*pos;
 }
