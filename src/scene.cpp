@@ -153,6 +153,7 @@ void Scene::draw_scene() {
 
 void Scene::draw_object(Object *o) {
     if(o->enable_draw()) {
+
         std::string program_name=o->get_program();
         // if the object's shader doesn't exist, use default one.
         Program *program=disp->get_program(program_name);

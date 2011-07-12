@@ -102,9 +102,16 @@ Uniform* Display::new_uniform(std::string uniform_name,Uniform_Type type) {
 }
 
 UniformBlock* Display::new_uniformblock(std::string uniformblock_name,int size) {
-    UniformBlock *uni=new UniformBlock(uniformblock_name,size,uniformblocks.size()+1);
-    uniformblocks.insert(uni);
-    return uni;
+    int max_uniforms;
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS,&max_uniforms);
+    if(uniformblocks.size()==(unsigned int)max_uniforms) {
+        std::cout<<"MAX_UNIFORM_BLOCKS is "<<max_uniforms<<" : you can't create anymore UniformBlocks"<<std::endl;
+        return NULL;
+    } else {
+        UniformBlock *uni=new UniformBlock(uniformblock_name,size,uniformblocks.size()+1);
+        uniformblocks.insert(uni);
+        return uni;
+    }
 }
 
 void Display::link_program_to_uniform(std::string program_name,Uniform *uni) {
