@@ -19,7 +19,8 @@ public:
     Display(int width=800,int height=600,bool fullscreen=false,bool aa=true);
     ~Display();
     void init();
-    void perspective(float angle,float near,float far,UniformBlock *matrices);
+    int get_width();
+    int get_height();
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
     bool has_program(std::string name);
     Program *get_program(std::string name);

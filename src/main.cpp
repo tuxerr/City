@@ -23,8 +23,7 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
-
-    disp.perspective(70,1,100,matrices);
+    sce.set_perspective(70,1,100);
 
     Timer timer;
     Controls c;
@@ -35,34 +34,8 @@ int main(int argc,char *argv[]) {
     o1->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o1->set_program("phong");
     
-    float v2[]= { -1, -1, 0, 
-                  -1, 1, 0,
-                  1, 1, 0,
-                  1, -1, 0};
-    float c2[]= { 1, 0, 0,
-                  1, 0, 0,
-                  1, 0, 0,
-                  1, 0, 0 };
-    float n2[]= { 1, 0, 0,
-                  1, 0, 0,
-                  1, 0, 0,
-                  1, 0, 0 };
-    
-    Object *o2=sce.new_object();
-    o2->set_draw_mode(OBJECT_DRAW_QUADS);
-    o2->set_program("phong");
-    o2->update_vertices_buffer(v2,sizeof(v2));
-    o2->update_color_buffer(c2,sizeof(c2));
-    o2->update_normals_buffer(n2,sizeof(n2));
-    o2->translate(0,0,-1);
-    o2->scale(3,3,3);
-
-    Light *l1=sce.new_light(Vec3<float>(1,0,0),Vec3<float>(0,0,1));
-    Light *l2=sce.new_light(Vec3<float>(2,2,2),Vec3<float>(1,0,0));
-
-
-
-
+    Light *l1=sce.new_light(Vec3<float>(2,0,1),Vec3<float>(0,0,1));
+    Light *l2=sce.new_light(Vec3<float>(0,2,1),Vec3<float>(1,0,0));
 
     int i=0;
     timer.init();
@@ -73,6 +46,9 @@ int main(int argc,char *argv[]) {
         o1->rotate(0.5,0,0,1);
 
         sce.draw_scene();
+        if(i==100) {
+            sce.set_camera(Vec3<float>(1,1,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
+        }
 
         c.refresh();
         disp.refresh();

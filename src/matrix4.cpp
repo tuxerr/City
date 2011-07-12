@@ -87,6 +87,53 @@ void Matrix4::transpose() {
     switchvals(val[6],val[9]);
 }
 
+void Matrix4::invert() {
+    float inv[16], det;
+    int i;
+
+    inv[0] =   val[5]*val[10]*val[15] - val[5]*val[11]*val[14] - val[9]*val[6]*val[15]
+        + val[9]*val[7]*val[14] + val[13]*val[6]*val[11] - val[13]*val[7]*val[10];
+    inv[4] =  -val[4]*val[10]*val[15] + val[4]*val[11]*val[14] + val[8]*val[6]*val[15]
+        - val[8]*val[7]*val[14] - val[12]*val[6]*val[11] + val[12]*val[7]*val[10];
+    inv[8] =   val[4]*val[9]*val[15] - val[4]*val[11]*val[13] - val[8]*val[5]*val[15]
+        + val[8]*val[7]*val[13] + val[12]*val[5]*val[11] - val[12]*val[7]*val[9];
+    inv[12] = -val[4]*val[9]*val[14] + val[4]*val[10]*val[13] + val[8]*val[5]*val[14]
+        - val[8]*val[6]*val[13] - val[12]*val[5]*val[10] + val[12]*val[6]*val[9];
+    inv[1] =  -val[1]*val[10]*val[15] + val[1]*val[11]*val[14] + val[9]*val[2]*val[15]
+        - val[9]*val[3]*val[14] - val[13]*val[2]*val[11] + val[13]*val[3]*val[10];
+    inv[5] =   val[0]*val[10]*val[15] - val[0]*val[11]*val[14] - val[8]*val[2]*val[15]
+        + val[8]*val[3]*val[14] + val[12]*val[2]*val[11] - val[12]*val[3]*val[10];
+    inv[9] =  -val[0]*val[9]*val[15] + val[0]*val[11]*val[13] + val[8]*val[1]*val[15]
+        - val[8]*val[3]*val[13] - val[12]*val[1]*val[11] + val[12]*val[3]*val[9];
+    inv[13] =  val[0]*val[9]*val[14] - val[0]*val[10]*val[13] - val[8]*val[1]*val[14]
+        + val[8]*val[2]*val[13] + val[12]*val[1]*val[10] - val[12]*val[2]*val[9];
+    inv[2] =   val[1]*val[6]*val[15] - val[1]*val[7]*val[14] - val[5]*val[2]*val[15]
+        + val[5]*val[3]*val[14] + val[13]*val[2]*val[7] - val[13]*val[3]*val[6];
+    inv[6] =  -val[0]*val[6]*val[15] + val[0]*val[7]*val[14] + val[4]*val[2]*val[15]
+        - val[4]*val[3]*val[14] - val[12]*val[2]*val[7] + val[12]*val[3]*val[6];
+    inv[10] =  val[0]*val[5]*val[15] - val[0]*val[7]*val[13] - val[4]*val[1]*val[15]
+        + val[4]*val[3]*val[13] + val[12]*val[1]*val[7] - val[12]*val[3]*val[5];
+    inv[14] = -val[0]*val[5]*val[14] + val[0]*val[6]*val[13] + val[4]*val[1]*val[14]
+        - val[4]*val[2]*val[13] - val[12]*val[1]*val[6] + val[12]*val[2]*val[5];
+    inv[3] =  -val[1]*val[6]*val[11] + val[1]*val[7]*val[10] + val[5]*val[2]*val[11]
+        - val[5]*val[3]*val[10] - val[9]*val[2]*val[7] + val[9]*val[3]*val[6];
+    inv[7] =   val[0]*val[6]*val[11] - val[0]*val[7]*val[10] - val[4]*val[2]*val[11]
+        + val[4]*val[3]*val[10] + val[8]*val[2]*val[7] - val[8]*val[3]*val[6];
+    inv[11] = -val[0]*val[5]*val[11] + val[0]*val[7]*val[9] + val[4]*val[1]*val[11]
+        - val[4]*val[3]*val[9] - val[8]*val[1]*val[7] + val[8]*val[3]*val[5];
+    inv[15] =  val[0]*val[5]*val[10] - val[0]*val[6]*val[9] - val[4]*val[1]*val[10]
+        + val[4]*val[2]*val[9] + val[8]*val[1]*val[6] - val[8]*val[2]*val[5];
+
+    det = val[0]*inv[0] + val[1]*inv[4] + val[2]*inv[8] + val[3]*inv[12];
+    if (det == 0)
+        std::cout<<"Matrix is not inversible"<<std::endl;
+
+    det = 1.0 / det;
+
+    for (i = 0; i < 16; i++)
+        val[i] = inv[i] * det;
+}
+
 
 void Matrix4::rotate(float angle,float x, float y, float z) {
     Vec3<float> axe(x,y,z);

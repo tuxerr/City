@@ -60,17 +60,12 @@ void Display::init() {
     glEnable(GL_DEPTH_TEST);
 }
 
-void Display::perspective(float angle,float near,float far,UniformBlock *matrices) {
-    Matrix4 tmp;
-    float f = 1.0 / tan(angle * M_PI / 360); 
-    tmp.val[0]=f/((float)width/height);
-    tmp.val[5]=f;
-    tmp.val[10]=(far + near)/(near-far);
-    tmp.val[11]=2*far*near/(near-far);
-    tmp.val[14]=-1;
+int Display::get_width() {
+    return width;
+}
 
-    tmp.transpose();
-    matrices->set_data(&tmp,sizeof(tmp),0);
+int Display::get_height() {
+    return height;
 }
 
 void Display::new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name) {

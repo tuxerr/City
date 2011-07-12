@@ -39,7 +39,6 @@ GLuint UniformBlock::get_ubo() {
 }
 
 void UniformBlock::set_data(void *data,int size,int offset) {
-    std::cout<<"Sending "<<size<<" bytes to "<<attachpoint<<std::endl;
     if(iscreated) {
         glBindBuffer(GL_UNIFORM_BUFFER,ubo);
         glBufferSubData(GL_UNIFORM_BUFFER,offset,size,data);

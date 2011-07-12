@@ -1,21 +1,21 @@
 #version 330
 
-layout(std140) uniform;
+layout(std140,row_major) uniform;
 
 in vec3 in_Vertex;
 in vec3 in_Color;
 in vec3 in_Normal;
 in vec3 in_TexCoord;
 
-uniform GlobalMatrices {
-    mat4 projection;
-    mat4 modelview;
-    mat4 camera;
-};
-
 out vec3 color;
 
+uniform GlobalMatrices {
+    mat4 modelview; // camera*modelview
+    mat4 projection_modelview; //perspective*camera*modelview
+    mat4 normal_matrix; // transpose(inverse(modelview))
+};
+
 void main() {
-    gl_Position = projection*camera*modelview*vec4(in_Vertex,1.0);
+    gl_Position = projection_modelview*vec4(in_Vertex,1.0);
     color=in_Color;
 }

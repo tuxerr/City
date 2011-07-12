@@ -17,6 +17,7 @@ public:
     Scene(Display *disp,UniformBlock *matrices);
     ~Scene();
     void new_draw();
+    void set_perspective(float angle,float near,float far);
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis);
     Object* new_object();
     void delete_object(Object *o);
@@ -33,6 +34,10 @@ private:
     UniformBlock *matrices;
     UniformBlock *uniform_lights[MAX_LIGHTS];
     Uniform *uniform_light_number;
+    Matrix4 camera;
+    Matrix4 perspective;
+    bool camera_changed;
+    bool perspective_changed;
 };
 
 #endif

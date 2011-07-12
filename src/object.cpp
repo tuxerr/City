@@ -4,10 +4,11 @@ Object::Object() :
     ena_colors(true),
     ena_draw(true),
     obj_draw_mode(OBJECT_DRAW_LINES),
-    program_name("default")
+    program_name("default"),
+    modelview_changed(true)
 {
     new_part();                 // create part 0.
-    modelview.identity();
+    obj_modelview.identity();
 }
 
 void Object::destroy() {
@@ -117,7 +118,15 @@ void Object::set_draw_mode(Object_Draw_Modes draw_mode) {
 }
 
 Matrix4 &Object::modelview_matrix() {
-    return modelview;
+    return total_modelview;
+}
+
+Matrix4 &Object::projection_modelview_matrix() {
+    return projection_modelview;
+}
+
+Matrix4 &Object::normal_matrix() {
+    return normal_mat;
 }
 
 std::string Object::get_program() {
@@ -176,16 +185,38 @@ void Object::draw() {
 }
 
 void Object::translate(float x, float y, float z) {
-    modelview.translate(x,y,z);
+    obj_modelview.translate(x,y,z);
     pos=pos+Vec3<float>(x,y,z);
+    modelview_changed=true;
 }
 
 void Object::scale(float x, float y, float z) {
-    modelview.scale(x,y,z);
+    obj_modelview.scale(x,y,z);
+    modelview_changed=true;
 }
 
 void Object::rotate(float angle,float x, float y, float z) {
-    modelview.rotate(angle,x,y,z);
+    obj_modelview.rotate(angle,x,y,z);
+    modelview_changed=true;
+}
+
+bool Object::need_to_update_matrices() {
+    return modelview_changed;
+}
+
+void Object::update_matrices(Matrix4 *perspective,Matrix4 *camera) {
+    if(camera!=NULL) {
+        total_modelview = (*camera)*obj_modelview;
+
+        normal_mat = total_modelview; 
+        normal_mat.invert();
+        normal_mat.transpose();
+
+        if(perspective!=NULL) {
+            projection_modelview = (*perspective)*total_modelview;
+        }
+    }
+    modelview_changed=false;
 }
 
 Vec3<float> Object::position() {
