@@ -1,0 +1,11 @@
+TODO du moteur : 
+*opti des matrices
+*gestion des spot lights
+*désactivation/activation des lumières
+*gestion textures
+*FBOs en sortie de fragment shader -> texture
+*shading (deferred shading/shadow mapping/parallax shadow mapping sur
+   grande surface)
+*gestion de halos lumineux dans une skybox
+*environment mapping
+*bump mapping
