@@ -26,11 +26,19 @@ void Light::set_intensity(float intensity) {
 }
 
 void Light::set_spot(Vec3<float> direction,float illu_angle,float max_illu_angle) {
+    this->direction=direction;
     set_direction(direction);
+    if(illu_angle<max_illu_angle) {
+        std::cout<<"Illumination angle is less than maximum illumination angle!"<<std::endl;
+    }
     this->illu_angle=illu_angle;
     this->max_illu_angle=max_illu_angle;
     uniform->set_data(&illu_angle,sizeof(illu_angle),sizeof(Vec3<float>)*3+sizeof(float)*3);
     uniform->set_data(&max_illu_angle,sizeof(max_illu_angle),sizeof(Vec3<float>)*3+sizeof(float)*2);
+}
+
+void Light::desactivate_spot() {
+    set_spot(direction,-1,-1);
 }
 
 void Light::set_linear_dissipation(float lin_dissipation) {
@@ -40,7 +48,11 @@ void Light::set_linear_dissipation(float lin_dissipation) {
 
 void Light::set_uniform(UniformBlock *uniform) {
     this->uniform=uniform;
-    uniform->set_data(&pos,uniform_size(),0);
+    set_pos(pos);
+    set_color(color);
+    set_intensity(intensity);
+    set_spot(direction,illu_angle,max_illu_angle);
+    set_linear_dissipation(linear_dissipation);
 }
 
 int Light::uniform_size() {

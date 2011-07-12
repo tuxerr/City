@@ -129,6 +129,10 @@ void Scene::delete_light(Light* l) {
 }
 
 void Scene::draw_scene() {
+    if(camera_changed) {
+        matrices->set_data(camera.adress(),sizeof(Matrix4),sizeof(Matrix4)*3);
+    }
+
     std::set<Object*>::iterator it;
     for(it=objects.begin();it!=objects.end();it++) {
         Object *o=*it;

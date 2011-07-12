@@ -13,6 +13,7 @@ uniform GlobalMatrices {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
+    mat4 camera;
 };
 
 void main() {

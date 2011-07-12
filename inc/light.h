@@ -13,6 +13,7 @@ public:
     void set_color(Vec3<float> color);
     void set_direction(Vec3<float> direction);    
     void set_spot(Vec3<float> direction,float illu_angle,float max_illu_angle);
+    void desactivate_spot();
     void set_intensity(float intensity);
     void set_linear_dissipation(float linear_dissipation);
     void set_uniform(UniformBlock *uniform);

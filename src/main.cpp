@@ -17,12 +17,14 @@ int main(int argc,char *argv[]) {
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
 
-    UniformBlock *matrices=disp.new_uniformblock("GlobalMatrices",sizeof(Matrix4)*3);
+    UniformBlock *matrices=disp.new_uniformblock("GlobalMatrices",sizeof(Matrix4)*4);
     disp.link_program_to_uniformblock("default",matrices);
     disp.link_program_to_uniformblock("phong",matrices);
 
     Scene sce(&disp,matrices);
-    sce.set_camera(Vec3<float>(2,2,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
+    
+    Vec3<float> camerapos(-4,2,2);
+    sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
     sce.set_perspective(70,1,100);
 
     Timer timer;
@@ -33,9 +35,24 @@ int main(int argc,char *argv[]) {
     spaceship.load_in_object(o1);
     o1->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o1->set_program("phong");
+    o1->translate(0,0,1);
     
-    Light *l1=sce.new_light(Vec3<float>(2,0,1),Vec3<float>(0,0,1));
-    Light *l2=sce.new_light(Vec3<float>(0,2,1),Vec3<float>(1,0,0));
+    float v2[]= { -1, -1, 0, 
+                  -1, 1, 0,
+                  1, 1, 0,
+                  1, -1, 0};
+    float c2[]= { 1, 0, 0,
+                  1, 0, 0,
+                  1, 0, 0,
+                  1, 0, 0 };
+    
+    Object *o2=sce.new_object();
+    o2->set_draw_mode(OBJECT_DRAW_QUADS);
+    o2->update_vertices_buffer(v2,sizeof(v2));
+    o2->update_color_buffer(c2,sizeof(c2));
+    o2->scale(10,1,1);
+
+    Light *l1=sce.new_light(Vec3<float>(1,1,1.5),Vec3<float>(0,0.3,1));
 
     int i=0;
     timer.init();
@@ -43,12 +60,11 @@ int main(int argc,char *argv[]) {
         sce.new_draw();
 
         i++;
-        o1->rotate(0.5,0,0,1);
+//        o1->rotate(0.1,0,0,1);
+        camerapos=camerapos+Vec3<float>(0.03,0,0);
+        sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
 
         sce.draw_scene();
-        if(i==100) {
-            sce.set_camera(Vec3<float>(1,1,2),Vec3<float>(0,0,0),Vec3<float>(0,0,1));
-        }
 
         c.refresh();
         disp.refresh();
