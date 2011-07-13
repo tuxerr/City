@@ -38,7 +38,7 @@ vec4 spotlight(int lightID) {
      vec4 specular = vec4(0,0,0,0);
 
 
-/*     if(Lights[lightID].illu_angle!=-1) {
+     if(Lights[lightID].illu_angle!=-1) {
          return vec4(1,1,1,1);
           float illu_angle = Lights[lightID].illu_angle;
           float max_illu_angle = Lights[lightID].max_illu_angle;
@@ -53,12 +53,12 @@ vec4 spotlight(int lightID) {
               diffuse = diffuse_mult_factor*globalcolor*0.4;
               specular = pow(specular_mult_factor,50)*1.5*globalcolor;
 
-         //     if(spot_angle>max_illu_angle) {
-//                  float attenuation = (spot_angle-max_illu_angle)/(illu_angle-max_illu_angle);
-//                  attenuation=pow(attenuation,2);
-//                  diffuse=diffuse*(1-attenuation);
-//                  specular=specular*(1-attenuation);
-//              }
+              if(spot_angle>max_illu_angle) {
+                  float attenuation = (spot_angle-max_illu_angle)/(illu_angle-max_illu_angle);
+                  attenuation=pow(attenuation,2);
+                  diffuse=diffuse*(1-attenuation);
+                  specular=specular*(1-attenuation);
+              }
           }
      
      }  else { //light is a pointlight */
