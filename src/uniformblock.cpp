@@ -1,5 +1,7 @@
 #include "uniformblock.h"
 
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+
 UniformBlock::UniformBlock(std::string name,int size,int attachpoint) : 
     name(name), size(size), iscreated(false), attachpoint(attachpoint)
 {
@@ -9,7 +11,7 @@ UniformBlock::UniformBlock(std::string name,int size,int attachpoint) :
 void UniformBlock::create() {
     glGenBuffers(1,&ubo);
     glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-    glBufferData(GL_UNIFORM_BUFFER,size,NULL,GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER,size,NULL,GL_STREAM_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER,0);
     iscreated=true;
 }
@@ -17,6 +19,7 @@ void UniformBlock::create() {
 void UniformBlock::destroy() {
     if(iscreated) {
         glDeleteBuffers(1,&ubo);
+        iscreated=false;
     }
 }
 
@@ -44,4 +47,18 @@ void UniformBlock::set_data(void *data,int size,int offset) {
         glBufferSubData(GL_UNIFORM_BUFFER,offset,size,data);
         glBindBuffer(GL_UNIFORM_BUFFER,0);
     }
+}
+
+void UniformBlock::print_contents() {
+    glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+    float *map_ubo = (float*)glMapBuffer(GL_UNIFORM_BUFFER,GL_READ_ONLY);
+    if(map_ubo==NULL) {
+        std::cout<<"UBO contents are not accessible"<<std::endl;
+    } else {
+        for(int i=0;i<size/4;i++) {
+            std::cout<<i<<" : "<<map_ubo[i]<<std::endl;
+        }
+    }
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER,0);
 }

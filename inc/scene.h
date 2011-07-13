@@ -34,6 +34,7 @@ private:
     UniformBlock *matrices;
     UniformBlock *uniform_lights[MAX_LIGHTS];
     Uniform *uniform_light_number;
+    Vec3<float> camera_pos;
     Matrix4 camera;
     Matrix4 perspective;
     bool camera_changed;

@@ -51,6 +51,7 @@ void Scene::set_perspective(float angle,float near,float far) {
 }
 
 void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
+    camera_pos = pos;
     camera.clear();
 
     Vec3<float> look=direction-pos;
@@ -130,7 +131,7 @@ void Scene::delete_light(Light* l) {
 
 void Scene::draw_scene() {
     if(camera_changed) {
-        matrices->set_data(camera.adress(),sizeof(Matrix4),sizeof(Matrix4)*3);
+        matrices->set_data(&camera_pos,sizeof(Vec3<float>),sizeof(Matrix4)*3);
     }
 
     std::set<Object*>::iterator it;

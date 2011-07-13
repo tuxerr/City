@@ -16,6 +16,7 @@ Display::~Display() {
 
     std::set<UniformBlock*>::iterator itub=uniformblocks.begin();
     for(;itub!=uniformblocks.end();itub++) {
+        (*itub)->destroy();
         delete (*itub);
     }
 

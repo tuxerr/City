@@ -15,6 +15,7 @@ public:
     std::string get_name();
     void set_data(void *data,int size,int offset);
     GLuint get_ubo();
+    void print_contents();
 
 private:
     std::string name;

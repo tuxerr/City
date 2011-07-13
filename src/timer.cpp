@@ -25,7 +25,7 @@ void Timer::wait() {
         cout<<"Performance issues : program cannot keep up to "<<fps
             <<" fps (act "<<act_time-last_time<<" ms or "<<act_fps
             <<" fps)"<<endl;
-    }
+    } 
 
     act_time=SDL_GetTicks();
 

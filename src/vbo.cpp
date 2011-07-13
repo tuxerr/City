@@ -79,6 +79,7 @@ void VBO::update(void *data,int size) {
 }
 
 void VBO::print_contents() {
+    bind();
     std::cout<<"Printing VBO contents"<<std::endl;
     if(!created) {
         std::cout<<"VBO isn't allocated"<<std::endl;
@@ -102,5 +103,6 @@ void VBO::print_contents() {
         }
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
     }
+    unbind();
 
 }

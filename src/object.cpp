@@ -118,7 +118,7 @@ void Object::set_draw_mode(Object_Draw_Modes draw_mode) {
 }
 
 Matrix4 &Object::modelview_matrix() {
-    return total_modelview;
+    return obj_modelview;
 }
 
 Matrix4 &Object::projection_modelview_matrix() {
@@ -208,7 +208,7 @@ void Object::update_matrices(Matrix4 *perspective,Matrix4 *camera) {
     if(camera!=NULL) {
         total_modelview = (*camera)*obj_modelview;
 
-        normal_mat = total_modelview; 
+        normal_mat = obj_modelview; 
         normal_mat.invert();
         normal_mat.transpose();
 

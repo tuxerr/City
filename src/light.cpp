@@ -44,6 +44,7 @@ void Light::desactivate_spot() {
 void Light::set_linear_dissipation(float lin_dissipation) {
     this->linear_dissipation=lin_dissipation;
     uniform->set_data(&lin_dissipation,sizeof(lin_dissipation),sizeof(Vec3<float>)*3+sizeof(float));
+
 }
 
 void Light::set_uniform(UniformBlock *uniform) {
