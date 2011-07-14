@@ -7,13 +7,11 @@ smooth in vec4 vert_pos;
 smooth in vec4 vert_normal;
 
 uniform Light {
-   vec3 origin; 
-   vec3 color; 
-   vec3 direction;
-   float intensity; 
-   float linear_dissipation; 
-   float illu_angle; 
-   float max_illu_angle;
+    float intensity; 
+    vec3 spot_values; //linear_dissipation,illu_angle,max_illu_angle
+    vec3 origin; 
+    vec3 color; 
+    vec3 direction;
 } Light[8];
 
 uniform GlobalValues {
@@ -38,9 +36,9 @@ vec4 spotlight(int lightID) {
      vec4 specular = vec4(0,0,0,0);
 
 
-     if(Light[lightID].illu_angle!=-1) {
-         float illu_angle = Light[lightID].illu_angle;
-         float max_illu_angle = Light[lightID].max_illu_angle;
+     if(Light[lightID].spot_values.y!=-1) {
+         float illu_angle = Light[lightID].spot_values.y;
+         float max_illu_angle = Light[lightID].spot_values.z;
          vec3 direction = Light[lightID].direction;
 
          float spot_angle = degrees(acos(dot(normalize(light_ray),normalize(-direction))));
@@ -50,12 +48,10 @@ vec4 spotlight(int lightID) {
              diffuse = diffuse_mult_factor*globalcolor*0.4;
              specular = pow(specular_mult_factor,500)*1*globalcolor;
              specular = specular/max(length(abs(Light[lightID].origin-GlobalValues.camera_pos)/10),1.0);
-
              if(spot_angle>max_illu_angle) {
-                 float attenuation = (spot_angle-max_illu_angle)/(illu_angle-max_illu_angle);
-                 attenuation=pow(attenuation,2);
-                 diffuse=diffuse*(1-attenuation);
-                 specular=specular*(1-attenuation);
+                 float attenuation = (1-(spot_angle-max_illu_angle)/(illu_angle-max_illu_angle));
+                 diffuse=diffuse*attenuation;
+                 specular=specular*attenuation;
              }
          } 
      

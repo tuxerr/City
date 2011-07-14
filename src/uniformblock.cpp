@@ -101,6 +101,7 @@ void UniformBlock::set_value(int val,std::string sub_name) {
 
 void UniformBlock::set_value(float val,std::string sub_name) {
     int offset = get_offset(sub_name);
+
     if(offset!=-1) {
         glBindBuffer(GL_UNIFORM_BUFFER,ubo);
         glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);

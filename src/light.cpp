@@ -33,8 +33,8 @@ void Light::set_spot(Vec3<float> direction,float illu_angle,float max_illu_angle
     }
     this->illu_angle=illu_angle;
     this->max_illu_angle=max_illu_angle;
-    uniform->set_value(illu_angle,"illu_angle");
-    uniform->set_value(max_illu_angle,"max_illu_angle");
+    Vec3<float> values(linear_dissipation,illu_angle,max_illu_angle);
+    uniform->set_value(values,"spot_values");
 }
 
 void Light::desactivate_spot() {
@@ -43,8 +43,8 @@ void Light::desactivate_spot() {
 
 void Light::set_linear_dissipation(float lin_dissipation) {
     this->linear_dissipation=lin_dissipation;
-    uniform->set_value(lin_dissipation,"linear_dissipation");
-
+    Vec3<float> values(linear_dissipation,illu_angle,max_illu_angle);
+    uniform->set_value(values,"spot_values");
 }
 
 void Light::set_uniform(UniformBlock *uniform) {

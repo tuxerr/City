@@ -61,8 +61,8 @@ int main(int argc,char *argv[]) {
     o->translate(0,0,1);
 
     Light *l1=sce.new_light(Vec3<float>(0,0,2),Vec3<float>(1,0,0));
-    Light *l2=sce.new_light(Vec3<float>(4,0,1),Vec3<float>(0,0,1));
-
+    l1->set_spot(Vec3<float>(0,0,-1),60,20);
+    
     int i=0;
     timer.init();
     while(!c.quit) {
