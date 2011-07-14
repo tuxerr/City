@@ -24,7 +24,7 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(-4,2,2);
+    Vec3<float> camerapos(2,2,2);
     sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
     sce.set_perspective(70,1,100);
 
@@ -60,8 +60,9 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     o->translate(0,0,1);
 
-    Light *l1=sce.new_light(Vec3<float>(0,0,2),Vec3<float>(1,0,0));
-    l1->set_spot(Vec3<float>(0,0,-1),60,20);
+    Vec3<float> lightpos(-5,2,2);
+    Light *l1=sce.new_light(lightpos,Vec3<float>(1,0,0));
+    l1->set_spot(Vec3<float>(0,-1,-1),60,20);
     
     int i=0;
     timer.init();
@@ -69,8 +70,8 @@ int main(int argc,char *argv[]) {
         sce.new_draw();
 
         i++;
-        camerapos=camerapos+Vec3<float>(0.03,0,0);
-        sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
+        lightpos=lightpos+Vec3<float>(0.03,0,0);
+        l1->set_pos(lightpos);
 
         sce.draw_scene();
 

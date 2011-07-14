@@ -41,14 +41,14 @@ vec4 spotlight(int lightID) {
          float max_illu_angle = Light[lightID].spot_values.z;
          vec3 direction = Light[lightID].direction;
 
-         float spot_angle = degrees(acos(dot(normalize(light_ray),normalize(-direction))));
-         if(spot_angle<illu_angle) {
+         float spot_angle = dot(normalize(light_ray),normalize(-direction));
+         if(spot_angle>illu_angle) {
              float diffuse_mult_factor = dot(normalize(light_ray),norm_normal);
              float specular_mult_factor = max(dot(normalize(eye_ray),reflected_ray),0.0);
              diffuse = diffuse_mult_factor*globalcolor*0.4;
              specular = pow(specular_mult_factor,500)*1*globalcolor;
              specular = specular/max(length(abs(Light[lightID].origin-GlobalValues.camera_pos)/10),1.0);
-             if(spot_angle>max_illu_angle) {
+             if(spot_angle<max_illu_angle) {
                  float attenuation = (1-(spot_angle-max_illu_angle)/(illu_angle-max_illu_angle));
                  diffuse=diffuse*attenuation;
                  specular=specular*attenuation;

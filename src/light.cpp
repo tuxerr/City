@@ -31,9 +31,9 @@ void Light::set_spot(Vec3<float> direction,float illu_angle,float max_illu_angle
     if(illu_angle<max_illu_angle) {
         std::cout<<"Illumination angle is less than maximum illumination angle!"<<std::endl;
     }
-    this->illu_angle=illu_angle;
-    this->max_illu_angle=max_illu_angle;
-    Vec3<float> values(linear_dissipation,illu_angle,max_illu_angle);
+    this->illu_angle=cos(illu_angle*M_PI/180);
+    this->max_illu_angle=cos(max_illu_angle*M_PI/180);
+    Vec3<float> values(linear_dissipation,this->illu_angle,this->max_illu_angle);
     uniform->set_value(values,"spot_values");
 }
 

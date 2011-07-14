@@ -1,8 +1,5 @@
 TODO du moteur : 
-*uniformblock shared types 
 *obj files shouldn't have to read 10 times to fill 10 objects 
-*light uniforms should contain the cosinus of angles, not angles (to avoid acos() call in fragment stage)
-*gestion des spot lights
 *désactivation/activation des lumières
 *gestion textures
 *FBOs en sortie de fragment shader -> texture
