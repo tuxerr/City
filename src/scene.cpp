@@ -11,7 +11,7 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
         for(int i=0;i<MAX_LIGHTS;i++) {
             std::stringstream uniform_name;
             uniform_name<<"Light["<<i<<"]";
-            uniform_lights[i]=disp->new_uniformblock(uniform_name.str(),Light::uniform_size());
+            uniform_lights[i]=disp->new_uniformblock(uniform_name.str());
             disp->link_program_to_uniformblock("phong",uniform_lights[i]);
         }
 
@@ -131,7 +131,7 @@ void Scene::delete_light(Light* l) {
 
 void Scene::draw_scene() {
     if(camera_changed) {
-        matrices->set_data(&camera_pos,sizeof(Vec3<float>),sizeof(Matrix4)*3);
+        matrices->set_value(camera_pos,"camera_pos");
     }
 
     std::set<Object*>::iterator it;
@@ -159,11 +159,11 @@ void Scene::draw_object(Object *o) {
         // if the object's shader doesn't exist, use default one.
         Program *program=disp->get_program(program_name);
 
-        matrices->set_data(o->modelview_matrix().adress(),sizeof(Matrix4),0);
+        matrices->set_value(o->modelview_matrix(),"modelview");
 
-        matrices->set_data(o->projection_modelview_matrix().adress(),sizeof(Matrix4),sizeof(Matrix4));
+        matrices->set_value(o->projection_modelview_matrix(),"projection_modelview");
 
-        matrices->set_data(o->normal_matrix().adress(),sizeof(Matrix4),sizeof(Matrix4)*2);
+        matrices->set_value(o->normal_matrix(),"normal_matrix");
 
         program->use();
 

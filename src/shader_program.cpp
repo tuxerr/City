@@ -120,7 +120,7 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
             std::cout<<"Error while binding block uniform "<<uni->get_name()<<"(program "<<id()
                      <<") to attach point "<<uni->get_attach_point()<<std::endl;
         } else {
-            uni->bind_to_attach_point();      
+            uni->bind_to_attach_point(id());      
             std::cout<<"Uniform "<<uni->get_name()<<" has been bound to attachpoint "<<uni->get_attach_point()<<std::endl;
         }
 

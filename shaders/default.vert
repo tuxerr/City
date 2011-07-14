@@ -1,6 +1,6 @@
 #version 330
 
-layout(std140,row_major) uniform;
+layout(row_major) uniform;
 
 in vec3 in_Vertex;
 in vec3 in_Color;
@@ -9,14 +9,14 @@ in vec3 in_TexCoord;
 
 out vec3 color;
 
-uniform GlobalMatrices {
+uniform GlobalValues {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
     vec3 camera_pos;
-};
+} GlobalValues;
 
 void main() {
-    gl_Position = projection_modelview*vec4(in_Vertex,1.0);
+    gl_Position = GlobalValues.projection_modelview*vec4(in_Vertex,1.0);
     color=in_Color;
 }

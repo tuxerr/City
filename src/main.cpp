@@ -18,7 +18,7 @@ int main(int argc,char *argv[]) {
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
 
-    UniformBlock *matrices=disp.new_uniformblock("GlobalValues",sizeof(Matrix4)*3+sizeof(Vec3<float>));
+    UniformBlock *matrices=disp.new_uniformblock("GlobalValues");
     disp.link_program_to_uniformblock("phong",matrices);
     disp.link_program_to_uniformblock("default",matrices);
 
@@ -60,7 +60,8 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     o->translate(0,0,1);
 
-    Light *l1=sce.new_light(Vec3<float>(0,0,2),Vec3<float>(0,0.3,1));
+    Light *l1=sce.new_light(Vec3<float>(0,0,2),Vec3<float>(1,0,0));
+    Light *l2=sce.new_light(Vec3<float>(4,0,1),Vec3<float>(0,0,1));
 
     int i=0;
     timer.init();
@@ -72,7 +73,6 @@ int main(int argc,char *argv[]) {
         sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
 
         sce.draw_scene();
-        glFinish();
 
         c.refresh();
         disp.refresh();

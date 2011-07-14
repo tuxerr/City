@@ -17,7 +17,6 @@ public:
     void set_intensity(float intensity);
     void set_linear_dissipation(float linear_dissipation);
     void set_uniform(UniformBlock *uniform);
-    static int uniform_size();
 
 private:
     UniformBlock *uniform;

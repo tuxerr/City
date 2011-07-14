@@ -1,6 +1,6 @@
 #version 330
 
-layout(std140,row_major) uniform;
+layout(row_major) uniform;
 
 in vec3 color;
 

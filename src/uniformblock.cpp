@@ -2,18 +2,24 @@
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-UniformBlock::UniformBlock(std::string name,int size,int attachpoint) : 
-    name(name), size(size), iscreated(false), attachpoint(attachpoint)
+UniformBlock::UniformBlock(std::string name,int attachpoint) : 
+    name(name), size(-1), iscreated(false), attachpoint(attachpoint)
 {
-    create();
+ 
 }
 
 void UniformBlock::create() {
-    glGenBuffers(1,&ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-    glBufferData(GL_UNIFORM_BUFFER,size,NULL,GL_STREAM_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER,0);
-    iscreated=true;
+    if(size==-1) {
+        std::cout<<"Invalid UBO size"<<std::endl;
+        return;
+    } else {
+        glGenBuffers(1,&ubo);
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        glBufferData(GL_UNIFORM_BUFFER,size,NULL,GL_STREAM_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        iscreated=true;
+        std::cout<<"Initializing UBO "<<get_ubo()<<" with size "<<size<<std::endl;
+    }
 }
 
 void UniformBlock::destroy() {
@@ -27,7 +33,20 @@ int UniformBlock::get_attach_point() {
     return attachpoint;
 }
 
-void UniformBlock::bind_to_attach_point() {
+void UniformBlock::bind_to_attach_point(GLuint program_id) {
+    // loc is a good value, since it has already been computed in the program stage of this function
+    this->program_id=program_id;
+    ubo_loc_in_program = glGetUniformBlockIndex(program_id,name.c_str());
+    int ubo_size=-1;
+    glGetActiveUniformBlockiv(program_id,ubo_loc_in_program,GL_UNIFORM_BLOCK_DATA_SIZE,&ubo_size);
+
+    if(!iscreated) {
+        size=ubo_size;
+        create();
+    } else if(size!=ubo_size) {
+        std::cout<<"Size mismatch for UBO "<<get_ubo()<<" : UBO size is "<<size
+                 <<" and needed size is "<<ubo_size<<std::endl;
+    }
     glBindBuffer(GL_UNIFORM_BUFFER,ubo);
     glBindBufferRange(GL_UNIFORM_BUFFER,attachpoint,ubo,0,size);
     glBindBuffer(GL_UNIFORM_BUFFER,0);
@@ -41,10 +60,106 @@ GLuint UniformBlock::get_ubo() {
     return ubo;
 }
 
-void UniformBlock::set_data(void *data,int size,int offset) {
-    if(iscreated) {
+GLint UniformBlock::get_value_from_pname(std::string sub_name,GLenum pname) {
+    GLuint indice;
+    std::string real_name=name;
+    real_name+=".";
+    real_name+=sub_name;
+    
+    const char *str_ptr = real_name.c_str();
+
+    glGetUniformIndices(program_id,1,&str_ptr,&indice);
+    if(indice==GL_INVALID_INDEX) {
+        std::cout<<"Subuniform "<<real_name<<" doesn't exist in program "<<program_id<<std::endl;
+        return -1;
+    } else {
+        GLint value;
+        glGetActiveUniformsiv(program_id,1,&indice,pname,&value);
+        return value;
+    }
+}
+
+GLint UniformBlock::get_offset(std::string sub_name) {
+    if(offsets.find(sub_name)==offsets.end()) {
+        GLint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
+        offsets[sub_name]=offset;
+        std::cout<<sub_name<<" : "<<offset<<std::endl;
+        return offset;
+    } else {
+        return offsets[sub_name];
+    }
+}
+
+void UniformBlock::set_value(int val,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
         glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,size,data);
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
+void UniformBlock::set_value(float val,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
+void UniformBlock::set_value(Vec3<float> &v3 ,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v3),&v3);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
+void UniformBlock::set_value(Vec3<int> &i3 ,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i3),&i3);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
+void UniformBlock::set_value(Vec2<float> &v2 ,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v2),&v2);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
+void UniformBlock::set_value(Vec2<int> &i2 ,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i2),&i2);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
+void UniformBlock::set_value(Matrix4 &mat,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        GLint mat_stride;
+        if(matrix_strides.find(sub_name)==matrix_strides.end()) {
+            mat_stride = get_value_from_pname(sub_name,GL_UNIFORM_MATRIX_STRIDE);
+            matrix_strides[sub_name] = mat_stride;
+        } else {
+            mat_stride = matrix_strides[sub_name];
+        }
+
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        for(int i=0;i<4;i++) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset+(sizeof(float)*4+mat_stride)*i,
+                            sizeof(float)*4,&(mat.val[i*4]));
+        }
         glBindBuffer(GL_UNIFORM_BUFFER,0);
     }
 }
