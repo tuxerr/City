@@ -95,11 +95,41 @@ void Scene::delete_object(Object *o) {
     objects.erase(o);
 }
 
-Light* Scene::new_light(Vec3<float> pos,Vec3<float> color,float intensity) {
+PointLight* Scene::new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity) {
     for(int i=0;i<MAX_LIGHTS;i++) {
         if(lights[i]==NULL) {
-            Light *l=new Light(uniform_lights[i],pos,intensity,color);
-            lights[i]=l;
+            PointLight *l=new PointLight(uniform_lights[i],pos,intensity,color);
+            lights[i]=(Light*)l;
+            light_number++;
+            uniform_light_number->set_value(light_number);
+            return l;            
+        }
+    }
+    
+    std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+    return NULL;
+}
+
+SpotLight* Scene::new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity) {
+    for(int i=0;i<MAX_LIGHTS;i++) {
+        if(lights[i]==NULL) {
+            SpotLight *l=new SpotLight(uniform_lights[i],pos,direction,intensity,color,illu_angle,max_illu_angle);
+            lights[i]=(Light*)l;
+            light_number++;
+            uniform_light_number->set_value(light_number);
+            return l;            
+        }
+    }
+    
+    std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+    return NULL;
+}
+
+DirectionalLight* Scene::new_directionallight(Vec3<float> direction,Vec3<float> color,float intensity) {
+    for(int i=0;i<MAX_LIGHTS;i++) {
+        if(lights[i]==NULL) {
+            DirectionalLight *l=new DirectionalLight(uniform_lights[i],direction,intensity,color);
+            lights[i]=(Light*)l;
             light_number++;
             uniform_light_number->set_value(light_number);
             return l;            

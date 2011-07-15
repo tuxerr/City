@@ -104,7 +104,7 @@ vec4 directionallight(int lightID) {
 void main(void) {
      vec4 res = vec4(0,0,0,0);
      for(int i=0;i<lightnumber;i++) {
-         if(Light[i].light_type==1 || 1==1) {
+         if(Light[i].light_type==1) {
              res+=pointlight(i);
          } else if(Light[i].light_type==2) {
              res+=spotlight(i);

@@ -64,7 +64,7 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    Light *l1=sce.new_light(Vec3<float>(0,0,2),Vec3<float>(1,0,0));
+    PointLight *l1=sce.new_pointlight(Vec3<float>(0,0,2),Vec3<float>(1,0,0));
     
     int i=0;
     timer.init();
