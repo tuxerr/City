@@ -82,6 +82,7 @@ GLint UniformBlock::get_offset(std::string sub_name) {
     if(offsets.find(sub_name)==offsets.end()) {
         GLint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
         offsets[sub_name]=offset;
+        std::cout<<sub_name<<" : "<<offset<<std::endl;
         return offset;
     } else {
         return offsets[sub_name];

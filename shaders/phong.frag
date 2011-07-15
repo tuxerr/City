@@ -7,6 +7,7 @@ smooth in vec4 vert_pos;
 smooth in vec4 vert_normal;
 
 uniform Light {
+    int light_type;
     float intensity; 
     vec3 spot_values; //linear_dissipation,illu_angle,max_illu_angle
     vec3 origin; 
@@ -26,49 +27,90 @@ uniform int lightnumber;
 vec4 spotlight(int lightID) {
      vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
 
-     vec3 light_ray = Light[lightID].origin-vert_pos.xyz;
+     vec3 light_ray = vert_pos.xyz-Light[lightID].origin;
      vec3 norm_normal = normalize(vert_normal.xyz);
-     vec3 reflected_ray = reflect(-normalize(light_ray),norm_normal);
+     vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
      vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
+     float distance = abs(length(Light[lightID].origin-GlobalValues.camera_pos));
 
      vec4 ambiant = globalcolor*0.1;
      vec4 diffuse = vec4(0,0,0,0);
      vec4 specular = vec4(0,0,0,0);
 
-
-     if(Light[lightID].spot_values.y!=-1) {
-         float illu_angle = Light[lightID].spot_values.y;
-         float max_illu_angle = Light[lightID].spot_values.z;
-         vec3 direction = Light[lightID].direction;
-
-         float spot_angle = dot(normalize(light_ray),normalize(-direction));
-         if(spot_angle>illu_angle) {
-             float diffuse_mult_factor = dot(normalize(light_ray),norm_normal);
-             float specular_mult_factor = max(dot(normalize(eye_ray),reflected_ray),0.0);
-             diffuse = diffuse_mult_factor*globalcolor*0.4;
-             specular = pow(specular_mult_factor,500)*1*globalcolor;
-             specular = specular/max(length(abs(Light[lightID].origin-GlobalValues.camera_pos)/10),1.0);
-             if(spot_angle<max_illu_angle) {
-                 float attenuation = (1-(spot_angle-max_illu_angle)/(illu_angle-max_illu_angle));
-                 diffuse=diffuse*attenuation;
-                 specular=specular*attenuation;
-             }
-         } 
+     float illu_angle = Light[lightID].spot_values.y;
+     float max_illu_angle = Light[lightID].spot_values.z;
+     vec3 direction = Light[lightID].direction;
      
-     }  else { //light is a pointlight */
-         float diffuse_mult_factor = dot(normalize(light_ray),norm_normal);
-         float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+     float spot_angle = dot(normalize(light_ray),normalize(direction));
+     if(spot_angle>illu_angle) {
+         float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
+         float specular_mult_factor = max(dot(normalize(eye_ray),reflected_ray),0.0);
          diffuse = diffuse_mult_factor*globalcolor*0.4;
          specular = pow(specular_mult_factor,500)*1*globalcolor;
-         specular = specular/max(length(abs(Light[lightID].origin-GlobalValues.camera_pos)/10),1.0);
-     }
-     return ambiant+diffuse+specular;
+         specular = specular/(distance*Light[lightID].spot_values.x);
+         
+         if(spot_angle<max_illu_angle) {
+             float attenuation = (1-(spot_angle-max_illu_angle)/(illu_angle-max_illu_angle));
+             diffuse=diffuse*attenuation;
+             specular=specular*attenuation;
+         }
+     } 
+     
+//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
+    return ambiant+diffuse+specular;
+}
+
+vec4 pointlight(int lightID) {
+    vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
+    
+    vec3 light_ray = vert_pos.xyz-Light[lightID].origin;
+    vec3 norm_normal = normalize(vert_normal.xyz);
+    vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
+    vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
+    float distance = abs(length(Light[lightID].origin-GlobalValues.camera_pos));
+
+    float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
+    float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+
+    vec4 ambiant = globalcolor*0.1;
+    vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
+    vec4 specular = pow(specular_mult_factor,500)*globalcolor;
+    specular = specular/(distance/3*Light[lightID].spot_values.x);
+        
+//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
+    return ambiant+diffuse+specular;
+}
+
+vec4 directionallight(int lightID) {
+    vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
+    
+    vec3 light_ray = Light[lightID].direction;
+    vec3 norm_normal = normalize(vert_normal.xyz);
+    vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
+    vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
+
+    float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
+    float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+
+    vec4 ambiant = globalcolor*0.1;
+    vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
+    vec4 specular = pow(specular_mult_factor,500)*globalcolor;
+    specular = specular/3*Light[lightID].spot_values.x;
+    
+//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
+    return ambiant+diffuse+specular;
 }
 
 void main(void) {
      vec4 res = vec4(0,0,0,0);
      for(int i=0;i<lightnumber;i++) {
+         if(Light[i].light_type==1 || 1==1) {
+             res+=pointlight(i);
+         } else if(Light[i].light_type==2) {
              res+=spotlight(i);
+         } else if(Light[i].light_type==3) {
+             res+=directionallight(i);
+         }
      }
      gl_FragColor = res;
 }       

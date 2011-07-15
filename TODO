@@ -1,5 +1,4 @@
 TODO du moteur : 
-*obj files shouldn't have to read 10 times to fill 10 objects 
 *désactivation/activation des lumières
 *gestion textures
 *FBOs en sortie de fragment shader -> texture

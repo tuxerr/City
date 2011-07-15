@@ -6,6 +6,13 @@
 #include "vec3.h"
 #include "uniformblock.h"
 
+typedef enum Light_Types {
+    OFF = 0,
+    POINT_LIGHT = 1, 
+    SPOT_LIGHT=2,
+    DIRECTION_LIGHT=3
+} Light_Types;
+
 class Light {
 public:
     Light(UniformBlock *uniform,Vec3<float> pos,float intensity,Vec3<float> color);
@@ -18,9 +25,12 @@ public:
     void set_intensity(float intensity);
     void set_linear_dissipation(float linear_dissipation);
     void set_uniform(UniformBlock *uniform);
+    void activate();
+    void desactivate();
 
 private:
     UniformBlock *uniform;
+    int type;
     Vec3<float> pos;
     Vec3<float> color;
     Vec3<float> direction;

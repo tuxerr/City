@@ -64,9 +64,7 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    Vec3<float> lightpos(-5,2,2);
-    Light *l1=sce.new_light(lightpos,Vec3<float>(1,0,0));
-    l1->set_spot(Vec3<float>(0,-1,-1),60,20);
+    Light *l1=sce.new_light(Vec3<float>(0,0,2),Vec3<float>(1,0,0));
     
     int i=0;
     timer.init();
@@ -74,9 +72,8 @@ int main(int argc,char *argv[]) {
         sce.new_draw();
 
         i++;
-        lightpos=lightpos+Vec3<float>(0.03,0,0);
-        l1->set_pos(lightpos);
 
+        o->rotate(0.2,0,0,1);
         sce.draw_scene();
 
         c.refresh();
