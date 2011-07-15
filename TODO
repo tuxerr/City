@@ -1,5 +1,4 @@
 TODO du moteur : 
-*désactivation/activation des lumières
 *gestion textures
 *FBOs en sortie de fragment shader -> texture
 *shading (cascaded shading)
