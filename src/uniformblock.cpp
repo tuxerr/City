@@ -18,7 +18,6 @@ void UniformBlock::create() {
         glBufferData(GL_UNIFORM_BUFFER,size,NULL,GL_STREAM_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER,0);
         iscreated=true;
-        std::cout<<"Initializing UBO "<<get_ubo()<<" with size "<<size<<std::endl;
     }
 }
 
@@ -83,7 +82,6 @@ GLint UniformBlock::get_offset(std::string sub_name) {
     if(offsets.find(sub_name)==offsets.end()) {
         GLint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
         offsets[sub_name]=offset;
-        std::cout<<sub_name<<" : "<<offset<<std::endl;
         return offset;
     } else {
         return offsets[sub_name];

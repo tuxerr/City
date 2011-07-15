@@ -74,6 +74,7 @@ void Object::update_triangles_index_buffer(void *data,int size,unsigned int part
         if(!parts[part_number].ibo_triangles.iscreated())
             parts[part_number].ibo_triangles.create();
         parts[part_number].ibo_triangles.update(data,size);
+
     }
 }
 

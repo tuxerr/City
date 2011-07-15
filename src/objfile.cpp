@@ -1,14 +1,19 @@
 #include "objfile.h"
 
-ObjFile::ObjFile(std::string path) : path(path) {
+ObjFile::ObjFile(std::string path) : path(path), part_number(0), isclosed(false) {
     file.open(path.c_str(),ios::in);
     if(!file) {
         cout<<".obj file "<<path<<" couldn't be opened"<<endl;
+    } else {
+        load();
     }
 }
 
 ObjFile::~ObjFile() {
-    file.close();
+    if(!isclosed) {
+        reset();
+        file.close();
+    }
 }
 
 void ObjFile::reset() {
@@ -24,18 +29,25 @@ void ObjFile::reset() {
     line_index.clear();
 }
 
-void ObjFile::load_in_object(Object *o) {
-    if(o==NULL) {
-        cout<<"Object is NULL : cannot parse "<<path<<endl;
-        return;
-    }
+void ObjFile::close() {
+    reset();
+    file.close();
+    isclosed=true;
+}
 
-    o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+void ObjFile::load() {
     reset();
 
     int act_part=0;
     int total_vertices=0;
     bool first_mtl=true;
+  
+    vbo_vertices.resize(1);
+    vbo_normals.resize(1);
+    vbo_texcoord.resize(1);
+    vert_indexes.resize(1);
+    tri_index.resize(1);
+    line_index.resize(1);
 
     while(!file.eof()) {
         string start;
@@ -88,72 +100,78 @@ void ObjFile::load_in_object(Object *o) {
 
             for(int i=0;i<4;i++) { // load data structure
                 data[i]=parse_face_string(str[i]);
-                if(vert_indexes.find(data[i])==vert_indexes.end()) {
+                if(vert_indexes[act_part].find(data[i])==vert_indexes[act_part].end()) {
                     total_vertices++;
 
-                    vbo_vertices.push_back(vertices[(data[i].pos-1)*3]);
-                    vbo_vertices.push_back(vertices[((data[i].pos-1)*3)+1]);
-                    vbo_vertices.push_back(vertices[((data[i].pos-1)*3)+2]);
+                    vbo_vertices[act_part].push_back(vertices[(data[i].pos-1)*3]);
+                    vbo_vertices[act_part].push_back(vertices[((data[i].pos-1)*3)+1]);
+                    vbo_vertices[act_part].push_back(vertices[((data[i].pos-1)*3)+2]);
 
                     if(data[i].texcoord!=-1) {
-                        vbo_texcoord.push_back(texcoord[(data[i].texcoord-1)*3]);
-                        vbo_texcoord.push_back(texcoord[((data[i].texcoord-1)*3)+1]);
-                        vbo_texcoord.push_back(texcoord[((data[i].texcoord-1)*3)+2]);
+                        vbo_texcoord[act_part].push_back(texcoord[(data[i].texcoord-1)*3]);
+                        vbo_texcoord[act_part].push_back(texcoord[((data[i].texcoord-1)*3)+1]);
+                        vbo_texcoord[act_part].push_back(texcoord[((data[i].texcoord-1)*3)+2]);
                     } else {
-                        vbo_texcoord.push_back(0);
-                        vbo_texcoord.push_back(0);
-                        vbo_texcoord.push_back(0);
+                        vbo_texcoord[act_part].push_back(0);
+                        vbo_texcoord[act_part].push_back(0);
+                        vbo_texcoord[act_part].push_back(0);
                     }
 
                     if(data[i].normal!=-1) {
-                        vbo_normals.push_back(normals[(data[i].normal-1)*3]);
-                        vbo_normals.push_back(normals[((data[i].normal-1)*3)+1]);
-                        vbo_normals.push_back(normals[((data[i].normal-1)*3)+2]);
+                        vbo_normals[act_part].push_back(normals[(data[i].normal-1)*3]);
+                        vbo_normals[act_part].push_back(normals[((data[i].normal-1)*3)+1]);
+                        vbo_normals[act_part].push_back(normals[((data[i].normal-1)*3)+2]);
                     } else {
-                        vbo_normals.push_back(0);
-                        vbo_normals.push_back(0);
-                        vbo_normals.push_back(0);
+                        vbo_normals[act_part].push_back(0);
+                        vbo_normals[act_part].push_back(0);
+                        vbo_normals[act_part].push_back(0);
                     }
                     
-                    vert_indexes.insert(pair<ObjData,int>(data[i],vbo_normals.size()/3-1));
+                    vert_indexes[act_part].insert(pair<ObjData,int>(data[i],vbo_normals[act_part].size()/3-1));
                 } 
             }
             
-            tri_index.push_back(vert_indexes[data[0]]);
-            tri_index.push_back(vert_indexes[data[1]]);
-            tri_index.push_back(vert_indexes[data[2]]);
+            tri_index[act_part].push_back(vert_indexes[act_part][data[0]]);
+            tri_index[act_part].push_back(vert_indexes[act_part][data[1]]);
+            tri_index[act_part].push_back(vert_indexes[act_part][data[2]]);
 
-            line_index.push_back(vert_indexes[data[0]]);
-            line_index.push_back(vert_indexes[data[1]]);
+            line_index[act_part].push_back(vert_indexes[act_part][data[0]]);
+            line_index[act_part].push_back(vert_indexes[act_part][data[1]]);
 
-            line_index.push_back(vert_indexes[data[1]]);
-            line_index.push_back(vert_indexes[data[2]]);
+            line_index[act_part].push_back(vert_indexes[act_part][data[1]]);
+            line_index[act_part].push_back(vert_indexes[act_part][data[2]]);
 
             if(data[3].pos!=-1) {
-                tri_index.push_back(vert_indexes[data[0]]);
-                tri_index.push_back(vert_indexes[data[2]]);
-                tri_index.push_back(vert_indexes[data[3]]);
+                tri_index[act_part].push_back(vert_indexes[act_part][data[0]]);
+                tri_index[act_part].push_back(vert_indexes[act_part][data[2]]);
+                tri_index[act_part].push_back(vert_indexes[act_part][data[3]]);
 
-                line_index.push_back(vert_indexes[data[2]]);
-                line_index.push_back(vert_indexes[data[3]]);
+                line_index[act_part].push_back(vert_indexes[act_part][data[2]]);
+                line_index[act_part].push_back(vert_indexes[act_part][data[3]]);
 
-                line_index.push_back(vert_indexes[data[3]]);
-                line_index.push_back(vert_indexes[data[0]]);
+                line_index[act_part].push_back(vert_indexes[act_part][data[3]]);
+                line_index[act_part].push_back(vert_indexes[act_part][data[0]]);
             } else {
-                line_index.push_back(vert_indexes[data[2]]);
-                line_index.push_back(vert_indexes[data[0]]);
+                line_index[act_part].push_back(vert_indexes[act_part][data[2]]);
+                line_index[act_part].push_back(vert_indexes[act_part][data[0]]);
             }
         } else if(start=="usemtl") {
             if(first_mtl) {
                 first_mtl=false;
             } else {
-                save_current_data_in_object(o,act_part);
-                act_part=o->new_part();
+                act_part++;
+                vbo_vertices.resize(act_part+1);
+                vbo_normals.resize(act_part+1);
+                vbo_texcoord.resize(act_part+1);
+                vert_indexes.resize(act_part+1);
+                tri_index.resize(act_part+1);
+                line_index.resize(act_part+1);
             }
         }
     }
-    save_current_data_in_object(o,act_part);
+
     cout<<"Total OpenGL vertices in the .obj : "<<total_vertices<<endl;
+    part_number=act_part;
 }
 
 ObjData ObjFile::parse_face_string(string substr) {
@@ -190,21 +208,20 @@ ObjData ObjFile::parse_face_string(string substr) {
     return data;
 }
 
-void ObjFile::save_current_data_in_object(Object *o,int part) {
-    vector<float> colors=vbo_vertices;
-    colors.assign(colors.size(),0.8);
+void ObjFile::load_in_object(Object *o) {
 
-    o->update_vertices_buffer(&vbo_vertices[0],vbo_vertices.size()*sizeof(float),part);
-    o->update_normals_buffer(&vbo_normals[0],vbo_normals.size()*sizeof(float),part);
-    o->update_texture_buffer(&vbo_texcoord[0],vbo_texcoord.size()*sizeof(float),part);
-    o->update_lines_index_buffer(&line_index[0],line_index.size()*sizeof(int),part);
-    o->update_triangles_index_buffer(&tri_index[0],tri_index.size()*sizeof(int),part);
-    o->update_color_buffer(&colors[0],colors.size()*sizeof(float),part);
-    
-    vbo_vertices.clear();    
-    vbo_normals.clear();     
-    vbo_texcoord.clear();
-    vert_indexes.clear();
-    tri_index.clear();
-    line_index.clear();
+    for(int i=0;i<=part_number;i++) {
+        vector<float> colors=vbo_vertices[i];
+        colors.assign(colors.size(),0.8);
+        if(i!=0) {
+            o->new_part();
+        }
+        
+        o->update_vertices_buffer(&vbo_vertices[i][0],vbo_vertices[i].size()*sizeof(float),i);
+        o->update_normals_buffer(&vbo_normals[i][0],vbo_normals[i].size()*sizeof(float),i);
+        o->update_texture_buffer(&vbo_texcoord[i][0],vbo_texcoord[i].size()*sizeof(float),i);
+        o->update_lines_index_buffer(&line_index[i][0],line_index[i].size()*sizeof(int),i);
+        o->update_triangles_index_buffer(&tri_index[i][0],tri_index[i].size()*sizeof(int),i);
+        o->update_color_buffer(&colors[0],colors.size()*sizeof(float),i);
+    }
 }

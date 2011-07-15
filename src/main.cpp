@@ -46,6 +46,7 @@ int main(int argc,char *argv[]) {
                   0, 0, 1,
                   0, 0, 1 };
     
+
     Object *o1=sce.new_object();
     o1->set_program("phong");
     o1->set_draw_mode(OBJECT_DRAW_QUADS);
@@ -53,12 +54,15 @@ int main(int argc,char *argv[]) {
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
 
-    Object *o=sce.new_object();
     ObjFile spaceship("data/spaceship.obj");
+
+    Object *o=sce.new_object();
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->set_program("phong");
     o->translate(0,0,1);
+
+    spaceship.close();
 
     Vec3<float> lightpos(-5,2,2);
     Light *l1=sce.new_light(lightpos,Vec3<float>(1,0,0));

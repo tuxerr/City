@@ -26,6 +26,8 @@ class ObjFile {
 public:
     ObjFile(string path);
     ~ObjFile();
+    void load();
+    void close();
     void load_in_object(Object *o);
     void reset();
 
@@ -33,6 +35,8 @@ private:
     ObjData parse_face_string(string substr);
     void save_current_data_in_object(Object *o,int part);
     string path;
+    int part_number;
+    bool isclosed;
 
     fstream file;
 
@@ -40,13 +44,13 @@ private:
     vector<float> normals;
     vector<float> texcoord;
 
-    vector<float> vbo_vertices; // these vectors are meant to be sent to the vbos (same size/
-    vector<float> vbo_normals;  // ordering)
-    vector<float> vbo_texcoord;
+    vector< vector<float> > vbo_vertices; // these vectors are meant to be sent to the vbos (same size/
+    vector< vector<float> > vbo_normals;  // ordering)
+    vector< vector<float> > vbo_texcoord;
 
-    map<ObjData,int> vert_indexes; // obj vertices indexes to put in index
-    vector<int> tri_index;             // .obj final rendering index for GL_TRIANGLES visualization
-    vector<int> line_index;             // .obj final rendering index for GL_LINES visualization
+    vector< map<ObjData,int> > vert_indexes; // obj vertices indexes to put in index
+    vector< vector<int> > tri_index;  // .obj final rendering index for GL_TRIANGLES visualization
+    vector< vector<int> > line_index;  // .obj final rendering index for GL_LINES visualization
 };
 
 #endif
