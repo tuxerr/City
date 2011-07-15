@@ -24,8 +24,8 @@ public:
     void draw_scene();
     void draw_object(Object *o);
     PointLight* new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity=1);
-    SpotLight* new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity);
-    DirectionalLight* new_directionallight(Vec3<float> direction,Vec3<float> color,float intensity);
+    SpotLight* new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity=1);
+    DirectionalLight* new_directionallight(Vec3<float> direction,Vec3<float> color,float intensity=1);
     void delete_light(Light* l);
 
 private:
