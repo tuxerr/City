@@ -59,6 +59,7 @@ void Display::init() {
     glewInit();
     
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
 }
 
 int Display::get_width() {

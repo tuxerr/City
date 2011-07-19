@@ -50,29 +50,45 @@ void Scene::set_perspective(float angle,float near,float far) {
     perspective_changed=true;
 }
 
-void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>axis) {
+void Scene::set_perspective_ortho(float width,float near,float far) {
+    float height=width*disp->get_height()/disp->get_width();
+    perspective.clear();
+
+    float right=width/2;
+    float top=height/2;
+    
+    perspective.val[0]=1/right;
+    perspective.val[5]=1/top;
+    perspective.val[10]=-2/(far-near);
+    perspective.val[11]=-(far+near)/(far-near);
+    perspective.val[15]=1;
+
+    perspective_changed=true;
+}
+
+void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
     camera_pos = pos;
     camera.clear();
 
-    Vec3<float> look=direction-pos;
-    Vec3<float> normal=look*axis;
-    Vec3<float> new_axis=normal*look;
+    Vec3<float> forward=direction-pos;
+    forward.normalize();
 
-    normal.normalize();
-    new_axis.normalize();
-    look.normalize();
+    Vec3<float> side=forward*up_vector;
+    side.normalize();
 
-    camera.val[0] = normal.x;
-    camera.val[1] = normal.y;
-    camera.val[2] = normal.z;
+    Vec3<float> up=side*forward;
 
-    camera.val[4] = new_axis.x;
-    camera.val[5] = new_axis.y;
-    camera.val[6] = new_axis.z;
+    camera.val[0] = side.x;
+    camera.val[1] = side.y;
+    camera.val[2] = side.z;
 
-    camera.val[8] = -look.x;
-    camera.val[9] = -look.y;
-    camera.val[10] = -look.z;
+    camera.val[4] = up.x;
+    camera.val[5] = up.y;
+    camera.val[6] = up.z;
+
+    camera.val[8] = -forward.x;
+    camera.val[9] = -forward.y;
+    camera.val[10] = -forward.z;
 
     camera.val[15] = 1.0;
 

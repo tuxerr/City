@@ -2,6 +2,8 @@
 
 layout(row_major) uniform;
 
+out vec4 pixel_color;
+
 in vec3 color;
 smooth in vec4 vert_pos;
 smooth in vec4 vert_normal;
@@ -112,5 +114,5 @@ void main(void) {
              res+=directionallight(i);
          }
      }
-     gl_FragColor = res;
+     pixel_color = res;
 }       
