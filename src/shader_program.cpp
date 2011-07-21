@@ -106,8 +106,19 @@ GLuint Program::compile_shader(const char *path,GLenum shader_type) {
 }
 
 void Program::subscribe_to_uniform(Uniform *uni) {
-    uniforms[uni]=false;
-    uni->add_subscriber(&(uniforms[uni]),program_id);
+    if(uni->get_type()==UNIFORM_SAMPLER) {
+        int max_size;
+        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,&max_size);
+        if(textures.size()==max_size) {
+            std::cout<<max_size<<" Textures are already binded to program "<<id()<<std::endl;
+        } else {
+            textures.resize(textures.size()+1);
+            uni->add_texture(&textures.back(),program_id,textures.size()-1);
+        }
+    } else {
+        uniforms[uni]=false;
+        uni->add_subscriber(&(uniforms[uni]),program_id);
+    }
 }
 
 void Program::subscribe_to_uniformblock(UniformBlock *uni) {
@@ -128,7 +139,14 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
 }
 
 void Program::use() {
+    for(int i=0;i<textures.size();i++) {
+        if(textures[i]!=NULL) {
+            textures[i]->bind(i);
+        }
+    }
+
     glUseProgram(program_id);
+
     std::map<Uniform*,bool>::iterator uni_it=uniforms.begin();
     for(;uni_it!=uniforms.end();uni_it++) {
 	// if the uniform has been modified since the last time
@@ -137,9 +155,14 @@ void Program::use() {
             uni_it->second=true;
         }
     }
+
 }
 
 void Program::unuse() {
+    for(int i=0;i<textures.size();i++) {
+        textures[i]->unbind();
+    }
+
     glUseProgram(0);
 }
 

@@ -5,19 +5,22 @@
 #include <map>
 #include <string>
 #include <GL/glew.h>
+#include "texture.h"
 #include "matrix4.h"
 #include "vec3.h"
 #include "vec2.h"
 
 typedef enum Uniform_Type {
     UNIFORM_INT, UNIFORM_FLOAT, UNIFORM_MAT4, UNIFORM_FLOAT3, UNIFORM_INT3, 
-    UNIFORM_FLOAT2, UNIFORM_INT2
+    UNIFORM_FLOAT2, UNIFORM_INT2, UNIFORM_SAMPLER
 } Uniform_Type;
 
 class Uniform {
 public:
     Uniform(std::string name,Uniform_Type type);
     void add_subscriber(bool *sub,GLuint program_id);
+    void add_texture(Texture **tex,GLuint program_id,int index);
+    Uniform_Type get_type();
     void set_value(int val);
     void set_value(float val);
     void set_value(Matrix4 &val);
@@ -25,6 +28,7 @@ public:
     void set_value(Vec3<int> val);
     void set_value(Vec2<float> val);
     void set_value(Vec2<int> val);
+    void set_value(Texture *tex);
     void send_value(GLuint program_id);
     std::string name();
 
@@ -42,6 +46,7 @@ private:
     Vec2<int> i2val;
     std::vector<bool*> sent_uniforms;
     std::map<GLuint,GLint> uniform_locations;
+    std::vector<Texture**> tex_pointers;
 };
 
 #endif

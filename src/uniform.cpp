@@ -10,7 +10,20 @@ void Uniform::add_subscriber(bool *sub,GLuint program_id) {
     } else {
         uniform_locations[program_id]=loc;
     }
+    *sub=false;
     sent_uniforms.push_back(sub);
+}
+
+void Uniform::add_texture(Texture **tex,GLuint program_id,int index) {
+    if(type==UNIFORM_SAMPLER) {
+        tex_pointers.push_back(tex);
+        GLint loc=glGetUniformLocation(program_id,uniform_name.c_str());
+        glUniform1i(loc,index);
+    }
+}
+
+Uniform_Type Uniform::get_type() {
+    return type;
 }
 
 void Uniform::set_value(int val) {
@@ -62,6 +75,13 @@ void Uniform::set_value(Vec2<int> val) {
     reset_bools();
 }
 
+void Uniform::set_value(Texture *tex) {
+    std::vector<Texture**>::iterator it=tex_pointers.begin();
+    for(;it!=tex_pointers.end();it++) {
+        *(*it)=tex;
+    }
+}
+
 void Uniform::reset_bools() {
     std::vector<bool*>::iterator it=sent_uniforms.begin();
     for(;it!=sent_uniforms.end();it++) {
@@ -98,6 +118,9 @@ void Uniform::send_value(GLuint program_id) {
     case UNIFORM_MAT4:
 	glUniformMatrix4fv(uniform_locations[program_id],1,GL_TRUE,mval.adress());
 	break;
+
+    case UNIFORM_SAMPLER:
+        break;
     }
 }
 

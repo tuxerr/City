@@ -29,6 +29,7 @@ public:
 private:
     GLuint program_id;
     std::map<Uniform*,bool> uniforms;
+    std::vector<Texture*> textures;
 };
 
 #endif

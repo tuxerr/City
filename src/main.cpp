@@ -26,7 +26,7 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(6,0,2);
     sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
-    sce.set_perspective_ortho(2.1,1,100);
+    sce.set_perspective(70,1,100);
 
     Timer timer;
     Controls c;
@@ -53,7 +53,6 @@ int main(int argc,char *argv[]) {
     o1->update_vertices_buffer(v2,sizeof(v2));
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
-    o1->scale(0.1,0.1,1);
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -62,7 +61,6 @@ int main(int argc,char *argv[]) {
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->set_program("phong");
     o->translate(0,0,1);
-    o->set_enable_draw(false);
 
     spaceship.close();
 
