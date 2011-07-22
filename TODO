@@ -1,7 +1,9 @@
 TODO du moteur : 
-*gestion textures
-*FBOs en sortie de fragment shader -> texture
+*redefine uniform block names (for NVIDIA compatibility)
+*gestion de la sortie des shaders
 *shading (cascaded shading)
+*fog variable
 *gestion de halos lumineux dans une skybox
-*environment mapping
-*bump mapping
+*frustum culling
+*perlin noise 
+
