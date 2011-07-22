@@ -1,5 +1,8 @@
 #include "shader_program.h"
 
+Program::Program() : binded(false) { 
+}
+
 Program::~Program() {
     glDeleteProgram(program_id);
 }
@@ -117,7 +120,7 @@ void Program::subscribe_to_uniform(Uniform *uni) {
         }
     } else {
         uniforms[uni]=false;
-        uni->add_subscriber(&(uniforms[uni]),program_id);
+        uni->add_subscriber(&(uniforms[uni]),program_id,&binded);
     }
 }
 
@@ -155,7 +158,8 @@ void Program::use() {
             uni_it->second=true;
         }
     }
-
+    
+    binded=true;
 }
 
 void Program::unuse() {
@@ -164,6 +168,8 @@ void Program::unuse() {
     }
 
     glUseProgram(0);
+
+    binded=false;
 }
 
 GLuint Program::id() {

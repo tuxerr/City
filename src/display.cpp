@@ -70,7 +70,15 @@ int Display::get_height() {
     return height;
 }
 
-int viewport(int new_width,int new_height) {
+void Display::viewport(int new_width,int new_height) {
+    if(new_width==-1) {
+        new_width=width;
+    }
+
+    if(new_height==-1) {
+        new_height=height;
+    }
+
     glViewport(0,0,new_width,new_height);
 }
 

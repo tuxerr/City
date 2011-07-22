@@ -15,10 +15,15 @@ typedef enum Uniform_Type {
     UNIFORM_FLOAT2, UNIFORM_INT2, UNIFORM_SAMPLER
 } Uniform_Type;
 
+typedef struct Program_Status {
+    bool* binded;
+    bool* uniform_sended;
+} Program_Status;
+ 
 class Uniform {
 public:
     Uniform(std::string name,Uniform_Type type);
-    void add_subscriber(bool *sub,GLuint program_id);
+    void add_subscriber(bool *uniform_sended,GLuint program_id,bool *state);
     void add_texture(Texture **tex,GLuint program_id,int index);
     Uniform_Type get_type();
     void set_value(int val);
@@ -44,7 +49,7 @@ private:
     Vec3<int> i3val;
     Vec2<float> f2val;
     Vec2<int> i2val;
-    std::vector<bool*> sent_uniforms;
+    std::map<GLuint,Program_Status> programs_status; /* binded/not binded */
     std::map<GLuint,GLint> uniform_locations;
     std::vector<Texture**> tex_pointers;
 };

@@ -17,6 +17,7 @@ enum Shader_Attribs {
 
 class Program {
 public:
+    Program();
     ~Program();
     void load_shaders(const char *vertex_shader_path,const char *fragment_shader_path);
     GLuint compile_shader(const char *path,GLenum shader_type);
@@ -30,6 +31,7 @@ private:
     GLuint program_id;
     std::map<Uniform*,bool> uniforms;
     std::vector<Texture*> textures;
+    bool binded;
 };
 
 #endif

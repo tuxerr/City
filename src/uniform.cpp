@@ -3,15 +3,16 @@
 Uniform::Uniform(std::string name,Uniform_Type type) : uniform_name(name), type(type) {
 }
 
-void Uniform::add_subscriber(bool *sub,GLuint program_id) {
+void Uniform::add_subscriber(bool *uniform_sended,GLuint program_id, bool *state) {
     GLint loc=glGetUniformLocation(program_id,uniform_name.c_str());
     if(loc==-1) {
         std::cout<<"Uniform "<<uniform_name<<" wasn't found in program "<<program_id<<std::endl;
     } else {
         uniform_locations[program_id]=loc;
     }
-    *sub=false;
-    sent_uniforms.push_back(sub);
+    *uniform_sended=false;
+    Program_Status status = { state, uniform_sended };
+    programs_status[program_id]=status;
 }
 
 void Uniform::add_texture(Texture **tex,GLuint program_id,int index) {
@@ -83,9 +84,13 @@ void Uniform::set_value(Texture *tex) {
 }
 
 void Uniform::reset_bools() {
-    std::vector<bool*>::iterator it=sent_uniforms.begin();
-    for(;it!=sent_uniforms.end();it++) {
-        *(*it)=false;
+    std::map<GLuint,Program_Status>::iterator it=programs_status.begin();
+    for(;it!=programs_status.end();it++) {
+        if( *((it->second).binded) ) {
+            send_value(it->first);
+        } else {
+            *((it->second).uniform_sended)=false;
+        }
     }
 }
 
