@@ -22,8 +22,8 @@ public:
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);
     Object* new_object();
     void delete_object(Object *o);
-    void draw_scene();
-    void draw_object(Object *o);
+    void draw_scene(std::string program_name = "");
+    void draw_object(Object *o,bool use_shaders);
     PointLight* new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity=1);
     SpotLight* new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity=1);
     DirectionalLight* new_directionallight(Vec3<float> direction,Vec3<float> color,float intensity=1);

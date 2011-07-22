@@ -175,9 +175,17 @@ void Scene::delete_light(Light* l) {
     }
 }
 
-void Scene::draw_scene() {
+void Scene::draw_scene(std::string program_name) {
+    Program *program=NULL;
+
     if(camera_changed) {
         matrices->set_value(camera_pos,"camera_pos");
+    }
+
+
+    if(program_name!="") {
+        program=disp->get_program(program_name);
+        program->use();
     }
 
     std::set<Object*>::iterator it;
@@ -186,7 +194,17 @@ void Scene::draw_scene() {
         if(o->need_to_update_matrices() || perspective_changed || camera_changed) {
             o->update_matrices(&perspective,&camera);
         }
-        draw_object(o);
+
+        if(program_name!="") {
+            draw_object(o,false);
+        } else {
+            draw_object(o,true);
+        }
+
+    }
+
+    if(program_name!="") {
+        program->unuse();
     }
 
     if(perspective_changed) {
@@ -198,7 +216,7 @@ void Scene::draw_scene() {
 
 }
 
-void Scene::draw_object(Object *o) {
+void Scene::draw_object(Object *o,bool use_shaders) {
     if(o->enable_draw()) {
 
         std::string program_name=o->get_program();
@@ -210,11 +228,15 @@ void Scene::draw_object(Object *o) {
         matrices->set_value(o->projection_modelview_matrix(),"projection_modelview");
 
         matrices->set_value(o->normal_matrix(),"normal_matrix");
-
-        program->use();
+        
+        if(use_shaders) {
+            program->use();
+        }
 
         o->draw();
 
-        program->unuse();
+        if(use_shaders) {
+            program->unuse();
+        }
     }
 }
