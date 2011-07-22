@@ -70,6 +70,10 @@ int Display::get_height() {
     return height;
 }
 
+int viewport(int new_width,int new_height) {
+    glViewport(0,0,new_width,new_height);
+}
+
 void Display::new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name) {
     // if a program with this name already exists, rewrite it.
     if(programs.find(name)!=programs.end()) {

@@ -10,6 +10,7 @@
 #include "uniform.h"
 #include "uniformblock.h"
 #include "objfile.h"
+#include "fbo.h"
 
 using namespace std;
 

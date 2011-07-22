@@ -19,6 +19,7 @@ public:
     Display(int width=800,int height=600,bool fullscreen=false,bool aa=true);
     ~Display();
     void init();
+    void viewport(int new_width = width, int new_height = height);
     int get_width();
     int get_height();
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
