@@ -9,7 +9,7 @@ in vec3 in_TexCoord;
 
 out vec3 color;
 
-uniform GlobalValues {
+uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))

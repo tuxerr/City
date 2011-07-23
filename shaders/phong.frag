@@ -8,7 +8,7 @@ in vec3 color;
 smooth in vec4 vert_pos;
 smooth in vec4 vert_normal;
 
-uniform Light {
+uniform Light_ {
     int light_type;
     float intensity; 
     vec3 spot_values; //linear_dissipation,illu_angle,max_illu_angle
@@ -17,7 +17,7 @@ uniform Light {
     vec3 direction;
 } Light[8];
 
-uniform GlobalValues {
+uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))

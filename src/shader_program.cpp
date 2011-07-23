@@ -112,7 +112,7 @@ void Program::subscribe_to_uniform(Uniform *uni) {
     if(uni->get_type()==UNIFORM_SAMPLER) {
         int max_size;
         glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,&max_size);
-        if(textures.size()==max_size) {
+        if((int)textures.size()==max_size) {
             std::cout<<max_size<<" Textures are already binded to program "<<id()<<std::endl;
         } else {
             textures.resize(textures.size()+1);
@@ -129,20 +129,20 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
     if(loc==GL_INVALID_INDEX) {
         std::cout<<"Uniform "<<uni->get_name()<<" does not exist in program "<<id()<<std::endl;
     } else {
+        uni->bind_to_attach_point(id());      
         glUniformBlockBinding(id(), loc, uni->get_attach_point());
         if(glGetError()==GL_INVALID_VALUE) {
             std::cout<<"Error while binding block uniform "<<uni->get_name()<<"(program "<<id()
-                     <<") to attach point "<<uni->get_attach_point()<<std::endl;
+                     <<") to attach point "<<uni->get_attach_point()<<" with location "<<loc<<std::endl;
         } else {
-            uni->bind_to_attach_point(id());      
-            std::cout<<"Uniform "<<uni->get_name()<<" has been bound to attachpoint "<<uni->get_attach_point()<<std::endl;
+            std::cout<<"Uniform "<<uni->get_name()<<" has been bound to attachpoint "<<uni->get_attach_point()<<" with loc" <<loc<<std::endl;
         }
 
     }
 }
 
 void Program::use() {
-    for(int i=0;i<textures.size();i++) {
+    for(int i=0;i<(int)textures.size();i++) {
         if(textures[i]!=NULL) {
             textures[i]->bind(i);
         }
@@ -163,7 +163,7 @@ void Program::use() {
 }
 
 void Program::unuse() {
-    for(int i=0;i<textures.size();i++) {
+    for(int i=0;i<(int)textures.size();i++) {
         textures[i]->unbind();
     }
 

@@ -11,7 +11,7 @@ out vec3 color;
 smooth out vec4 vert_pos;
 smooth out vec4 vert_normal;
 
-uniform GlobalValues {
+uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))

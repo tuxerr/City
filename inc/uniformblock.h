@@ -31,7 +31,8 @@ private:
     GLint get_value_from_pname(std::string sub_name,GLenum pname);
     GLint get_offset(std::string sub_name);
 
-    std::string name;
+    std::string complete_name;
+    std::string subuniform_name; /* name without the _ to query subuniforms */
     int size;
     bool iscreated;
     int attachpoint;

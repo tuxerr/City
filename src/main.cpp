@@ -20,8 +20,8 @@ int main(int argc,char *argv[]) {
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
 
     UniformBlock *matrices=disp.new_uniformblock("GlobalValues");
-    disp.link_program_to_uniformblock("phong",matrices);
     disp.link_program_to_uniformblock("default",matrices);
+    disp.link_program_to_uniformblock("phong",matrices);
 
     Scene sce(&disp,matrices);
     
@@ -58,9 +58,9 @@ int main(int argc,char *argv[]) {
     ObjFile spaceship("data/spaceship.obj");
 
     Object *o=sce.new_object();
+    o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->set_program("phong");
     o->translate(0,0,1);
 
     spaceship.close();

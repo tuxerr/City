@@ -3,9 +3,13 @@
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 UniformBlock::UniformBlock(std::string name,int attachpoint) : 
-    name(name), size(-1), iscreated(false), attachpoint(attachpoint)
+    complete_name(name), subuniform_name(name), size(-1), iscreated(false), attachpoint(attachpoint)
 {
- 
+    if(complete_name.find('[')==std::string::npos) {
+        complete_name+="_";
+    } else {
+        complete_name.insert(complete_name.find('['),"_");
+    }
 }
 
 void UniformBlock::create() {
@@ -35,7 +39,7 @@ int UniformBlock::get_attach_point() {
 void UniformBlock::bind_to_attach_point(GLuint program_id) {
     // loc is a good value, since it has already been computed in the program stage of this function
     this->program_id=program_id;
-    ubo_loc_in_program = glGetUniformBlockIndex(program_id,name.c_str());
+    ubo_loc_in_program = glGetUniformBlockIndex(program_id,complete_name.c_str());
     int ubo_size=-1;
     glGetActiveUniformBlockiv(program_id,ubo_loc_in_program,GL_UNIFORM_BLOCK_DATA_SIZE,&ubo_size);
 
@@ -52,7 +56,7 @@ void UniformBlock::bind_to_attach_point(GLuint program_id) {
 }
 
 std::string UniformBlock::get_name() {
-    return name;
+    return complete_name;
 }
 
 GLuint UniformBlock::get_ubo() {
@@ -61,7 +65,7 @@ GLuint UniformBlock::get_ubo() {
 
 GLint UniformBlock::get_value_from_pname(std::string sub_name,GLenum pname) {
     GLuint indice;
-    std::string real_name=name;
+    std::string real_name=subuniform_name;
     real_name+=".";
     real_name+=sub_name;
     
