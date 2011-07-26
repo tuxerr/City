@@ -37,74 +37,18 @@ void Scene::new_draw() {
     disp->new_draw();
 }
 
-Matrix4 Scene::create_perspective(float angle, float near, float far) {
-    Matrix4 perspective;
-    float f = 1.0 / tan(angle * M_PI / 360); 
-    perspective.val[0]=f/((float)disp->get_width()/disp->get_height());
-    perspective.val[5]=f;
-    perspective.val[10]=(far + near)/(near-far);
-    perspective.val[11]=2*far*near/(near-far);
-    perspective.val[14]=-1;
-    return perspective;
-}
-
 void Scene::set_perspective(float angle,float near,float far) {
-    perspective=create_perspective(angle,near,far);
+    perspective.perspective(angle,near,far,(float)disp->get_width()/disp->get_height());
     perspective_changed=true;
-}
-
-Matrix4 Scene::create_perspective_ortho(float width,float near,float far) {
-    Matrix4 perspective;
-    float height=width*disp->get_height()/disp->get_width();
-
-    float right=width/2;
-    float top=height/2;
-    
-    perspective.val[0]=1/right;
-    perspective.val[5]=1/top;
-    perspective.val[10]=-2/(far-near);
-    perspective.val[11]=-(far+near)/(far-near);
-    perspective.val[15]=1;
-
-    return perspective;
 }
 
 void Scene::set_perspective_ortho(float width,float near,float far) {
-    perspective=create_perspective_ortho(width,near,far);
+    perspective.perspective_ortho(width,near,far,(float)disp->get_width()/disp->get_height());
     perspective_changed=true;
 }
 
-Matrix4 Scene::create_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
-    Matrix4 camera;
-
-    Vec3<float> forward=direction-pos;
-    forward.normalize();
-
-    Vec3<float> side=forward*up_vector;
-    side.normalize();
-
-    Vec3<float> up=side*forward;
-
-    camera.val[0] = side.x;
-    camera.val[1] = side.y;
-    camera.val[2] = side.z;
-
-    camera.val[4] = up.x;
-    camera.val[5] = up.y;
-    camera.val[6] = up.z;
-
-    camera.val[8] = -forward.x;
-    camera.val[9] = -forward.y;
-    camera.val[10] = -forward.z;
-
-    camera.val[15] = 1.0;
-
-    camera.translate(-pos.x,-pos.y,-pos.z);
-    return camera;
-}
-
 void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
-    camera=create_camera(pos,direction,up_vector);
+    camera.camera(pos,direction,up_vector);
     camera_pos = pos;
     camera_changed=true;
 }

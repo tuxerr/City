@@ -7,6 +7,7 @@
 #include "uniformblock.h"
 #include "texture.h"
 #include "matrix4.h"
+#include "constants.h"
 
 typedef enum Light_Types {
     OFF = 0,
@@ -24,6 +25,7 @@ public:
     void set_uniform(UniformBlock *uniform);
     void activate();
     void desactivate();
+    Matrix4& get_matrix();
 
 protected:
     UniformBlock *uniform;

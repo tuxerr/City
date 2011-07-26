@@ -9,8 +9,7 @@
 #include "object.h"
 #include "light.h"
 #include "vec3.h"
-
-#define MAX_LIGHTS 8
+#include "constants.h"
 
 class Scene {
 public:
@@ -20,9 +19,6 @@ public:
     void set_perspective(float angle,float near,float far);    
     void set_perspective_ortho(float width,float near,float far);
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);
-    Matrix4 create_perspective(float angle,float near,float far);    
-    Matrix4 create_perspective_ortho(float width,float near,float far);
-    Matrix4 create_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);
     Object* new_object();
     void delete_object(Object *o);
     void draw_scene(std::string program_name = "");

@@ -11,8 +11,7 @@
 #include "uniform.h"
 #include "uniformblock.h"
 #include "matrix4.h"
-
-#define TITLE "City"
+#include "constants.h"
 
 class Display{
 public:

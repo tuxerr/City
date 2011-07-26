@@ -159,3 +159,52 @@ void Matrix4::rotate(float angle,float x, float y, float z) {
 
     *this=Matrix4(val)*rot;
 }
+
+void Matrix4::perspective(float angle, float near, float far, float ratio) {
+    float f = 1.0 / tan(angle * M_PI / 360); 
+    val[0]=f/ratio;
+    val[5]=f;
+    val[10]=(far + near)/(near-far);
+    val[11]=2*far*near/(near-far);
+    val[14]=-1;
+}
+
+// ratio is width/height
+void Matrix4::perspective_ortho(float width,float near,float far, float ratio) {
+    float height=width/ratio;
+
+    float right=width/2;
+    float top=height/2;
+    
+    val[0]=1/right;
+    val[5]=1/top;
+    val[10]=-2/(far-near);
+    val[11]=-(far+near)/(far-near);
+    val[15]=1;
+}
+
+void Matrix4::camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
+    Vec3<float> forward=direction-pos;
+    forward.normalize();
+
+    Vec3<float> side=forward*up_vector;
+    side.normalize();
+
+    Vec3<float> up=side*forward;
+
+    val[0] = side.x;
+    val[1] = side.y;
+    val[2] = side.z;
+
+    val[4] = up.x;
+    val[5] = up.y;
+    val[6] = up.z;
+
+    val[8] = -forward.x;
+    val[9] = -forward.y;
+    val[10] = -forward.z;
+
+    val[15] = 1.0;
+
+    translate(-pos.x,-pos.y,-pos.z);
+}

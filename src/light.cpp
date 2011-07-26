@@ -39,6 +39,10 @@ void Light::set_uniform(UniformBlock *uniform) {
     set_linear_dissipation(linear_dissipation);
 }
 
+Matrix4& Light::get_matrix() {
+    return projection_camera_matrix;
+}
+
 /*** PointLight Class ***/
 
 PointLight::PointLight(UniformBlock *uniform,Vec3<float> pos,float intensity,Vec3<float> color) : 
@@ -73,7 +77,9 @@ DirectionalLight::DirectionalLight(UniformBlock *uniform,Vec3<float> direction,f
 
 void DirectionalLight::set_direction(Vec3<float> direction) {
     this->direction=direction;
+    
     uniform->set_value(direction,"direction");
+    uniform->set_value(projection_camera_matrix,"matrix");
 }
 
 void DirectionalLight::set_uniform(UniformBlock *uniform) {

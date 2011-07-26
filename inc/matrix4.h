@@ -23,6 +23,9 @@ public:
     void translate(float x, float y, float z);
     void scale(float x, float y, float z);
     void rotate(float angle,float x, float y, float z);
+    void perspective(float angle,float near,float far,float ratio);    
+    void perspective_ortho(float width,float near,float far,float ratio);
+    void camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);
 
     float val[16];
 };
