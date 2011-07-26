@@ -18,15 +18,17 @@ int main(int argc,char *argv[]) {
     Display disp(1024,768,false);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
+    disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
 
     UniformBlock *matrices=disp.new_uniformblock("GlobalValues");
     disp.link_program_to_uniformblock("default",matrices);
     disp.link_program_to_uniformblock("phong",matrices);
+    disp.link_program_to_uniformblock("depth_creation",matrices);
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(6,0,2);
-    sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
+    Vec3<float> camerapos(3,0,2);
+    sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
     sce.set_perspective(70,1,100);
 
     Timer timer;
@@ -54,6 +56,7 @@ int main(int argc,char *argv[]) {
     o1->update_vertices_buffer(v2,sizeof(v2));
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
+    o1->scale(10,10,10);
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -65,7 +68,7 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    PointLight *l1=sce.new_pointlight(Vec3<float>(0,2,3),Vec3<float>(1,0,0));
+    SpotLight *l1=sce.new_spotlight(Vec3<float>(0,2,9),Vec3<float>(1,0,0),Vec3<float>(0,0,-1),70,40);
     
     int i=0;
     timer.init();

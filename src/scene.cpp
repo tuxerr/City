@@ -37,22 +37,25 @@ void Scene::new_draw() {
     disp->new_draw();
 }
 
-void Scene::set_perspective(float angle,float near,float far) {
-    perspective.clear();
-    
+Matrix4 Scene::create_perspective(float angle, float near, float far) {
+    Matrix4 perspective;
     float f = 1.0 / tan(angle * M_PI / 360); 
     perspective.val[0]=f/((float)disp->get_width()/disp->get_height());
     perspective.val[5]=f;
     perspective.val[10]=(far + near)/(near-far);
     perspective.val[11]=2*far*near/(near-far);
     perspective.val[14]=-1;
+    return perspective;
+}
 
+void Scene::set_perspective(float angle,float near,float far) {
+    perspective=create_perspective(angle,near,far);
     perspective_changed=true;
 }
 
-void Scene::set_perspective_ortho(float width,float near,float far) {
+Matrix4 Scene::create_perspective_ortho(float width,float near,float far) {
+    Matrix4 perspective;
     float height=width*disp->get_height()/disp->get_width();
-    perspective.clear();
 
     float right=width/2;
     float top=height/2;
@@ -63,12 +66,16 @@ void Scene::set_perspective_ortho(float width,float near,float far) {
     perspective.val[11]=-(far+near)/(far-near);
     perspective.val[15]=1;
 
+    return perspective;
+}
+
+void Scene::set_perspective_ortho(float width,float near,float far) {
+    perspective=create_perspective_ortho(width,near,far);
     perspective_changed=true;
 }
 
-void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
-    camera_pos = pos;
-    camera.clear();
+Matrix4 Scene::create_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
+    Matrix4 camera;
 
     Vec3<float> forward=direction-pos;
     forward.normalize();
@@ -93,7 +100,12 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector
     camera.val[15] = 1.0;
 
     camera.translate(-pos.x,-pos.y,-pos.z);
+    return camera;
+}
 
+void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
+    camera=create_camera(pos,direction,up_vector);
+    camera_pos = pos;
     camera_changed=true;
 }
 

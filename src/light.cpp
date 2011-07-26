@@ -1,7 +1,8 @@
 #include "light.h"
 
 Light::Light(UniformBlock *uniform,float intensity,Vec3<float> color) : 
-    uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1)
+    uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1), 
+    shadowmap(LIGHT_SHADOWMAP_HEIGHT,LIGHT_SHADOWMAP_WIDTH,TEXTURE_DEPTH)
 {
     set_uniform(uniform);
 }

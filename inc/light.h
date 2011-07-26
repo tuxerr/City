@@ -5,6 +5,8 @@
 #include "math.h"
 #include "vec3.h"
 #include "uniformblock.h"
+#include "texture.h"
+#include "matrix4.h"
 
 typedef enum Light_Types {
     OFF = 0,
@@ -29,7 +31,10 @@ protected:
     Vec3<float> color;
     float intensity;
     float linear_dissipation;
+    Texture shadowmap;
+    Matrix4 projection_camera_matrix;
 };
+
 
 
 class PointLight : public Light {
@@ -43,6 +48,7 @@ private:
 };
 
 
+
 class DirectionalLight : public Light{
 public:
     DirectionalLight(UniformBlock *uniform,Vec3<float> direction,float intensity,Vec3<float> color);
@@ -52,6 +58,7 @@ public:
 private:
     Vec3<float> direction;
 };
+
 
 
 class SpotLight : public PointLight {
