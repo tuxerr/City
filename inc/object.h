@@ -36,6 +36,7 @@ public:
     bool need_to_update_matrices();
     void update_matrices(Matrix4 *perspective,Matrix4 *camera);
     void enable_color(bool color);
+    void enable_textures(bool textures);
     void set_enable_draw(bool draw);
     bool enable_draw();
     void set_draw_mode(Object_Draw_Modes draw_mode);
@@ -53,6 +54,7 @@ public:
 private:
     std::vector<ObjectPart> parts;
     bool ena_colors;
+    bool ena_textures;
     bool ena_draw;
     Object_Draw_Modes obj_draw_mode;
     std::string program_name;

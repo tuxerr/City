@@ -10,6 +10,8 @@
 #include "light.h"
 #include "vec3.h"
 #include "constants.h"
+#include "fbo.h"
+#include "texture.h"
 
 class Scene {
 public:
@@ -21,6 +23,7 @@ public:
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);
     Object* new_object();
     void delete_object(Object *o);
+    void render();
     void draw_scene(std::string program_name = "");
     void draw_object(Object *o,bool use_shaders);
     PointLight* new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity=1);
@@ -36,6 +39,8 @@ private:
     UniformBlock *matrices;
     UniformBlock *uniform_lights[MAX_LIGHTS];
     Uniform *uniform_light_number;
+    Uniform *uniform_light_sampler;
+    Uniform *uniform_light_projection;
     Vec3<float> camera_pos;
     Matrix4 camera;
     Matrix4 perspective;

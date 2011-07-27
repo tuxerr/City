@@ -15,7 +15,7 @@
 using namespace std;
 
 int main(int argc,char *argv[]) {
-    Display disp(1024,768,false);     disp.init();     
+    Display disp(1024,1024,false);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
     disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
@@ -48,6 +48,11 @@ int main(int argc,char *argv[]) {
                   0, 0, 1,
                   0, 0, 1,
                   0, 0, 1 };
+
+    float t2[]= { 0, 0, 1,
+                  0, 1, 1,
+                  1, 1, 1,
+                  1, 0, 1 };
     
 
     Object *o1=sce.new_object();
@@ -56,7 +61,8 @@ int main(int argc,char *argv[]) {
     o1->update_vertices_buffer(v2,sizeof(v2));
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
-    o1->scale(10,10,10);
+    o1->update_texture_buffer(t2,sizeof(t2));
+    o1->scale(0.1,0.1,0.1);
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -65,10 +71,11 @@ int main(int argc,char *argv[]) {
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->translate(0,0,1);
+    o->set_enable_draw(false);
 
     spaceship.close();
 
-    SpotLight *l1=sce.new_spotlight(Vec3<float>(0,2,9),Vec3<float>(1,0,0),Vec3<float>(0,0,-1),70,40);
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
     
     int i=0;
     timer.init();
@@ -78,7 +85,7 @@ int main(int argc,char *argv[]) {
         i++;
 
         o->rotate(0.2,0,0,1);
-        sce.draw_scene();
+        sce.render();
 
         c.refresh();
         disp.refresh();

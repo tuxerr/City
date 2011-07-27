@@ -7,6 +7,7 @@ out vec4 pixel_color;
 in vec3 color;
 smooth in vec4 vert_pos;
 smooth in vec4 vert_normal;
+smooth in vec2 texcoord;
 
 uniform Light_ {
     int light_type;
@@ -15,6 +16,7 @@ uniform Light_ {
     vec3 origin; 
     vec3 color; 
     vec3 direction;
+    mat4 matrix;
 } Light[8];
 
 uniform GlobalValues_ {
@@ -25,9 +27,10 @@ uniform GlobalValues_ {
 } GlobalValues;
 
 uniform int lightnumber;
+uniform sampler2D shadowmap;
 
 vec4 spotlight(int lightID) {
-     vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
+     vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
 
      vec3 light_ray = vert_pos.xyz-Light[lightID].origin;
      vec3 norm_normal = normalize(vert_normal.xyz);
@@ -114,5 +117,6 @@ void main(void) {
              res+=directionallight(i);
          }
      }
-     pixel_color = res;
+//     pixel_color = res;
+     pixel_color = texture(shadowmap,texcoord.xy);
 }       

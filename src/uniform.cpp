@@ -19,7 +19,13 @@ void Uniform::add_texture(Texture **tex,GLuint program_id,int index) {
     if(type==UNIFORM_SAMPLER) {
         tex_pointers.push_back(tex);
         GLint loc=glGetUniformLocation(program_id,uniform_name.c_str());
-        glUniform1i(loc,index);
+        if(loc!=-1) {
+            glUseProgram(program_id);
+            glUniform1i(loc,index);
+            glUseProgram(0);
+        } else {
+            std::cout<<"Uniform "<<uniform_name<<" wasn't found in program "<<program_id<<std::endl;
+        }
     }
 }
 

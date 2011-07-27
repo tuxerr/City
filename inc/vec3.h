@@ -15,6 +15,7 @@ public:
     Vec3<number> operator+(Vec3<number> n);
     Vec3<number> operator-(Vec3<number> n);
     Vec3<number> operator*(Vec3<number> n);
+    Vec3<number> operator*(number n);
 private:
 };
 
@@ -61,6 +62,16 @@ Vec3<number> Vec3<number>::operator*(Vec3<number> n) {
     res.x=(y*n.z-z*n.y);
     res.y=(z*n.x-x*n.z);
     res.z=(x*n.y-y*n.x);
+    return res;
+}
+
+// vectorial product
+template <class number>
+Vec3<number> Vec3<number>::operator*(number n) {
+    Vec3<number> res;
+    res.x=x*n;
+    res.y=y*n;
+    res.z=z*n;
     return res;
 }
 

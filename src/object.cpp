@@ -2,6 +2,7 @@
 
 Object::Object() : 
     ena_colors(true),
+    ena_textures(true),
     ena_draw(true),
     obj_draw_mode(OBJECT_DRAW_LINES),
     program_name("default"),
@@ -26,13 +27,13 @@ void Object::destroy() {
 int Object::new_part() {
     ObjectPart part = 
     {
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT),
-        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,2,GL_UNSIGNED_INT),
-        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT),
-        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT),
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT),
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT),
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT) 
+        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // vbo
+        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,2,GL_UNSIGNED_INT), // ibo lines
+        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT), // ibo triangles
+        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT), // ibo quads
+        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // cbo
+        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // tbo
+        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT)  // nbo
     };
 
     parts.push_back(part);
@@ -106,6 +107,10 @@ void Object::enable_color(bool color) {
     ena_colors=color;
 }
 
+void Object::enable_textures(bool textures) {
+    ena_textures=textures;
+}
+
 void Object::set_enable_draw(bool draw) {
     ena_draw=draw;
 }
@@ -157,6 +162,12 @@ void Object::draw() {
             glVertexAttribPointer(SHADER_NORMAL_ATTRIB,it->nbo.element_size(),it->nbo.element_type(),GL_FALSE,0,0);
         }
 
+        if(ena_textures && it->tbo.size()>0) {
+            it->tbo.bind();
+            glEnableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
+            glVertexAttribPointer(SHADER_TEXTURE_ATTRIB,it->tbo.element_size(),it->tbo.element_type(),GL_FALSE,0,0);
+        }
+
         if(obj_draw_mode==OBJECT_DRAW_LINES && it->ibo_lines.size()>0) {
             it->ibo_lines.bind();
             glDrawElements(GL_LINES,it->ibo_lines.size()/it->ibo_lines.element_size(),it->ibo_lines.element_type(),0);
@@ -180,6 +191,12 @@ void Object::draw() {
     
         if(ena_colors && it->cbo.size()>0) {
             glDisableVertexAttribArray(SHADER_COLOR_ATTRIB);
+        }
+        if(it->nbo.size()>0) {
+            glDisableVertexAttribArray(SHADER_NORMAL_ATTRIB);
+        }
+        if(ena_textures && it->tbo.size()>0) {
+            glDisableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
         }
         glDisableVertexAttribArray(SHADER_VERTEX_ATTRIB);
     }

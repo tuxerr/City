@@ -6,7 +6,10 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
     }
     if(disp->has_program("phong")) {
         uniform_light_number=disp->new_uniform("lightnumber",UNIFORM_INT);
+        uniform_light_sampler=disp->new_uniform("shadowmap",UNIFORM_SAMPLER);
+
         disp->link_program_to_uniform("phong",uniform_light_number);
+        disp->link_program_to_uniform("phong",uniform_light_sampler);
 
         for(int i=0;i<MAX_LIGHTS;i++) {
             std::stringstream uniform_name;
@@ -16,6 +19,10 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
         }
 
         uniform_light_number->set_value(light_number);
+    }
+    if(disp->has_program("depth_creation")) {
+        uniform_light_projection=disp->new_uniform("light_projection",UNIFORM_MAT4);
+        disp->link_program_to_uniform("depth_creation",uniform_light_projection);
     }
 }
 
@@ -131,13 +138,45 @@ void Scene::delete_light(Light* l) {
     }
 }
 
+void Scene::render() {
+    FBO fbo;
+    Texture tex(1024,1024,TEXTURE_DEPTH);
+    fbo.attach_texture(&tex,FBO_DEPTH); 
+    Texture tex2(1024,1024,TEXTURE_RGBA);
+    fbo.attach_texture(&tex2,FBO_COLOR0);
+    
+    if(fbo.iscomplete()) {
+        disp->viewport(1024,1024);
+    
+        fbo.bind();
+        uniform_light_projection->set_value(lights[0]->get_matrix());
+        draw_scene("depth_creation");
+        std::cout<<"offscreen rendering"<<std::endl;
+        fbo.unbind();
+
+        uniform_light_sampler->set_value(&tex2);
+
+        disp->viewport();
+
+    }  else {
+        std::cout<<"FBO incomplete"<<std::endl;
+    }  
+    std::vector<float> vec;
+    vec.assign(100*100*4,0.3);
+
+    tex2.bind();
+    glTexSubImage2D(GL_TEXTURE_2D,0,400,400,100,100,GL_RGBA,GL_FLOAT,&vec[0]);        
+    tex2.unbind(); 
+
+    draw_scene();
+}
+
 void Scene::draw_scene(std::string program_name) {
     Program *program=NULL;
 
     if(camera_changed) {
         matrices->set_value(camera_pos,"camera_pos");
     }
-
 
     if(program_name!="") {
         program=disp->get_program(program_name);
@@ -184,7 +223,7 @@ void Scene::draw_object(Object *o,bool use_shaders) {
         matrices->set_value(o->projection_modelview_matrix(),"projection_modelview");
 
         matrices->set_value(o->normal_matrix(),"normal_matrix");
-        
+
         if(use_shaders) {
             program->use();
         }

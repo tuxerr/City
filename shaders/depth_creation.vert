@@ -3,6 +3,9 @@
 layout(row_major) uniform;
 
 in vec3 in_Vertex;
+in vec3 in_Color;
+
+out vec3 color;
 
 uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
@@ -11,6 +14,9 @@ uniform GlobalValues_ {
     vec3 camera_pos;
 } GlobalValues;
 
+uniform mat4 light_projection; //perspective*camera*modelview
+
 void main() {
-    gl_Position = GlobalValues.projection_modelview*vec4(in_Vertex,1.0);
+    gl_Position = light_projection*GlobalValues.modelview*vec4(in_Vertex,1.0);
+    color = in_Color;
 }
