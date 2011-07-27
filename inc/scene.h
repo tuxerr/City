@@ -17,7 +17,6 @@ class Scene {
 public:
     Scene(Display *disp,UniformBlock *matrices);
     ~Scene();
-    void new_draw();
     void set_perspective(float angle,float near,float far);    
     void set_perspective_ortho(float width,float near,float far);
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);

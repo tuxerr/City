@@ -71,7 +71,6 @@ int main(int argc,char *argv[]) {
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->translate(0,0,1);
-    o->set_enable_draw(false);
 
     spaceship.close();
 
@@ -80,10 +79,7 @@ int main(int argc,char *argv[]) {
     int i=0;
     timer.init();
     while(!c.quit) {
-        sce.new_draw();
-
         i++;
-
         o->rotate(0.2,0,0,1);
         sce.render();
 

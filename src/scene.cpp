@@ -40,10 +40,6 @@ Scene::~Scene() {
     }
 }
 
-void Scene::new_draw() {
-    disp->new_draw();
-}
-
 void Scene::set_perspective(float angle,float near,float far) {
     perspective.perspective(angle,near,far,(float)disp->get_width()/disp->get_height());
     perspective_changed=true;
@@ -161,17 +157,13 @@ void Scene::render() {
     }  else {
         std::cout<<"FBO incomplete"<<std::endl;
     }  
-    std::vector<float> vec;
-    vec.assign(100*100*4,0.3);
-
-    tex2.bind();
-    glTexSubImage2D(GL_TEXTURE_2D,0,400,400,100,100,GL_RGBA,GL_FLOAT,&vec[0]);        
-    tex2.unbind(); 
 
     draw_scene();
 }
 
 void Scene::draw_scene(std::string program_name) {
+    disp->new_draw();
+
     Program *program=NULL;
 
     if(camera_changed) {
