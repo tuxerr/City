@@ -1,7 +1,5 @@
 #version 330
 
-layout(row_major) uniform;
-
 out vec4 pixel_color;
 
 in vec3 color;
@@ -115,7 +113,6 @@ void main(void) {
              res+=spotlight(i);
          } else if(Light[i].light_type==3) {
              vec4 light_point = Light[i].matrix*vert_pos;
-             light_point.y = -light_point.y;
              light_point.x = (light_point.x/2)+0.5;
              light_point.y = (light_point.y/2)+0.5;
              light_point.z = (light_point.z/2)+0.5;

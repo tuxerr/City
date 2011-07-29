@@ -39,7 +39,7 @@ private:
     UniformBlock *uniform_lights[MAX_LIGHTS];
     Uniform *uniform_light_number;
     Uniform *uniform_light_sampler;
-    Uniform *uniform_light_projection;
+    UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;
     Matrix4 camera;
     Matrix4 perspective;

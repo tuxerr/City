@@ -233,6 +233,7 @@ void Object::update_matrices(Matrix4 *perspective,Matrix4 *camera) {
         if(perspective!=NULL) {
             projection_modelview = (*perspective)*total_modelview;
         }
+        
     }
     modelview_changed=false;
 }

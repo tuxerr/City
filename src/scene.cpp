@@ -21,8 +21,8 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
         uniform_light_number->set_value(light_number);
     }
     if(disp->has_program("depth_creation")) {
-        uniform_light_projection=disp->new_uniform("light_projection",UNIFORM_MAT4);
-        disp->link_program_to_uniform("depth_creation",uniform_light_projection);
+        uniform_light_projection=disp->new_uniformblock("Light_properties");
+        disp->link_program_to_uniformblock("depth_creation",uniform_light_projection);
     }
 }
 
@@ -136,18 +136,19 @@ void Scene::delete_light(Light* l) {
 
 void Scene::render() {
     FBO fbo;
-    Texture tex_color(1024,1024,TEXTURE_RGBA);
+    Texture tex_color(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
     fbo.attach_texture(&tex_color,FBO_COLOR0);
-    Texture tex_depth(1024,1024,TEXTURE_DEPTH);
+    Texture tex_depth(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH);
     fbo.attach_texture(&tex_depth,FBO_DEPTH);
     
     if(fbo.iscomplete()) {
-        disp->viewport(1024,1024);
+        disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
     
-//        fbo.bind();
-        uniform_light_projection->set_value(lights[0]->get_matrix());
+        fbo.bind();
+        Matrix4 light_mat = lights[0]->get_matrix();
+        uniform_light_projection->set_value(light_mat,"matrix");
         draw_scene("depth_creation");
-//        fbo.unbind();
+        fbo.unbind();
 
         uniform_light_sampler->set_value(&tex_depth);
 
@@ -156,7 +157,8 @@ void Scene::render() {
     }  else {
         std::cout<<"FBO incomplete"<<std::endl;
     }  
-//    draw_scene();
+
+    draw_scene();
 }
 
 void Scene::draw_scene(std::string program_name) {

@@ -149,6 +149,9 @@ void UniformBlock::set_value(Vec2<int> &i2 ,std::string sub_name) {
 }
 
 void UniformBlock::set_value(Matrix4 &mat,std::string sub_name) {
+    Matrix4 m = mat;
+    m.transpose();
+
     int offset = get_offset(sub_name);
     if(offset!=-1) {
         GLint mat_stride;
@@ -162,7 +165,7 @@ void UniformBlock::set_value(Matrix4 &mat,std::string sub_name) {
         glBindBuffer(GL_UNIFORM_BUFFER,ubo);
         for(int i=0;i<4;i++) {
             glBufferSubData(GL_UNIFORM_BUFFER,offset+(sizeof(float)*4+mat_stride)*i,
-                            sizeof(float)*4,&(mat.val[i*4]));
+                            sizeof(float)*4,&(m.val[i*4]));
         }
         glBindBuffer(GL_UNIFORM_BUFFER,0);
     }

@@ -39,7 +39,7 @@ void Light::set_uniform(UniformBlock *uniform) {
     set_linear_dissipation(linear_dissipation);
 }
 
-Matrix4& Light::get_matrix() {
+Matrix4 Light::get_matrix() {
     return projection_camera_matrix;
 }
 
@@ -83,11 +83,9 @@ void DirectionalLight::set_direction(Vec3<float> direction) {
     Matrix4 tmp;
     Vec3<float> dir_tmp = direction; dir_tmp.normalize();
     
-    tmp.camera(Vec3<float>(0,0,10),Vec3<float>(0,0,0),Vec3<float>(1,0,0));
-    
-//    tmp.camera(Vec3<float>(0,0,0)-dir_tmp*FAR,direction,Vec3<float>(direction.y,direction.z,direction.x));
-
+    tmp.camera(Vec3<float>(0,0,0)-dir_tmp*FAR,Vec3<float>(0,0,0),Vec3<float>(1,1,0));
     projection_camera_matrix = projection_camera_matrix * tmp;
+
     projection_camera_matrix.print();
 
     uniform->set_value(direction,"direction");

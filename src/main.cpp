@@ -62,6 +62,7 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    o->translate(4,0,1);
 
     spaceship.close();
 

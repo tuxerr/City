@@ -127,7 +127,7 @@ void Uniform::send_value(GLuint program_id) {
         break;
 	
     case UNIFORM_MAT4:
-	glUniformMatrix4fv(uniform_locations[program_id],1,GL_FALSE,mval.adress());
+	glUniformMatrix4fv(uniform_locations[program_id],1,GL_TRUE,mval.adress());
 	break;
 
     case UNIFORM_SAMPLER:

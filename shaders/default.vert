@@ -1,7 +1,5 @@
 #version 330
 
-layout(row_major) uniform;
-
 in vec3 in_Vertex;
 in vec3 in_Color;
 in vec3 in_Normal;

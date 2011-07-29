@@ -25,7 +25,7 @@ public:
     void set_uniform(UniformBlock *uniform);
     void activate();
     void desactivate();
-    Matrix4& get_matrix();
+    Matrix4 get_matrix();
 
 protected:
     UniformBlock *uniform;
