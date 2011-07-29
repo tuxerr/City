@@ -161,6 +161,7 @@ void Matrix4::rotate(float angle,float x, float y, float z) {
 }
 
 void Matrix4::perspective(float angle, float near, float far, float ratio) {
+    clear();
     float f = 1.0 / tan(angle * M_PI / 360); 
     val[0]=f/ratio;
     val[5]=f;
@@ -171,6 +172,7 @@ void Matrix4::perspective(float angle, float near, float far, float ratio) {
 
 // ratio is width/height
 void Matrix4::perspective_ortho(float width,float near,float far, float ratio) {
+    clear();
     float height=width/ratio;
 
     float right=width/2;
@@ -184,6 +186,7 @@ void Matrix4::perspective_ortho(float width,float near,float far, float ratio) {
 }
 
 void Matrix4::camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
+    clear();
     Vec3<float> forward=direction-pos;
     forward.normalize();
 

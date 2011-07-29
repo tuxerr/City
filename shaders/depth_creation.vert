@@ -6,6 +6,7 @@ in vec3 in_Vertex;
 in vec3 in_Color;
 
 out vec3 color;
+smooth out vec4 pos;
 
 uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
@@ -18,5 +19,6 @@ uniform mat4 light_projection; //perspective*camera*modelview
 
 void main() {
     gl_Position = light_projection*GlobalValues.modelview*vec4(in_Vertex,1.0);
+    pos = gl_Position;
     color = in_Color;
 }

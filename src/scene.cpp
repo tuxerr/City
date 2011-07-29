@@ -136,29 +136,27 @@ void Scene::delete_light(Light* l) {
 
 void Scene::render() {
     FBO fbo;
-    Texture tex(1024,1024,TEXTURE_DEPTH);
-    fbo.attach_texture(&tex,FBO_DEPTH); 
-    Texture tex2(1024,1024,TEXTURE_RGBA);
-    fbo.attach_texture(&tex2,FBO_COLOR0);
+    Texture tex_color(1024,1024,TEXTURE_RGBA);
+    fbo.attach_texture(&tex_color,FBO_COLOR0);
+    Texture tex_depth(1024,1024,TEXTURE_DEPTH);
+    fbo.attach_texture(&tex_depth,FBO_DEPTH);
     
     if(fbo.iscomplete()) {
         disp->viewport(1024,1024);
     
-        fbo.bind();
+//        fbo.bind();
         uniform_light_projection->set_value(lights[0]->get_matrix());
         draw_scene("depth_creation");
-        std::cout<<"offscreen rendering"<<std::endl;
-        fbo.unbind();
+//        fbo.unbind();
 
-        uniform_light_sampler->set_value(&tex2);
+        uniform_light_sampler->set_value(&tex_depth);
 
         disp->viewport();
 
     }  else {
         std::cout<<"FBO incomplete"<<std::endl;
     }  
-
-    draw_scene();
+//    draw_scene();
 }
 
 void Scene::draw_scene(std::string program_name) {

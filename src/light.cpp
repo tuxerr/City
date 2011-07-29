@@ -78,13 +78,17 @@ DirectionalLight::DirectionalLight(UniformBlock *uniform,Vec3<float> direction,f
 void DirectionalLight::set_direction(Vec3<float> direction) {
     this->direction=direction;
     projection_camera_matrix.clear();
-    projection_camera_matrix.perspective_ortho(10,NEAR,FAR*2,1);
+    projection_camera_matrix.perspective_ortho(30,NEAR,FAR*2,1);
     
     Matrix4 tmp;
     Vec3<float> dir_tmp = direction; dir_tmp.normalize();
-    tmp.camera(Vec3<float>(0,0,0)-dir_tmp*FAR,direction,Vec3<float>(direction.y,direction.z,direction.x));
+    
+    tmp.camera(Vec3<float>(0,0,10),Vec3<float>(0,0,0),Vec3<float>(1,0,0));
+    
+//    tmp.camera(Vec3<float>(0,0,0)-dir_tmp*FAR,direction,Vec3<float>(direction.y,direction.z,direction.x));
 
     projection_camera_matrix = projection_camera_matrix * tmp;
+    projection_camera_matrix.print();
 
     uniform->set_value(direction,"direction");
     uniform->set_value(projection_camera_matrix,"matrix");

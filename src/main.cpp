@@ -27,7 +27,7 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(3,0,2);
+    Vec3<float> camerapos(9,0,3);
     sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
     sce.set_perspective(70,1,100);
 
@@ -49,20 +49,12 @@ int main(int argc,char *argv[]) {
                   0, 0, 1,
                   0, 0, 1 };
 
-    float t2[]= { 0, 0, 1,
-                  0, 1, 1,
-                  1, 1, 1,
-                  1, 0, 1 };
-    
-
     Object *o1=sce.new_object();
     o1->set_program("phong");
     o1->set_draw_mode(OBJECT_DRAW_QUADS);
     o1->update_vertices_buffer(v2,sizeof(v2));
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
-    o1->update_texture_buffer(t2,sizeof(t2));
-    o1->scale(0.1,0.1,0.1);
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -70,7 +62,6 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->translate(0,0,1);
 
     spaceship.close();
 

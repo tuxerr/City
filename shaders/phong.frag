@@ -27,7 +27,7 @@ uniform GlobalValues_ {
 } GlobalValues;
 
 uniform int lightnumber;
-uniform sampler2D shadowmap;
+uniform sampler2DShadow shadowmap;
 
 vec4 spotlight(int lightID) {
      vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
@@ -114,9 +114,16 @@ void main(void) {
          } else if(Light[i].light_type==2) {
              res+=spotlight(i);
          } else if(Light[i].light_type==3) {
-             res+=directionallight(i);
+             vec4 light_point = Light[i].matrix*vert_pos;
+             light_point.y = -light_point.y;
+             light_point.x = (light_point.x/2)+0.5;
+             light_point.y = (light_point.y/2)+0.5;
+             light_point.z = (light_point.z/2)+0.5;
+             float lightval = texture(shadowmap,light_point.xyz);
+             if(light_point.z<=lightval) {
+                 res+=directionallight(i);
+             }
          }
      }
-//     pixel_color = res;
-     pixel_color = texture(shadowmap,texcoord.xy);
+     pixel_color = res;
 }       
