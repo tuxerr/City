@@ -66,7 +66,8 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,-1,-1),Vec3<float>(1,1,1));
+    PointLight *l=sce.new_pointlight(Vec3<float>(0,0,5),Vec3<float>(1,1,1));
     
     int i=0;
     timer.init();

@@ -116,8 +116,8 @@ void main(void) {
              light_point.x = (light_point.x/2)+0.5;
              light_point.y = (light_point.y/2)+0.5;
              light_point.z = (light_point.z/2)+0.5;
-             float lightval = texture(shadowmap,light_point.xyz);
-             if(light_point.z<=lightval) {
+             float lightval = texture(shadowmap,light_point.xyz)+0.0025;
+             if(light_point.z <= lightval) {
                  res+=directionallight(i);
              }
          }
