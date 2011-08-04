@@ -5,9 +5,6 @@
 #include <vector>
 #include <GL/glew.h>
 
-#define LIGHT_SHADOWMAP_HEIGHT 1024
-#define LIGHT_SHADOWMAP_WIDTH 1024
-
 typedef enum Texture_Types {
     TEXTURE_DEPTH, TEXTURE_RGBA
 } Texture_Types;

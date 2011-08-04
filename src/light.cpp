@@ -2,7 +2,7 @@
 
 Light::Light(UniformBlock *uniform,float intensity,Vec3<float> color) : 
     uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1), 
-    shadowmap(LIGHT_SHADOWMAP_HEIGHT,LIGHT_SHADOWMAP_WIDTH,TEXTURE_DEPTH)
+    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH)
 {
     set_uniform(uniform);
 }
@@ -39,8 +39,16 @@ void Light::set_uniform(UniformBlock *uniform) {
     set_linear_dissipation(linear_dissipation);
 }
 
-Matrix4 Light::get_matrix() {
-    return projection_camera_matrix;
+Texture* Light::get_depth_texture() {
+    return &shadowmap;
+}
+
+UniformBlock* Light::get_uniformblock() {
+    return uniform;
+}
+
+Light_Types Light::get_type() {
+    return type;
 }
 
 /*** PointLight Class ***/
@@ -77,22 +85,16 @@ DirectionalLight::DirectionalLight(UniformBlock *uniform,Vec3<float> direction,f
 
 void DirectionalLight::set_direction(Vec3<float> direction) {
     this->direction=direction;
-    projection_camera_matrix.clear();
-    projection_camera_matrix.perspective_ortho(30,NEAR,FAR*2,1);
-    
-    Matrix4 tmp;
-    Vec3<float> dir_tmp = direction; dir_tmp.normalize();
-    
-    tmp.camera(Vec3<float>(0,0,0)-dir_tmp*FAR,Vec3<float>(0,0,0),Vec3<float>(direction.y,direction.z,direction.x));
-    projection_camera_matrix = projection_camera_matrix * tmp;
-
     uniform->set_value(direction,"direction");
-    uniform->set_value(projection_camera_matrix,"matrix");
 }
 
 void DirectionalLight::set_uniform(UniformBlock *uniform) {
     Light::set_uniform(uniform);
     set_direction(direction);
+}
+
+Vec3<float> DirectionalLight::get_direction() {
+    return direction;
 }
 
 /*** SpotLight ***/

@@ -25,19 +25,18 @@ public:
     void set_uniform(UniformBlock *uniform);
     void activate();
     void desactivate();
-    Matrix4 get_matrix();
+    Texture* get_depth_texture();
+    UniformBlock* get_uniformblock();
+    Light_Types get_type();
 
 protected:
     UniformBlock *uniform;
-    int type;
+    Light_Types type;
     Vec3<float> color;
     float intensity;
     float linear_dissipation;
     Texture shadowmap;
-    Matrix4 projection_camera_matrix;
 };
-
-
 
 class PointLight : public Light {
 public:
@@ -54,7 +53,8 @@ private:
 class DirectionalLight : public Light{
 public:
     DirectionalLight(UniformBlock *uniform,Vec3<float> direction,float intensity,Vec3<float> color);
-    void set_direction(Vec3<float> direction);    
+    void set_direction(Vec3<float> direction);   
+    Vec3<float> get_direction();
     void set_uniform(UniformBlock *uniform);
 
 private:

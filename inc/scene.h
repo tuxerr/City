@@ -37,8 +37,10 @@ private:
     Display *disp;
     UniformBlock *matrices;
     UniformBlock *uniform_lights[MAX_LIGHTS];
+    Uniform *uniform_light_sampler[MAX_LIGHTS];
+    Uniform *uniform_light_samplercube[MAX_LIGHTS];
     Uniform *uniform_light_number;
-    Uniform *uniform_light_sampler;
+
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;
     Matrix4 camera;

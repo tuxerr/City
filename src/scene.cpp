@@ -6,16 +6,23 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
     }
     if(disp->has_program("phong")) {
         uniform_light_number=disp->new_uniform("lightnumber",UNIFORM_INT);
-        uniform_light_sampler=disp->new_uniform("shadowmap",UNIFORM_SAMPLER);
-
         disp->link_program_to_uniform("phong",uniform_light_number);
-        disp->link_program_to_uniform("phong",uniform_light_sampler);
 
         for(int i=0;i<MAX_LIGHTS;i++) {
             std::stringstream uniform_name;
             uniform_name<<"Light["<<i<<"]";
             uniform_lights[i]=disp->new_uniformblock(uniform_name.str());
             disp->link_program_to_uniformblock("phong",uniform_lights[i]);
+            
+            uniform_name.str("");
+            uniform_name<<"shadowmap["<<i<<"]";
+            uniform_light_sampler[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
+            disp->link_program_to_uniform("phong",uniform_light_sampler[i]);
+
+            uniform_name.str("");
+            uniform_name<<"shadowcubemap["<<i<<"]";
+            uniform_light_samplercube[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
+            disp->link_program_to_uniform("phong",uniform_light_samplercube[i]);
         }
 
         uniform_light_number->set_value(light_number);
@@ -24,6 +31,7 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
         uniform_light_projection=disp->new_uniformblock("Light_properties");
         disp->link_program_to_uniformblock("depth_creation",uniform_light_projection);
     }
+
 }
 
 Scene::~Scene() {
@@ -138,27 +146,64 @@ void Scene::render() {
     FBO fbo;
     Texture tex_color(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
     fbo.attach_texture(&tex_color,FBO_COLOR0);
-    Texture tex_depth(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH);
-    fbo.attach_texture(&tex_depth,FBO_DEPTH);
+
+    for(int i=0;i<MAX_LIGHTS;i++) {
+
+        if(lights[i]!=NULL) {
+            fbo.attach_texture(lights[i]->get_depth_texture(),FBO_DEPTH);
     
-    if(fbo.iscomplete()) {
-        disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
-    
-        fbo.bind();
-        Matrix4 light_mat = lights[0]->get_matrix();
-        uniform_light_projection->set_value(light_mat,"matrix");
-        draw_scene("depth_creation");
-        fbo.unbind();
+            if(fbo.iscomplete()) {
+                disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
+             
+                UniformBlock *uni = lights[i]->get_uniformblock();
+                Matrix4 light_mat;
+                Matrix4 camera_mat;
+                DirectionalLight* dirlight;
+                Vec3<float> dir_tmp;
 
-        uniform_light_sampler->set_value(&tex_depth);
+                switch(lights[i]->get_type()) {
+                case POINT_LIGHT:
+                    break;
 
-        disp->viewport();
+                case SPOT_LIGHT:
+                    break;
 
-    }  else {
-        std::cout<<"FBO incomplete"<<std::endl;
-    }  
+                case DIRECTION_LIGHT:
+                    dirlight = (DirectionalLight*) lights[i];
+                    dir_tmp = dirlight->get_direction(); 
 
+                    dir_tmp.normalize();
+
+                    camera_mat.camera(camera_pos-dir_tmp*FAR,camera_pos,Vec3<float>(dir_tmp.y,dir_tmp.z,dir_tmp.x));
+
+                    light_mat.perspective_ortho(30,NEAR,FAR*2,1);
+                    light_mat = light_mat*camera_mat;
+
+                    uni->set_value(light_mat,"matrix");
+                    uniform_light_sampler[i]->set_value(lights[i]->get_depth_texture());
+                    break;
+
+                case OFF:
+                    break;
+
+                default:
+                    break;
+                }
+
+                fbo.bind();
+                uniform_light_projection->set_value(light_mat,"matrix");
+                draw_scene("depth_creation");
+                fbo.unbind();
+
+                disp->viewport();
+
+            }  else {
+                std::cout<<"FBO incomplete for the render of light "<<i<<std::endl;
+            }  
+        }
+    }
     draw_scene();
+
 }
 
 void Scene::draw_scene(std::string program_name) {

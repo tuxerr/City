@@ -25,7 +25,9 @@ uniform GlobalValues_ {
 } GlobalValues;
 
 uniform int lightnumber;
-uniform sampler2DShadow shadowmap;
+
+uniform sampler2DShadow shadowmap[8];
+uniform samplerCubeShadow shadowcubemap[8];
 
 vec4 spotlight(int lightID) {
      vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
@@ -107,18 +109,34 @@ vec4 directionallight(int lightID) {
 void main(void) {
      vec4 res = vec4(0,0,0,0);
      for(int i=0;i<lightnumber;i++) {
+
          if(Light[i].light_type==1) {
-             res+=pointlight(i);
-         } else if(Light[i].light_type==2) {
-             res+=spotlight(i);
-         } else if(Light[i].light_type==3) {
+             vec3 light_ray = vert_pos.xyz-Light[i].origin;
+             float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
+             if(abs(light_ray.z) <= lightval) {
+                 res+=pointlight(i);
+             }
+
+         } else {
              vec4 light_point = Light[i].matrix*vert_pos;
              light_point.x = (light_point.x/2)+0.5;
              light_point.y = (light_point.y/2)+0.5;
              light_point.z = (light_point.z/2)+0.5;
-             float lightval = texture(shadowmap,light_point.xyz)+0.0025;
-             if(light_point.z <= lightval) {
-                 res+=directionallight(i);
+             float lightval = texture(shadowmap[i],light_point.xyz)+0.0025;
+
+
+             if(Light[i].light_type==2) {
+
+                 if(light_point.z <= lightval) {
+                     res+=spotlight(i);
+                 }
+
+             } else if(Light[i].light_type==3) {
+                 
+//                 lightval=1;
+                 if(light_point.z <= lightval) {
+                     res+=directionallight(i);
+                 }
              }
          }
      }
