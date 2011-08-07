@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <map>
+#include <list>
 #include <string>
 #include <GL/glew.h>
 #include <stdio.h>
@@ -30,7 +31,7 @@ public:
 private:
     GLuint program_id;
     std::map<Uniform*,bool> uniforms;
-    std::vector<Texture*> textures;
+    std::list<Texture*> textures;
     bool binded;
 };
 

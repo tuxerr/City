@@ -115,7 +115,7 @@ void Program::subscribe_to_uniform(Uniform *uni) {
         if((int)textures.size()==max_size) {
             std::cout<<max_size<<" Textures are already binded to program "<<id()<<std::endl;
         } else {
-            textures.resize(textures.size()+1);
+            textures.push_back(NULL);
             uni->add_texture(&textures.back(),program_id,textures.size()-1);
         }
     } else {
@@ -142,10 +142,13 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
 }
 
 void Program::use() {
-    for(int i=0;i<(int)textures.size();i++) {
-        if(textures[i]!=NULL) {
-            textures[i]->bind(i);
+    std::list<Texture*>::iterator it = textures.begin();
+    int tex_index=0;
+    for(;it!=textures.end();it++) {
+        if( (*it) != NULL) {
+            (*it)->bind(tex_index);
         }
+        tex_index++;
     }
 
     glUseProgram(program_id);
@@ -163,8 +166,11 @@ void Program::use() {
 }
 
 void Program::unuse() {
-    for(int i=0;i<(int)textures.size();i++) {
-        textures[i]->unbind();
+    std::list<Texture*>::iterator it = textures.begin();
+    for(;it!=textures.end();it++) {
+        if( (*it) != NULL) {
+            (*it)->unbind();
+        }
     }
 
     glUseProgram(0);

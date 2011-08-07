@@ -124,7 +124,6 @@ void main(void) {
              light_point.z = (light_point.z/2)+0.5;
              float lightval = texture(shadowmap[i],light_point.xyz)+0.0025;
 
-
              if(Light[i].light_type==2) {
 
                  if(light_point.z <= lightval) {
