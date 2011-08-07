@@ -154,12 +154,6 @@ void Scene::render() {
     
             if(fbo.iscomplete()) {
                 disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
-             
-                UniformBlock *uni = lights[i]->get_uniformblock();
-                Matrix4 light_mat;
-                Matrix4 camera_mat;
-                DirectionalLight* dirlight;
-                Vec3<float> dir_tmp;
 
                 switch(lights[i]->get_type()) {
                 case POINT_LIGHT:
@@ -169,18 +163,7 @@ void Scene::render() {
                     break;
 
                 case DIRECTION_LIGHT:
-                    dirlight = (DirectionalLight*) lights[i];
-                    dir_tmp = dirlight->get_direction(); 
-
-                    dir_tmp.normalize();
-
-                    camera_mat.camera(camera_pos-dir_tmp*FAR,camera_pos,Vec3<float>(dir_tmp.y,dir_tmp.z,dir_tmp.x));
-
-                    light_mat.perspective_ortho(30,NEAR,FAR*2,1);
-                    light_mat = light_mat*camera_mat;
-
-                    uni->set_value(light_mat,"matrix");
-                    uniform_light_sampler[i]->set_value(lights[i]->get_depth_texture());
+                    render_directional_shadowmap((DirectionalLight*) lights[i],fbo,uniform_light_sampler[i]);
                     break;
 
                 case OFF:
@@ -189,11 +172,6 @@ void Scene::render() {
                 default:
                     break;
                 }
-
-                fbo.bind();
-                uniform_light_projection->set_value(light_mat,"matrix");
-                draw_scene("depth_creation");
-                fbo.unbind();
 
                 disp->viewport();
 
@@ -204,6 +182,30 @@ void Scene::render() {
     }
     draw_scene();
 
+}
+
+void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
+    UniformBlock *uni = dirlight->get_uniformblock();
+    Matrix4 light_mat;
+    Matrix4 camera_mat;
+    Vec3<float> dir_tmp;
+
+    dir_tmp = dirlight->get_direction(); 
+
+    dir_tmp.normalize();
+
+    camera_mat.camera(camera_pos-dir_tmp*FAR,camera_pos,Vec3<float>(dir_tmp.y,dir_tmp.z,dir_tmp.x));
+
+    light_mat.perspective_ortho(30,NEAR,FAR*2,1);
+    light_mat = light_mat*camera_mat;
+
+    uni->set_value(light_mat,"matrix");
+    shadowmap_uni->set_value(dirlight->get_depth_texture());
+
+    fbo.bind();
+    uniform_light_projection->set_value(light_mat,"matrix");
+    draw_scene("depth_creation");
+    fbo.unbind();
 }
 
 void Scene::draw_scene(std::string program_name) {

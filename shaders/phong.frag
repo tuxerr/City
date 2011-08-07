@@ -123,6 +123,10 @@ void main(void) {
              light_point.y = (light_point.y/2)+0.5;
              light_point.z = (light_point.z/2)+0.5;
              float lightval = texture(shadowmap[i],light_point.xyz)+0.0025;
+             float lightvals1 = textureOffset(shadowmap[i],light_point.xyz,ivec2(1,0))+0.0025;
+             float lightvals2 = textureOffset(shadowmap[i],light_point.xyz,ivec2(-1,0))+0.0025;
+             float lightvals3 = textureOffset(shadowmap[i],light_point.xyz,ivec2(0,1))+0.0025;
+             float lightvals4 = textureOffset(shadowmap[i],light_point.xyz,ivec2(0,-1))+0.0025;
 
              if(Light[i].light_type==2) {
 
@@ -132,9 +136,23 @@ void main(void) {
 
              } else if(Light[i].light_type==3) {
                  
-//                 lightval=1;
                  if(light_point.z <= lightval) {
                      res+=directionallight(i);
+                 } else {
+                     float endres = 0;
+                     if(light_point.z <= lightvals1) {
+                         endres+=0.25;
+                     }
+                     if(light_point.z <= lightvals2) {
+                         endres+=0.25;
+                     }
+                     if(light_point.z <= lightvals3) {
+                         endres+=0.25;
+                     }
+                     if(light_point.z <= lightvals4) {
+                         endres+=0.25;
+                     }
+                     res+=directionallight(i)*endres;
                  }
              }
          }

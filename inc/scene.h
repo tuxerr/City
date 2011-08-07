@@ -23,6 +23,7 @@ public:
     Object* new_object();
     void delete_object(Object *o);
     void render();
+    void render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni);
     void draw_scene(std::string program_name = "");
     void draw_object(Object *o,bool use_shaders);
     PointLight* new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity=1);
