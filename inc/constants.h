@@ -5,6 +5,7 @@
 #define TITLE "City"
 #define NEAR 1
 #define FAR 100
-#define DEPTH_TEXTURE_SIZE 2048
+#define DEPTH_TEXTURE_SIZE 1024
+#define CASCADED_SHADING_DEPTH 4
 
 #endif

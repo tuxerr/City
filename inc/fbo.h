@@ -24,7 +24,7 @@ public:
     bool iscomplete();
     void bind(FBO_Type = FBO_BOTH);
     void unbind();
-    void attach_texture(Texture *tex,FBO_Attachment attachpoint);
+    void attach_texture(Texture *tex,FBO_Attachment attachpoint,int array_layer=-1);
 
 private:
     GLuint fbo_id;

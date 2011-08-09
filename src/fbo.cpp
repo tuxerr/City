@@ -80,10 +80,27 @@ void FBO::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
-void FBO::attach_texture(Texture *tex,FBO_Attachment attachpoint) {
+void FBO::attach_texture(Texture *tex,FBO_Attachment attachpoint,int array_layer) {
     bind();
     tex->bind();
-    glFramebufferTexture2D(GL_FRAMEBUFFER,attachpoint,GL_TEXTURE_2D,tex->id(),0);
+    switch(tex->get_gl_texture_type()) {
+    case GL_TEXTURE_2D:
+        if(array_layer!=-1) {
+            std::cout<<"You shouldn't specify a layer ("<<array_layer<<") for a 2-dimensional texture"<<std::endl;
+        }
+        glFramebufferTexture2D(GL_FRAMEBUFFER,attachpoint,GL_TEXTURE_2D,tex->id(),0);
+        break;
+
+    case GL_TEXTURE_2D_ARRAY:
+        if(array_layer==-1) {
+            std::cout<<"You should specify a layer for the FBO binding of a 3-dimensional texture"<<std::endl;
+        } else {
+            glFramebufferTexture3D(GL_FRAMEBUFFER,attachpoint,GL_TEXTURE_2D_ARRAY,tex->id(),0,array_layer);
+        }
+
+        break;
+    }
+
     tex->unbind();
     unbind();
 }

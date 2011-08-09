@@ -1,29 +1,37 @@
 #include "texture.h"
 
-Texture::Texture(int width,int height,Texture_Types type) : width(width), height(height), texture_type(type) {
+Texture::Texture(int width,int height,Texture_Types type) : width(width), height(height), texture_type(type), gl_texture_type(GL_TEXTURE_2D) {
     glGenTextures(1,&texture_id);
-    glBindTexture(GL_TEXTURE_2D,texture_id);
+
     switch(type) {
     case TEXTURE_DEPTH:
-        glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT24,width,height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        gl_texture_type=GL_TEXTURE_2D;
+        glBindTexture(gl_texture_type,texture_id);
+        glTexImage2D(gl_texture_type,0,GL_DEPTH_COMPONENT24,width,height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
         break;
         
     case TEXTURE_RGBA:
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_FLOAT,NULL);
+        gl_texture_type=GL_TEXTURE_2D;
+        glBindTexture(gl_texture_type,texture_id);
+        glTexImage2D(gl_texture_type,0,GL_RGBA,width,height,0,GL_RGBA,GL_FLOAT,NULL);
+        break;
+
+    case TEXTURE_DEPTH_LAYERED:
+        gl_texture_type=GL_TEXTURE_2D_ARRAY;
+        glBindTexture(gl_texture_type,texture_id);
+        glTexImage3D(gl_texture_type,0,GL_DEPTH_COMPONENT24,width,height,CASCADED_SHADING_DEPTH,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
         break;
 
     default:
         std::cout<<"Texture spec problem"<<std::endl;
         break;
     }
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glBindTexture(GL_TEXTURE_2D,0);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glBindTexture(gl_texture_type,0);
 }
 
 Texture::~Texture() {
@@ -46,9 +54,13 @@ void Texture::bind(int texture_index) {
     if(texture_index!=-1) {
         glActiveTexture(GL_TEXTURE0 + texture_index);
     }
-    glBindTexture(GL_TEXTURE_2D,texture_id);
+    glBindTexture(gl_texture_type,texture_id);
 }
 
 void Texture::unbind() {
-    glBindTexture(GL_TEXTURE_2D,0);
+    glBindTexture(gl_texture_type,0);
+}
+
+GLenum Texture::get_gl_texture_type() {
+    return gl_texture_type;
 }
