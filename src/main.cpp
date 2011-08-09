@@ -29,7 +29,7 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(9,0,3);
     sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
-    sce.set_perspective(70,1,100);
+    sce.set_perspective(FOV,1,100);
 
     Timer timer;
     Controls c;

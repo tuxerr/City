@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <sstream>
+#include <math.h>
 #include "display.h"
 #include "object.h"
 #include "light.h"
@@ -41,9 +42,11 @@ private:
     Uniform *uniform_light_sampler[MAX_LIGHTS];
     Uniform *uniform_light_samplercube[MAX_LIGHTS];
     Uniform *uniform_light_number;
+    Uniform *uniform_cascaded_shading_zdelta;
 
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;
+    Vec3<float> eye_vector;
     Matrix4 camera;
     Matrix4 perspective;
     bool camera_changed;

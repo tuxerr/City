@@ -2,7 +2,7 @@
 
 Light::Light(UniformBlock *uniform,float intensity,Vec3<float> color) : 
     uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1), 
-    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH)
+    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH_LAYERED)
 {
     set_uniform(uniform);
 }

@@ -14,7 +14,10 @@ uniform Light_ {
     vec3 origin; 
     vec3 color; 
     vec3 direction;
-    mat4 matrix;
+    mat4 matrix1;
+    mat4 matrix2;
+    mat4 matrix3;
+    mat4 matrix4;
 } Light[8];
 
 uniform GlobalValues_ {
@@ -26,8 +29,10 @@ uniform GlobalValues_ {
 
 uniform int lightnumber;
 
-uniform sampler2DShadow shadowmap[8];
+uniform sampler2DArrayShadow shadowmap[8];
 uniform samplerCubeShadow shadowcubemap[8];
+
+uniform float cascaded_shading_zdelta;
 
 vec4 spotlight(int lightID) {
      vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
@@ -106,6 +111,59 @@ vec4 directionallight(int lightID) {
     return ambiant+diffuse+specular;
 }
 
+float directional_shadowing(int lightID) {
+    float zdelta = length(GlobalValues.camera_pos-vert_pos.xyz);
+    int cascaded_layer=-1;
+    for(int i=0;i<4;i++) {
+        if(zdelta<cascaded_shading_zdelta*(pow(2,i)+1)) {
+            cascaded_layer=i;
+        }        
+    }
+    
+    vec4 light_point;
+    if(cascaded_layer==0) {
+        light_point = Light[lightID].matrix1*vert_pos;    
+    } else if(cascaded_layer==1) {
+        light_point = Light[lightID].matrix2*vert_pos;    
+    } else if(cascaded_layer==2) {
+        light_point = Light[lightID].matrix3*vert_pos;    
+    } else if(cascaded_layer==3) {
+        light_point = Light[lightID].matrix4*vert_pos;    
+    }
+
+    
+    cascaded_layer=cascaded_layer/4;
+    light_point.x = (light_point.x/2)+0.5;
+    light_point.y = (light_point.y/2)+0.5;
+    light_point.z = (light_point.z/2)+0.5;
+    float lightval = texture(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer))+0.0025;
+/*  float lightvals1 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(1,0))+0.0025;
+    float lightvals2 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(-1,0))+0.0025;
+    float lightvals3 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(0,1)+0.0025;
+    float lightvals4 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(0,-1)+0.0025; */
+
+    if(light_point.z <= lightval) {
+        return 1.0;
+    } else {
+        float endres = 0;
+/*        if(light_point.z <= lightvals1) {
+            endres+=0.25;
+        }
+        if(light_point.z <= lightvals2) {
+            endres+=0.25;
+        }
+        if(light_point.z <= lightvals3) {
+            endres+=0.25;
+        }
+        if(light_point.z <= lightvals4) {
+            endres+=0.25;
+            } */
+        return endres;
+    }
+
+    return 0.0;
+}
+
 void main(void) {
      vec4 res = vec4(0,0,0,0);
      for(int i=0;i<lightnumber;i++) {
@@ -117,44 +175,10 @@ void main(void) {
                  res+=pointlight(i);
              }
 
-         } else {
-             vec4 light_point = Light[i].matrix*vert_pos;
-             light_point.x = (light_point.x/2)+0.5;
-             light_point.y = (light_point.y/2)+0.5;
-             light_point.z = (light_point.z/2)+0.5;
-             float lightval = texture(shadowmap[i],light_point.xyz)+0.0025;
-             float lightvals1 = textureOffset(shadowmap[i],light_point.xyz,ivec2(1,0))+0.0025;
-             float lightvals2 = textureOffset(shadowmap[i],light_point.xyz,ivec2(-1,0))+0.0025;
-             float lightvals3 = textureOffset(shadowmap[i],light_point.xyz,ivec2(0,1))+0.0025;
-             float lightvals4 = textureOffset(shadowmap[i],light_point.xyz,ivec2(0,-1))+0.0025;
-
-             if(Light[i].light_type==2) {
-
-                 if(light_point.z <= lightval) {
-                     res+=spotlight(i);
-                 }
-
-             } else if(Light[i].light_type==3) {
-                 
-                 if(light_point.z <= lightval) {
-                     res+=directionallight(i);
-                 } else {
-                     float endres = 0;
-                     if(light_point.z <= lightvals1) {
-                         endres+=0.25;
-                     }
-                     if(light_point.z <= lightvals2) {
-                         endres+=0.25;
-                     }
-                     if(light_point.z <= lightvals3) {
-                         endres+=0.25;
-                     }
-                     if(light_point.z <= lightvals4) {
-                         endres+=0.25;
-                     }
-                     res+=directionallight(i)*endres;
-                 }
-             }
+         } else if(Light[i].light_type==2) {
+             res+=spotlight(i);
+         } else if(Light[i].light_type==3) {
+             res += directionallight(i)*directional_shadowing(i);
          }
      }
      pixel_color = res;

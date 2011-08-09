@@ -8,6 +8,9 @@ Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp)
         uniform_light_number=disp->new_uniform("lightnumber",UNIFORM_INT);
         disp->link_program_to_uniform("phong",uniform_light_number);
 
+        uniform_cascaded_shading_zdelta=disp->new_uniform("cascaded_shading_zdelta",UNIFORM_FLOAT);
+        disp->link_program_to_uniform("phong",uniform_cascaded_shading_zdelta);
+
         for(int i=0;i<MAX_LIGHTS;i++) {
             std::stringstream uniform_name;
             uniform_name<<"Light["<<i<<"]";
@@ -61,6 +64,7 @@ void Scene::set_perspective_ortho(float width,float near,float far) {
 void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
     camera.camera(pos,direction,up_vector);
     camera_pos = pos;
+    eye_vector = direction;
     camera_changed=true;
 }
 
@@ -150,7 +154,7 @@ void Scene::render() {
     for(int i=0;i<MAX_LIGHTS;i++) {
 
         if(lights[i]!=NULL) {
-            fbo.attach_texture(lights[i]->get_depth_texture(),FBO_DEPTH);
+
     
             if(fbo.iscomplete()) {
                 disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
@@ -185,27 +189,53 @@ void Scene::render() {
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
+
     UniformBlock *uni = dirlight->get_uniformblock();
     Matrix4 light_mat;
     Matrix4 camera_mat;
-    Vec3<float> dir_tmp;
 
-    dir_tmp = dirlight->get_direction(); 
+    Vec3<float> ldir_norm;
+    ldir_norm = dirlight->get_direction(); 
+    ldir_norm.normalize();
 
-    dir_tmp.normalize();
+    Vec3<float> eye_norm;
+    eye_norm = eye_vector;
+    eye_norm.normalize();
 
-    camera_mat.camera(camera_pos-dir_tmp*FAR,camera_pos,Vec3<float>(dir_tmp.y,dir_tmp.z,dir_tmp.x));
+    float min_z_iter = (FAR-NEAR)/(powf(2,CASCADED_SHADING_DEPTH)-1);
+    uniform_cascaded_shading_zdelta->set_value(min_z_iter);
 
-    light_mat.perspective_ortho(30,NEAR,FAR*2,1);
-    light_mat = light_mat*camera_mat;
+    for(int cascaded_layer=0;cascaded_layer<CASCADED_SHADING_DEPTH;cascaded_layer++) {
 
-    uni->set_value(light_mat,"matrix");
+        float zmin=(1-pow(2,cascaded_layer))*min_z_iter+NEAR;
+        float zmax=(1-pow(2,cascaded_layer+1))*min_z_iter+NEAR;
+        float zdelta = zmax-zmin;
+        float f = tanf(FOV_RAD/2)*zmax;
+        float n = tanf(FOV_RAD/2)*zmin;
+        float ratio = (f*f-n*n)/(2*zdelta*zdelta);
+        float layer_length = sqrtf(zmin*zmin + pow((ratio*zdelta),2));
+        Vec3<float> cam_pos;
+        cam_pos = camera_pos + eye_norm*zmin + eye_norm*zdelta*ratio;
+
+        camera_mat.camera(cam_pos-ldir_norm*FAR,cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+
+        light_mat.perspective_ortho(layer_length,NEAR,FAR*2,1);
+        light_mat = light_mat*camera_mat;
+
+    
+        std::stringstream uniform_name;
+        uniform_name<<"matrix"<<(cascaded_layer+1);
+        uni->set_value(light_mat,uniform_name.str());
+
+        fbo.attach_texture(dirlight->get_depth_texture(),FBO_DEPTH,cascaded_layer);
+        fbo.bind();
+        uniform_light_projection->set_value(light_mat,"matrix");
+        draw_scene("depth_creation");
+        fbo.unbind();
+
+    }
+
     shadowmap_uni->set_value(dirlight->get_depth_texture());
-
-    fbo.bind();
-    uniform_light_projection->set_value(light_mat,"matrix");
-    draw_scene("depth_creation");
-    fbo.unbind();
 }
 
 void Scene::draw_scene(std::string program_name) {
