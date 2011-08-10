@@ -10,6 +10,7 @@ uniform GlobalValues_ {
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
     vec3 camera_pos;
+    vec3 eye_vector;
 } GlobalValues;
 
 uniform Light_properties_ {

@@ -25,6 +25,7 @@ uniform GlobalValues_ {
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
     vec3 camera_pos;
+    vec3 eye_vector;
 } GlobalValues;
 
 uniform int lightnumber;
@@ -112,11 +113,14 @@ vec4 directionallight(int lightID) {
 }
 
 float directional_shadowing(int lightID) {
-    float zdelta = length(GlobalValues.camera_pos-vert_pos.xyz);
-    float cascaded_layer=-1;
+    float dotprod = dot(normalize(vert_pos.xyz-GlobalValues.camera_pos),normalize(GlobalValues.eye_vector));
+
+    float zdelta = (distance(vert_pos.xyz,GlobalValues.camera_pos)*dotprod)-1;
+    float cascaded_layer=5;
     for(int i=0;i<4;i++) {
-        if(zdelta<cascaded_shading_zdelta*(pow(2,i)+1)) {
+        if(zdelta<=cascaded_shading_zdelta*(pow(2,i+1)-1)) {
             cascaded_layer=i;
+            break;
         }        
     }
     
@@ -131,11 +135,11 @@ float directional_shadowing(int lightID) {
         light_point = Light[lightID].matrix4*vert_pos;    
     }
 
-    cascaded_layer=0;
     light_point.x = (light_point.x/2)+0.5;
     light_point.y = (light_point.y/2)+0.5;
     light_point.z = (light_point.z/2)+0.5;
-    float lightval = texture(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer))+0.0025;
+//    float lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+0.0025;
+    float lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+0.0025;
 /*  float lightvals1 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(1,0))+0.0025;
     float lightvals2 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(-1,0))+0.0025;
     float lightvals3 = textureOffset(shadowmap[lightID],vec4(light_point.xyz,cascaded_layer),ivec2(0,1)+0.0025;

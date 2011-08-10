@@ -39,7 +39,7 @@ void Program::load_shaders(const char *vertex_shader_path,const char *fragment_s
 
     if(link_status != GL_TRUE) {
         GLsizei logsize = 0;
-        glGetShaderiv(program_id,GL_INFO_LOG_LENGTH,&logsize);
+        glGetProgramiv(program_id,GL_INFO_LOG_LENGTH,&logsize);
             
         char *log=new char[logsize+1];
         memset(log,'\0',logsize+1);

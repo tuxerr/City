@@ -60,6 +60,7 @@ void Display::init() {
     
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D_ARRAY);
 }
 
 int Display::get_width() {

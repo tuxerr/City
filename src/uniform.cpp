@@ -42,7 +42,7 @@ void Uniform::set_value(int val) {
 
 void Uniform::set_value(float val) {
     if(type==UNIFORM_FLOAT) {
-	ival=val;
+	fval=val;
     }
     reset_bools();
 }

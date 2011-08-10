@@ -13,6 +13,7 @@
 #include "constants.h"
 #include "fbo.h"
 #include "texture.h"
+#include "utils.h"
 
 class Scene {
 public:

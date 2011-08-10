@@ -55,6 +55,7 @@ int main(int argc,char *argv[]) {
     o1->update_vertices_buffer(v2,sizeof(v2));
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
+    o1->scale(10,10,10);
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -62,7 +63,7 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->translate(4,0,1);
+    o->translate(-50,-3,1);
 
     spaceship.close();
 
@@ -73,7 +74,7 @@ int main(int argc,char *argv[]) {
     timer.init();
     while(!c.quit) {
         i++;
-        o->rotate(0.2,0,0,1);
+        o->translate(0.05,0,0);
         sce.render();
 
         c.refresh();
