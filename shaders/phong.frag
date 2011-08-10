@@ -113,7 +113,7 @@ vec4 directionallight(int lightID) {
 
 float directional_shadowing(int lightID) {
     float zdelta = length(GlobalValues.camera_pos-vert_pos.xyz);
-    int cascaded_layer=-1;
+    float cascaded_layer=-1;
     for(int i=0;i<4;i++) {
         if(zdelta<cascaded_shading_zdelta*(pow(2,i)+1)) {
             cascaded_layer=i;
@@ -131,8 +131,7 @@ float directional_shadowing(int lightID) {
         light_point = Light[lightID].matrix4*vert_pos;    
     }
 
-    
-    cascaded_layer=cascaded_layer/4;
+    cascaded_layer=0;
     light_point.x = (light_point.x/2)+0.5;
     light_point.y = (light_point.y/2)+0.5;
     light_point.z = (light_point.z/2)+0.5;

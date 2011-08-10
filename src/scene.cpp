@@ -64,7 +64,7 @@ void Scene::set_perspective_ortho(float width,float near,float far) {
 void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
     camera.camera(pos,direction,up_vector);
     camera_pos = pos;
-    eye_vector = direction;
+    eye_vector = direction-pos;
     camera_changed=true;
 }
 
@@ -207,19 +207,23 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
     for(int cascaded_layer=0;cascaded_layer<CASCADED_SHADING_DEPTH;cascaded_layer++) {
 
-        float zmin=(1-pow(2,cascaded_layer))*min_z_iter+NEAR;
-        float zmax=(1-pow(2,cascaded_layer+1))*min_z_iter+NEAR;
+        float zmin=(pow(2,cascaded_layer)-1)*min_z_iter+NEAR;
+        float zmax=(pow(2,cascaded_layer+1)-1)*min_z_iter+NEAR;
+
         float zdelta = zmax-zmin;
         float f = tanf(FOV_RAD/2)*zmax;
         float n = tanf(FOV_RAD/2)*zmin;
         float ratio = (f*f-n*n)/(2*zdelta*zdelta);
-        float layer_length = sqrtf(zmin*zmin + pow((ratio*zdelta),2));
+
+        float layer_length = sqrtf(n*n + pow((ratio*zdelta),2));
         Vec3<float> cam_pos;
         cam_pos = camera_pos + eye_norm*zmin + eye_norm*zdelta*ratio;
 
+        std::cout<<"layer : "<<cascaded_layer<<"/ original "<<camera_pos.x<<":"<<camera_pos.y<<":"<<camera_pos.z<<"/ new : "<<cam_pos.x<<":"<<cam_pos.y<<":"<<cam_pos.z<<"/ laylength : "<<layer_length<<std::endl;
+
         camera_mat.camera(cam_pos-ldir_norm*FAR,cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
 
-        light_mat.perspective_ortho(layer_length,NEAR,FAR*2,1);
+        light_mat.perspective_ortho(layer_length*2,NEAR,FAR*2,1);
         light_mat = light_mat*camera_mat;
 
     
