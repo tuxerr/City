@@ -11,8 +11,14 @@
 #include "uniformblock.h"
 #include "objfile.h"
 #include "fbo.h"
+#include "terrain.h"
+#include "math.h"
 
 using namespace std;
+
+float terrainheight(float x, float y) {
+    return sin(x*y);
+}
 
 int main(int argc,char *argv[]) {
     Display disp(1024,1024,false);     disp.init();     
@@ -27,11 +33,13 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(9,0,3);
-    sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
+    Vec3<float> camerapos(0,0,3);
+    sce.set_camera(camerapos,Vec3<float>(5,5,1),Vec3<float>(0,0,1));
     sce.set_perspective(FOV,1,100);
 
     Timer timer;
+    Terrain terrain(&terrainheight,0.2);
+    
     Controls c;
 
 
@@ -56,6 +64,7 @@ int main(int argc,char *argv[]) {
     o1->update_color_buffer(c2,sizeof(c2));
     o1->update_normals_buffer(n2,sizeof(n2));
     o1->scale(10,10,10);
+    o1->set_enable_draw(false);
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -63,7 +72,11 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->translate(-50,-3,1);
+    o->translate(20,20,1);
+
+    Object *t=sce.new_object();
+    terrain.generate_terrain(Vec2<float>(0,0),20,20,t);
+    t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
 
     spaceship.close();
 
@@ -74,7 +87,7 @@ int main(int argc,char *argv[]) {
     timer.init();
     while(!c.quit) {
         i++;
-        o->translate(0.05,0,0);
+        o->translate(-0.05,-0.05,0);
         sce.render();
 
         c.refresh();
