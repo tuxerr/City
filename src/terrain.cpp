@@ -8,7 +8,7 @@ void Terrain::generate_terrain(Vec2<float> coord,float height,float width,Object
     if(object==NULL) {
         std::cout<<"Could not generate terrain: object is NULL"<<std::endl;
         return;
-    }
+    } 
     int obj_part = object->new_part();
     int matrix_height = (height+precision)/precision;
     int matrix_width = (width+precision)/precision;
@@ -18,6 +18,9 @@ void Terrain::generate_terrain(Vec2<float> coord,float height,float width,Object
     std::vector< Vec3<float> > color_matrix;
     std::vector< int > line_index_buffer;
     std::vector< int > triangles_index_buffer;
+
+    std::cout<<"Generating "<<matrix_width*matrix_height<<" vertices terrain"<<std::endl;
+
     pos_matrix.reserve(matrix_width*matrix_height);
     color_matrix.reserve(matrix_width*matrix_height);
     normal_matrix.reserve(matrix_width*matrix_height);
@@ -27,15 +30,22 @@ void Terrain::generate_terrain(Vec2<float> coord,float height,float width,Object
         int i=k%matrix_width;
         int j=(k-i)/matrix_width;
 
-        int cx=coord.x+i*precision,cy=coord.y+j*precision;
+        float cx=coord.x+i*precision,cy=coord.y+j*precision;
+        float cz=height_func(cx,cy);
 
-        pos_matrix.push_back(Vec3<float>(cx,cy,height_func(cx,cy)));
+        pos_matrix.push_back(Vec3<float>(cx,cy,cz));
         color_matrix.push_back(Vec3<float>(1,1,1));
 
-        normal_matrix.push_back(Vec3<float>(height_func(cx-EPS,cy)-height_func(cx+EPS,cy),
-                                            2.0f*EPS,
-                                            height_func(cx,cy-EPS)-height_func(cx,cy+EPS)));
-        
+        Vec3<float> n1(EPS,0,height_func(cx+EPS,cy)-cz);
+        Vec3<float> n2(0,EPS,height_func(cx,cy+EPS)-cz);
+        n1=n1*10;
+        n2=n2*10;
+        Vec3<float> res = n1.cross(n2);
+        if(res.z<0) {
+            res=res*-1;
+        }
+
+        normal_matrix.push_back(res);
     }
 
     fill_line_buffer(line_index_buffer,0,matrix_width,0,matrix_height,EDGE_FILL);

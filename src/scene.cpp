@@ -223,7 +223,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         cam_pos = camera_pos + eye_norm*zmin + eye_norm*zdelta*ratio;
 
         camera_mat.camera(cam_pos-ldir_norm*FAR,cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
-        light_mat.perspective_ortho(layer_length*2,NEAR,FAR*2,1);
+        light_mat.perspective_ortho(layer_length*3,NEAR,FAR*2,1);
         light_mat = light_mat*camera_mat;
     
         std::stringstream uniform_name;

@@ -33,15 +33,14 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(0,0,3);
-    sce.set_camera(camerapos,Vec3<float>(5,5,1),Vec3<float>(0,0,1));
+    Vec3<float> camerapos(5,5,4);
+    sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
     sce.set_perspective(FOV,1,100);
 
     Timer timer;
     Terrain terrain(&terrainheight,0.2);
     
     Controls c;
-
 
     float v2[]= { -10, -10, 0, 
                   -10, 10, 0,
@@ -72,24 +71,25 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->translate(20,20,1);
+    o->translate(-5,-5,2);
 
     Object *t=sce.new_object();
-    terrain.generate_terrain(Vec2<float>(0,0),20,20,t);
+    terrain.generate_terrain(Vec2<float>(-10,-10),20,20,t);
     t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    t->set_program("phong");
 
     spaceship.close();
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
-//    PointLight *l=sce.new_pointlight(Vec3<float>(0,0,5),Vec3<float>(1,1,1));
+//    PointLight *l=sce.new_pointlight(Vec3<float>(0,0,5),Vec3<float>(1,0,0));
     
     int i=0;
     timer.init();
     while(!c.quit) {
         i++;
-        o->translate(-0.05,-0.05,0);
         sce.render();
 
+        o->translate(0.02,0.02,0);
         c.refresh();
         disp.refresh();
         timer.wait();

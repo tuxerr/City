@@ -12,6 +12,7 @@ public:
     number z;
     number norm();
     void normalize();
+    Vec3<number> cross(Vec3<number> n);
     Vec3<number> operator+(Vec3<number> n);
     Vec3<number> operator-(Vec3<number> n);
     Vec3<number> operator*(Vec3<number> n);
@@ -65,13 +66,22 @@ Vec3<number> Vec3<number>::operator*(Vec3<number> n) {
     return res;
 }
 
-// vectorial product
 template <class number>
 Vec3<number> Vec3<number>::operator*(number n) {
     Vec3<number> res;
     res.x=x*n;
     res.y=y*n;
     res.z=z*n;
+    return res;
+}
+
+//cross product
+template <class number>
+Vec3<number> Vec3<number>::cross(Vec3<number> n) {
+    Vec3<number> res;
+    res.x=y*n.z-z*n.y;
+    res.y=z*n.x-x*n.z;
+    res.z=x*n.y-y*n.x;
     return res;
 }
 

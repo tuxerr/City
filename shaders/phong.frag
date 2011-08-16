@@ -172,11 +172,12 @@ void main(void) {
      for(int i=0;i<lightnumber;i++) {
 
          if(Light[i].light_type==1) {
-             vec3 light_ray = vert_pos.xyz-Light[i].origin;
+             res+=pointlight(i);
+/*             vec3 light_ray = vert_pos.xyz-Light[i].origin;
              float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
              if(abs(light_ray.z) <= lightval) {
-                 res+=pointlight(i);
-             }
+
+                 }*/
 
          } else if(Light[i].light_type==2) {
              res+=spotlight(i);
