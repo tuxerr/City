@@ -1,17 +1,27 @@
 #include "terrain.h"
 
-Terrain::Terrain(float (*height_func)(float,float),float precision) : height_func(height_func), precision(precision) {
+Terrain::Terrain(float (*height_func)(float,float),float precision) : height_func(height_func), precision(precision), scalar(Vec3<float>(1,1,1)) {
     
 }
 
-void Terrain::generate_terrain(Vec2<float> coord,float height,float width,Object *object) {
+void Terrain::scale(float x,float y,float z) {
+    scalar.x = x;
+    scalar.y = y;
+    scalar.z = z;
+}
+
+float Terrain::height(float x,float y) {
+    return scalar.z*height_func(x*scalar.x,y*scalar.y);
+}
+
+void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object) {
     if(object==NULL) {
         std::cout<<"Could not generate terrain: object is NULL"<<std::endl;
         return;
     } 
     int obj_part = object->new_part();
-    int matrix_height = (height+precision)/precision;
-    int matrix_width = (width+precision)/precision;
+    int matrix_height = (xlength+precision)/precision;
+    int matrix_width = (ylength+precision)/precision;
     
     std::vector< Vec3<float> > pos_matrix;
     std::vector< Vec3<float> > normal_matrix;    
@@ -31,13 +41,13 @@ void Terrain::generate_terrain(Vec2<float> coord,float height,float width,Object
         int j=(k-i)/matrix_width;
 
         float cx=coord.x+i*precision,cy=coord.y+j*precision;
-        float cz=height_func(cx,cy);
+        float cz=height(cx,cy);
 
         pos_matrix.push_back(Vec3<float>(cx,cy,cz));
         color_matrix.push_back(Vec3<float>(1,1,1));
 
-        Vec3<float> n1(EPS,0,height_func(cx+EPS,cy)-cz);
-        Vec3<float> n2(0,EPS,height_func(cx,cy+EPS)-cz);
+        Vec3<float> n1(EPS,0,height(cx+EPS,cy)-cz);
+        Vec3<float> n2(0,EPS,height(cx,cy+EPS)-cz);
         n1=n1*10;
         n2=n2*10;
         Vec3<float> res = n1.cross(n2);

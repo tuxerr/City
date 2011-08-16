@@ -1,7 +1,7 @@
 TODO du moteur : 
-*shading (cascaded shading)
+*height function/color scheme
 *fog variable
 *gestion de halos lumineux dans une skybox
 *frustum culling
-*perlin noise 
+
 
