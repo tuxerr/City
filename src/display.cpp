@@ -91,7 +91,7 @@ void Display::new_program(const char *vertex_shader_path,const char *fragment_sh
     
     // creates the new program with both vertex and fragment shaders.
     programs[name].load_shaders(vertex_shader_path,fragment_shader_path);
-    std::cout<<"Program "<<name<<" was created with id "<<programs[name].id()<<std::endl;
+    std::cout<<"Program "<<name<<" was created"<<std::endl;
 }
 
 bool Display::has_program(std::string name) {

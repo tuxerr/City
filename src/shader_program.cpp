@@ -98,9 +98,7 @@ GLuint Program::compile_shader(const char *path,GLenum shader_type) {
             glDeleteShader(shader);
             return 0;
 
-        } else {
-            std::cout<<"Shader "<<path<<" was compiled"<<std::endl;
-        }
+        } 
         
     } else {
         std::cout<<"File "<<path<<" couldn't be opened"<<std::endl;
@@ -134,10 +132,7 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
         if(glGetError()==GL_INVALID_VALUE) {
             std::cout<<"Error while binding block uniform "<<uni->get_name()<<"(program "<<id()
                      <<") to attach point "<<uni->get_attach_point()<<" with location "<<loc<<std::endl;
-        } else {
-            std::cout<<"Uniform "<<uni->get_name()<<" has been bound to attachpoint "<<uni->get_attach_point()<<" with loc" <<loc<<std::endl;
-        }
-
+        } 
     }
 }
 
