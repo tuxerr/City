@@ -11,8 +11,8 @@
 #include "vec2.h"
 
 typedef enum Uniform_Type {
-    UNIFORM_INT, UNIFORM_FLOAT, UNIFORM_MAT4, UNIFORM_FLOAT3, UNIFORM_INT3, 
-    UNIFORM_FLOAT2, UNIFORM_INT2, UNIFORM_SAMPLER
+    UNIFORM_BOOL, UNIFORM_INT, UNIFORM_FLOAT, UNIFORM_MAT4, UNIFORM_FLOAT3, 
+    UNIFORM_INT3, UNIFORM_FLOAT2, UNIFORM_INT2, UNIFORM_SAMPLER
 } Uniform_Type;
 
 typedef struct Program_Status {
@@ -26,6 +26,7 @@ public:
     void add_subscriber(bool *uniform_sended,GLuint program_id,bool *state);
     void add_texture(Texture **tex,GLuint program_id,int index);
     Uniform_Type get_type();
+    void set_value(bool val);
     void set_value(int val);
     void set_value(float val);
     void set_value(Matrix4 &val);
@@ -42,6 +43,7 @@ private:
     
     std::string uniform_name;
     Uniform_Type type;
+    bool bval;
     int ival;
     float fval;
     Matrix4 mval;

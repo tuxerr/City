@@ -80,8 +80,9 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
-//    PointLight *l=sce.new_pointlight(Vec3<float>(0,0,5),Vec3<float>(1,0,0));
+
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,-2,-2),Vec3<float>(1,0,1));
+    l1->enable_shadows(true);
     
     int i=0;
     timer.init();

@@ -18,6 +18,7 @@ uniform Light_ {
     mat4 matrix2;
     mat4 matrix3;
     mat4 matrix4;
+    bool render_shadows;
 } Light[8];
 
 uniform GlobalValues_ {
@@ -172,17 +173,25 @@ void main(void) {
      for(int i=0;i<lightnumber;i++) {
 
          if(Light[i].light_type==1) {
-             res+=pointlight(i);
-/*             vec3 light_ray = vert_pos.xyz-Light[i].origin;
-             float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
-             if(abs(light_ray.z) <= lightval) {
-
-                 }*/
+             if(Light[i].render_shadows) {
+                 vec3 light_ray = vert_pos.xyz-Light[i].origin;
+                 float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
+                 if(abs(light_ray.z) <= lightval) {
+                     res+=pointlight(i);
+                 }   
+             } else {
+                 res+=pointlight(i);
+             }
 
          } else if(Light[i].light_type==2) {
              res+=spotlight(i);
          } else if(Light[i].light_type==3) {
-             res += directionallight(i)*directional_shadowing(i);
+             if(Light[i].render_shadows) {
+                 res += directionallight(i)*directional_shadowing(i);
+             } else {
+                 res += directionallight(i);
+             }
+
          }
      }
      pixel_color = res;

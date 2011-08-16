@@ -2,7 +2,7 @@
 
 Light::Light(UniformBlock *uniform,float intensity,Vec3<float> color) : 
     uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1), 
-    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH_LAYERED)
+    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH_LAYERED),render_shadows(false)
 {
     set_uniform(uniform);
 }
@@ -25,6 +25,15 @@ void Light::desactivate() {
     uniform->set_value(OFF,"light_type");
 }
 
+void Light::enable_shadows(bool shadow) {
+    render_shadows=shadow;
+    uniform->set_value(render_shadows,"render_shadows");
+}
+
+bool Light::enable_shadows() {
+    return render_shadows;
+}
+
 void Light::set_linear_dissipation(float lin_dissipation) {
     this->linear_dissipation=lin_dissipation;
     Vec3<float> values(linear_dissipation,0,0);
@@ -37,6 +46,7 @@ void Light::set_uniform(UniformBlock *uniform) {
     set_color(color);
     set_intensity(intensity);
     set_linear_dissipation(linear_dissipation);
+    enable_shadows(render_shadows);
 }
 
 Texture* Light::get_depth_texture() {
@@ -80,6 +90,7 @@ DirectionalLight::DirectionalLight(UniformBlock *uniform,Vec3<float> direction,f
 {
     type=DIRECTION_LIGHT;
     set_direction(direction);
+    enable_shadows(true);
     uniform->set_value(type,"light_type");
 }
 

@@ -17,6 +17,7 @@ public:
     int get_attach_point();
     void bind_to_attach_point(GLuint program_id);
     std::string get_name();
+    void set_value(bool val,std::string sub_name);
     void set_value(int val,std::string sub_name);
     void set_value(float val,std::string sub_name);
     void set_value(Vec3<float> &val,std::string sub_name);

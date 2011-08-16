@@ -23,6 +23,8 @@ public:
     void set_intensity(float intensity);
     void set_linear_dissipation(float linear_dissipation);
     void set_uniform(UniformBlock *uniform);
+    void enable_shadows(bool shadow);
+    bool enable_shadows();
     void activate();
     void desactivate();
     Texture* get_depth_texture();
@@ -36,6 +38,7 @@ protected:
     float intensity;
     float linear_dissipation;
     Texture shadowmap;
+    bool render_shadows;
 };
 
 class PointLight : public Light {

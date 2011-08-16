@@ -93,6 +93,21 @@ GLint UniformBlock::get_offset(std::string sub_name) {
     }
 }
 
+void UniformBlock::set_value(bool val,std::string sub_name) {
+    int offset = get_offset(sub_name);
+    if(offset!=-1) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        int realval;
+        if(val) {
+            realval=1;
+        } else {
+            realval=0;
+        }
+        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(realval),&realval);
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+    }
+}
+
 void UniformBlock::set_value(int val,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {

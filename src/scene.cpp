@@ -155,29 +155,30 @@ void Scene::render() {
     for(int i=0;i<MAX_LIGHTS;i++) {
 
         if(lights[i]!=NULL) {
-
-            disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
+            if(lights[i]->enable_shadows()) {
+                disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
             
-            switch(lights[i]->get_type()) {
-            case POINT_LIGHT:
-                break;
+                switch(lights[i]->get_type()) {
+                case POINT_LIGHT:
+                    break;
 
-            case SPOT_LIGHT:
-                break;
+                case SPOT_LIGHT:
+                    break;
 
-            case DIRECTION_LIGHT:
-                render_directional_shadowmap((DirectionalLight*) lights[i],fbo,uniform_light_sampler[i]);
-                break;
+                case DIRECTION_LIGHT:
+                    render_directional_shadowmap((DirectionalLight*) lights[i],fbo,uniform_light_sampler[i]);
 
-            case OFF:
-                break;
+                    break;
 
-            default:
-                break;
+                case OFF:
+                    break;
+
+                default:
+                    break;
+                }
+
+                disp->viewport();
             }
-
-            disp->viewport();
-            
         }
     }
     draw_scene();

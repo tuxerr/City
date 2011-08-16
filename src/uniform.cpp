@@ -33,6 +33,13 @@ Uniform_Type Uniform::get_type() {
     return type;
 }
 
+void Uniform::set_value(bool val) {
+    if(type==UNIFORM_BOOL) {
+	bval=val;
+    }
+    reset_bools();
+}
+
 void Uniform::set_value(int val) {
     if(type==UNIFORM_INT) {
 	ival=val;
@@ -102,6 +109,14 @@ void Uniform::reset_bools() {
 
 void Uniform::send_value(GLuint program_id) {
     switch(type) {
+    case UNIFORM_BOOL:
+        if(bval) {
+            glUniform1i(uniform_locations[program_id],1);            
+        } else {
+            glUniform1i(uniform_locations[program_id],0);            
+        }
+	break;
+        
     case UNIFORM_INT:
 	glUniform1i(uniform_locations[program_id],ival);
 	break;
