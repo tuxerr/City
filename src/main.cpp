@@ -17,7 +17,7 @@
 using namespace std;
 
 float terrainheight(float x, float y) {
-    return sin(x*y);
+    return 0;
 }
 
 int main(int argc,char *argv[]) {
@@ -74,9 +74,10 @@ int main(int argc,char *argv[]) {
     o->translate(-5,-5,2);
 
     Object *t=sce.new_object();
-    terrain.generate_terrain(Vec2<float>(-10,-10),20,20,t);
-    t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    terrain.generate_terrain(Vec2<float>(-5,-5),10,10,t);
+    t->set_draw_mode(OBJECT_DRAW_LINES);
     t->set_program("phong");
+    t->translate(-20,-20,2);
 
     spaceship.close();
 
@@ -89,7 +90,7 @@ int main(int argc,char *argv[]) {
         i++;
         sce.render();
 
-        o->translate(0.02,0.02,0);
+        t->translate(0.05,0.05,0);
         c.refresh();
         disp.refresh();
         timer.wait();
