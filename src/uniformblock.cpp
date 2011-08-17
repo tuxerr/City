@@ -84,7 +84,7 @@ GLint UniformBlock::get_value_from_pname(std::string sub_name,GLenum pname) {
 
 GLint UniformBlock::get_offset(std::string sub_name) {
     if(offsets.find(sub_name)==offsets.end()) {
-        GLint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
+        GLuint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
 
         if(offset==-1) {
             std::cout<<sub_name<<" has a negative offset in the uniformblock "<<complete_name<<std::endl;            

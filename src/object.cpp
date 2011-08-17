@@ -197,7 +197,7 @@ void Object::draw(float distance_from_camera) {
             break;
         }
     }
-    std::cout<<"distance from cam is "<<distance_from_camera<<", using LOD "<<lod<<std::endl;
+
     for(unsigned int i=0;i<parts.size();i++) {
         parts[i][lod].vbo.bind();
         glEnableVertexAttribArray(SHADER_VERTEX_ATTRIB);

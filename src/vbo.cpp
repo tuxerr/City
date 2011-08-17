@@ -75,6 +75,7 @@ void VBO::update(void *data,int size) {
             memcpy(map_vbo,data,size);
             vbo_size=size;
         }
+        glUnmapBuffer(vbo_type);
     }
 }
 

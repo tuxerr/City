@@ -33,8 +33,8 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(5,5,4);
-    sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,0,1));
+    Vec3<float> camerapos(-30,-30,2);
+    sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,1,0));
     sce.set_perspective(FOV,1,100);
 
     Timer timer;
@@ -73,11 +73,16 @@ int main(int argc,char *argv[]) {
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->translate(-5,-5,2);
 
-    Object *t=sce.new_object();
-    terrain.generate_terrain(Vec2<float>(-5,-5),10,10,t);
-    t->set_draw_mode(OBJECT_DRAW_LINES);
-    t->set_program("phong");
-    t->translate(-20,-20,2);
+    int terrain_detail=10;
+    for(int i=-40;i<40;i+=terrain_detail) {
+        for(int j=-40;j<40;j+=terrain_detail) {
+            Object *t=sce.new_object();
+            terrain.generate_terrain(Vec2<float>(-terrain_detail/2,-terrain_detail/2),terrain_detail,terrain_detail,t);
+            t->set_draw_mode(OBJECT_DRAW_LINES);
+            t->set_program("phong");
+            t->translate(i+terrain_detail/2,j+terrain_detail/2,0); 
+        }
+    }
 
     spaceship.close();
 
@@ -90,7 +95,9 @@ int main(int argc,char *argv[]) {
         i++;
         sce.render();
 
-        t->translate(0.05,0.05,0);
+        camerapos=camerapos+Vec3<float>(0.03,0.03,0);
+        sce.set_camera(camerapos,camerapos+Vec3<float>(10,10,-3),Vec3<float>(0,0,1));
+
         c.refresh();
         disp.refresh();
         timer.wait();

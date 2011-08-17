@@ -26,8 +26,9 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
     for(int lod=0;lod<TERRAIN_LOD_DEPTH;lod++) {
         float lod_precision = precision*pow(2,lod);
         int obj_part = 0;
-        int matrix_height = (xlength+lod_precision)/lod_precision;
-        int matrix_width = (ylength+lod_precision)/lod_precision;
+        int matrix_width = (xlength+lod_precision)/lod_precision;
+        lod_precision = (float)xlength/(matrix_width-1);
+        int matrix_height = (ylength+lod_precision)/lod_precision;
     
         std::vector< Vec3<float> > pos_matrix;
         std::vector< Vec3<float> > normal_matrix;    
@@ -42,26 +43,27 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
         normal_matrix.reserve(matrix_width*matrix_height);
         triangles_index_buffer.reserve((matrix_width-1)*(matrix_height)*6);
         line_index_buffer.reserve((matrix_width-1)*(matrix_height)*6);
-        for(int k=0;k<matrix_width*matrix_height;k++) {
-            int i=k%matrix_width;
-            int j=(k-i)/matrix_width;
+        for(int i=0;i<matrix_width;i++) {
+            for(int j=0;j<matrix_height;j++) {
 
-            float cx=coord.x+i*lod_precision,cy=coord.y+j*lod_precision;
-            float cz=height(cx,cy);
+                float cx=coord.x+i*lod_precision,cy=coord.y+j*lod_precision;
+                float cz=height(cx,cy);
 
-            pos_matrix.push_back(Vec3<float>(cx,cy,cz));
-            color_matrix.push_back(Vec3<float>(1,1,1));
+                pos_matrix.push_back(Vec3<float>(cx,cy,cz));
+                color_matrix.push_back(Vec3<float>(1,1,1));
 
-            Vec3<float> n1(EPS,0,height(cx+EPS,cy)-cz);
-            Vec3<float> n2(0,EPS,height(cx,cy+EPS)-cz);
-            n1=n1*10;
-            n2=n2*10;
-            Vec3<float> res = n1.cross(n2);
-            if(res.z<0) {
-                res=res*-1;
+                Vec3<float> n1(EPS,0,height(cx+EPS,cy)-cz);
+                Vec3<float> n2(0,EPS,height(cx,cy+EPS)-cz);
+                n1=n1*10;
+                n2=n2*10;
+                Vec3<float> res = n1.cross(n2);
+                if(res.z<0) {
+                    res=res*-1;
+                }
+
+                normal_matrix.push_back(res);
+
             }
-
-            normal_matrix.push_back(res);
         }
     
         fill_line_buffer(line_index_buffer,0,matrix_width,0,matrix_height,EDGE_FILL);
