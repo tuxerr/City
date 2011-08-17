@@ -14,92 +14,137 @@ Object::Object() :
 
 void Object::destroy() {
     // destroy all subparts VBOs
-    for(std::vector<ObjectPart>::iterator it=parts.begin();it!=parts.end();it++) {
-        it->vbo.destroy();
-        it->ibo_lines.destroy();
-        it->ibo_triangles.destroy();
-        it->ibo_quads.destroy();
-        it->cbo.destroy();
-        it->tbo.destroy();
+    for(unsigned int i=0;i<parts.size();i++) {
+        for(std::vector<ObjectPart>::iterator it=parts[i].begin();it!=parts[i].end();it++) {
+            it->vbo.destroy();
+            it->ibo_lines.destroy();
+            it->ibo_triangles.destroy();
+            it->ibo_quads.destroy();
+            it->cbo.destroy();
+            it->tbo.destroy();
+        }
     }
 }
 
 int Object::new_part() {
-    ObjectPart part = 
-    {
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // vbo
-        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,2,GL_UNSIGNED_INT), // ibo lines
-        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT), // ibo triangles
-        VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT), // ibo quads
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // cbo
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // tbo
-        VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT)  // nbo
-    };
+    std::vector<ObjectPart> v;
+    if(parts.size()==0) {
+        ObjectPart part = 
+        {
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // vbo
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,2,GL_UNSIGNED_INT), // ibo lines
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT), // ibo triangles
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT), // ibo quads
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // cbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // tbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // nbo
+            -1                          // minimum viewing distance for the LOD
+        };
+        v.push_back(part);
 
-    parts.push_back(part);
+    } else {
+        for(unsigned int i=0;i<parts[0].size();i++) {
+            ObjectPart part = 
+            {
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // vbo
+                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,2,GL_UNSIGNED_INT), // ibo lines
+                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT), // ibo triangles
+                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT), // ibo quads
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // cbo
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // tbo
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // nbo
+                parts[0][i].lodmindist                          // minimum viewing distance for the LOD
+            };
+            v.push_back(part);
+        }
+
+    }
+    parts.push_back(v);
     return parts.size()-1;
 }
 
-void Object::update_vertices_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].vbo.iscreated())
-            parts[part_number].vbo.create();
-        parts[part_number].vbo.update(data,size);
+int Object::new_lod(float lodmindist) {
+    int lod_iter=parts[0].size();
+    for(unsigned int i=0;i<parts[0].size();i++) {
+        if(parts[0][i].lodmindist==lodmindist) {
+            std::cout<<"A LOD having "<<lodmindist<<" as a minimum viewing distance already exists"<<std::endl;
+        } else if(parts[0][i].lodmindist>lodmindist) {
+            lod_iter=i;
+            break;
+        }
+    }
+
+    for(unsigned int i=0;i<parts.size();i++) {
+        ObjectPart part = 
+        {
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // vbo
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,2,GL_UNSIGNED_INT), // ibo lines
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_UNSIGNED_INT), // ibo triangles
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,4,GL_UNSIGNED_INT), // ibo quads
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // cbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // tbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,3,GL_FLOAT), // nbo
+            lodmindist                                      // minimum viewing distance for the LOD
+        };  
+        parts[i].insert(parts[i].begin()+lod_iter,part);
+    }
+    return lod_iter;
+}
+
+void Object::update_vertices_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].vbo.iscreated())
+            parts[part_number][lod_number].vbo.create();
+        parts[part_number][lod_number].vbo.update(data,size);
     }
 }
 
-void Object::update_normals_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].nbo.iscreated())
-            parts[part_number].nbo.create();
-        parts[part_number].nbo.update(data,size);
+void Object::update_normals_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].nbo.iscreated())
+            parts[part_number][lod_number].nbo.create();
+        parts[part_number][lod_number].nbo.update(data,size);
     }
 }
 
-void Object::vertices_buffer_link(unsigned int src_part,unsigned int dest_part) {
-    if(src_part<parts.size() && dest_part<parts.size()) {
-        parts[dest_part].vbo=parts[src_part].vbo;
+void Object::update_lines_index_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].ibo_lines.iscreated())
+            parts[part_number][lod_number].ibo_lines.create();
+        parts[part_number][lod_number].ibo_lines.update(data,size);
     }
 }
 
-void Object::update_lines_index_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].ibo_lines.iscreated())
-            parts[part_number].ibo_lines.create();
-        parts[part_number].ibo_lines.update(data,size);
-    }
-}
-
-void Object::update_triangles_index_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].ibo_triangles.iscreated())
-            parts[part_number].ibo_triangles.create();
-        parts[part_number].ibo_triangles.update(data,size);
+void Object::update_triangles_index_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].ibo_triangles.iscreated())
+            parts[part_number][lod_number].ibo_triangles.create();
+        parts[part_number][lod_number].ibo_triangles.update(data,size);
 
     }
 }
 
-void Object::update_quads_index_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].ibo_quads.iscreated())
-            parts[part_number].ibo_quads.create();
-        parts[part_number].ibo_quads.update(data,size);
+void Object::update_quads_index_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].ibo_quads.iscreated())
+            parts[part_number][lod_number].ibo_quads.create();
+        parts[part_number][lod_number].ibo_quads.update(data,size);
     }
 }
 
-void Object::update_color_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].cbo.iscreated())
-            parts[part_number].cbo.create();
-        parts[part_number].cbo.update(data,size);
+void Object::update_color_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].cbo.iscreated())
+            parts[part_number][lod_number].cbo.create();
+        parts[part_number][lod_number].cbo.update(data,size);
     }
 }
 
-void Object::update_texture_buffer(void *data,int size,unsigned int part_number) {
-    if(part_number<parts.size()) {
-        if(!parts[part_number].tbo.iscreated())
-            parts[part_number].tbo.create();
-        parts[part_number].tbo.update(data,size);
+void Object::update_texture_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    if(part_number<parts.size() && lod_number<parts[0].size()) {
+        if(!parts[part_number][lod_number].tbo.iscreated())
+            parts[part_number][lod_number].tbo.create();
+        parts[part_number][lod_number].tbo.update(data,size);
     }
 }
 
@@ -143,59 +188,66 @@ void Object::set_program(std::string name) {
     program_name=name;
 }
 
-void Object::draw() {
-    for(std::vector<ObjectPart>::iterator it=parts.begin();it!=parts.end();it++) {
-        
-        it->vbo.bind();
+void Object::draw(float distance_from_camera) {
+    int lod=0;
+    for(unsigned int i=0;i<parts[0].size();i++) {
+        if(parts[0][i].lodmindist<=distance_from_camera) {
+            lod=i;
+        } else {
+            break;
+        }
+    }
+    for(unsigned int i=0;i<parts.size();i++) {
+        parts[i][lod].vbo.bind();
         glEnableVertexAttribArray(SHADER_VERTEX_ATTRIB);
-        glVertexAttribPointer(SHADER_VERTEX_ATTRIB,it->vbo.element_size(),it->vbo.element_type(),GL_FALSE,0,0);
+        glVertexAttribPointer(SHADER_VERTEX_ATTRIB,parts[i][lod].vbo.element_size(),parts[i][lod].vbo.element_type(),GL_FALSE,0,0);
 
-        if(ena_colors && it->cbo.size()>0) {
-            it->cbo.bind();
+        if(ena_colors && parts[i][lod].cbo.size()>0) {
+            parts[i][lod].cbo.bind();
             glEnableVertexAttribArray(SHADER_COLOR_ATTRIB);
-            glVertexAttribPointer(SHADER_COLOR_ATTRIB,it->cbo.element_size(),it->cbo.element_type(),GL_FALSE,0,0);
+            glVertexAttribPointer(SHADER_COLOR_ATTRIB,parts[i][lod].cbo.element_size(),parts[i][lod].cbo.element_type(),GL_FALSE,0,0);
         }
 
-        if(it->nbo.size()>0) {
-            it->nbo.bind();
+        if(parts[i][lod].nbo.size()>0) {
+            parts[i][lod].nbo.bind();
             glEnableVertexAttribArray(SHADER_NORMAL_ATTRIB);
-            glVertexAttribPointer(SHADER_NORMAL_ATTRIB,it->nbo.element_size(),it->nbo.element_type(),GL_FALSE,0,0);
+            glVertexAttribPointer(SHADER_NORMAL_ATTRIB,parts[i][lod].nbo.element_size(),parts[i][lod].nbo.element_type(),GL_FALSE,0,0);
         }
 
-        if(ena_textures && it->tbo.size()>0) {
-            it->tbo.bind();
+        if(ena_textures && parts[i][lod].tbo.size()>0) {
+            parts[i][lod].tbo.bind();
             glEnableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
-            glVertexAttribPointer(SHADER_TEXTURE_ATTRIB,it->tbo.element_size(),it->tbo.element_type(),GL_FALSE,0,0);
+            glVertexAttribPointer(SHADER_TEXTURE_ATTRIB,parts[i][lod].tbo.element_size(),parts[i][lod].tbo.element_type(),GL_FALSE,0,0);
         }
 
-        if(obj_draw_mode==OBJECT_DRAW_LINES && it->ibo_lines.size()>0) {
-            it->ibo_lines.bind();
-            glDrawElements(GL_LINES,it->ibo_lines.size()/it->ibo_lines.element_size(),it->ibo_lines.element_type(),0);
+        if(obj_draw_mode==OBJECT_DRAW_LINES && parts[i][lod].ibo_lines.size()>0) {
+            parts[i][lod].ibo_lines.bind();
+            glDrawElements(GL_LINES,parts[i][lod].ibo_lines.size()/parts[i][lod].ibo_lines.element_size(),parts[i][lod].ibo_lines.element_type(),0);
 
-        } else if(obj_draw_mode==OBJECT_DRAW_QUADS && it->ibo_quads.size()>0) {
-            it->ibo_quads.bind();
-            glDrawElements(GL_QUADS,it->ibo_quads.size()/it->ibo_quads.element_size(),it->ibo_quads.element_type(),0);
+        } else if(obj_draw_mode==OBJECT_DRAW_QUADS && parts[i][lod].ibo_quads.size()>0) {
+            parts[i][lod].ibo_quads.bind();
+            glDrawElements(GL_QUADS,parts[i][lod].ibo_quads.size()/parts[i][lod].ibo_quads.element_size(),parts[i][lod].ibo_quads.element_type(),0);
 
-        } else if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && it->ibo_triangles.size()>0) {
-            it->ibo_triangles.bind();
-            glDrawElements(GL_TRIANGLES,it->ibo_triangles.size()/it->ibo_triangles.element_size(),it->ibo_triangles.element_type(),0);
+        } else if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && parts[i][lod].ibo_triangles.size()>0) {
+            parts[i][lod].ibo_triangles.bind();
+            glDrawElements(GL_TRIANGLES,parts[i][lod].ibo_triangles.size()/parts[i][lod].ibo_triangles.element_size(),parts[i][lod].ibo_triangles.element_type(),0);
 
         } else {
             // draw using standard index if nothing else has been found
-            if(it->vbo.element_type()==GL_FLOAT) {
-                glDrawArrays(obj_draw_mode,0,it->vbo.size()/(it->vbo.element_size()*sizeof(float)));
-            } else if(it->vbo.element_type()==GL_DOUBLE) {
-                glDrawArrays(obj_draw_mode,0,it->vbo.size()/(it->vbo.element_size()*sizeof(double)));
+            if(parts[i][lod].vbo.element_type()==GL_FLOAT) {
+                glDrawArrays(obj_draw_mode,0,parts[i][lod].vbo.size()/(parts[i][lod].vbo.element_size()*sizeof(float)));
+            } else if(parts[i][lod].vbo.element_type()==GL_DOUBLE) {
+                glDrawArrays(obj_draw_mode,0,parts[i][lod].vbo.size()/(parts[i][lod].vbo.element_size()*sizeof(double)));
             }
         }
     
-        if(ena_colors && it->cbo.size()>0) {
+        if(ena_colors && parts[i][lod].cbo.size()>0) {
             glDisableVertexAttribArray(SHADER_COLOR_ATTRIB);
         }
-        if(it->nbo.size()>0) {
+        if(parts[i][lod].nbo.size()>0) {
             glDisableVertexAttribArray(SHADER_NORMAL_ATTRIB);
         }
-        if(ena_textures && it->tbo.size()>0) {
+        if(ena_textures && parts[i][lod].tbo.size()>0) {
             glDisableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
         }
         glDisableVertexAttribArray(SHADER_VERTEX_ATTRIB);

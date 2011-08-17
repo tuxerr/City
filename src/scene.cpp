@@ -295,6 +295,10 @@ void Scene::draw_object(Object *o,bool use_shaders) {
         std::string program_name=o->get_program();
         // if the object's shader doesn't exist, use default one.
         Program *program=disp->get_program(program_name);
+        Vec3<float> object_position((o->modelview_matrix()).val[3],
+                                    (o->modelview_matrix()).val[7],
+                                    (o->modelview_matrix()).val[11]);
+        Vec3<float> objminuscam = object_position - camera_pos;
 
         matrices->set_value(o->modelview_matrix(),"modelview");
 
@@ -306,7 +310,7 @@ void Scene::draw_object(Object *o,bool use_shaders) {
             program->use();
         }
 
-        o->draw();
+        o->draw(objminuscam.norm());
 
         if(use_shaders) {
             program->unuse();

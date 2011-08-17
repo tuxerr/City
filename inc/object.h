@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <list>
 #include <GL/glew.h>
 #include "vbo.h"
 #include "matrix4.h"
@@ -13,7 +14,7 @@
 
 typedef struct ObjectPart {
     VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo,tbo,nbo;
-    /* reflection stuff */
+    float lodmindist; /* for LOD purposes, minimum display distance */
 } ObjectPart;
 
 typedef enum Object_Draw_Modes {
@@ -25,14 +26,14 @@ public:
     Object();
     void destroy();
     int new_part();
-    void update_vertices_buffer(void *data,int size,unsigned int part_number=0);
-    void update_normals_buffer(void *data,int size,unsigned int part_number=0);
-    void vertices_buffer_link(unsigned int src_part,unsigned int dest_part);
-    void update_lines_index_buffer(void *data,int size,unsigned int part_number=0);
-    void update_triangles_index_buffer(void *data,int size,unsigned int part_number=0);
-    void update_quads_index_buffer(void *data,int size,unsigned int part_number=0);
-    void update_color_buffer(void *data,int size,unsigned int part_number=0);
-    void update_texture_buffer(void *data,int size,unsigned int part_number=0);
+    int new_lod(float lodmindist);
+    void update_vertices_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    void update_normals_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    void update_lines_index_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    void update_triangles_index_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    void update_quads_index_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    void update_color_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    void update_texture_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
     bool need_to_update_matrices();
     void update_matrices(Matrix4 *perspective,Matrix4 *camera);
     void enable_color(bool color);
@@ -45,14 +46,14 @@ public:
     Matrix4 &normal_matrix();
     std::string get_program();
     void set_program(std::string name);
-    void draw();
+    void draw(float distance_from_camera);
     void translate(float x, float y, float z);
     void scale(float x, float y, float z);
     void rotate(float angle,float x, float y, float z);
     Vec3<float> position();
     
 private:
-    std::vector<ObjectPart> parts;
+    std::vector< std::vector<ObjectPart> > parts; /* parts[PART][LOD] */
     bool ena_colors;
     bool ena_textures;
     bool ena_draw;
