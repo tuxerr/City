@@ -1,7 +1,7 @@
 #include "vbo.h"
 
-VBO::VBO(GLenum target,GLenum mode,int element_size,GLenum element_type)  : 
-    vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0), vbo_element_size(element_size),
+VBO::VBO(GLenum target,GLenum mode,GLenum element_type)  : 
+    vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0),
     vbo_element_type(element_type), created(false)
 {
 }
@@ -48,7 +48,19 @@ int VBO::size() {
 }
 
 int VBO::element_size() {
-    return vbo_element_size;
+    switch(vbo_element_type) {
+    case GL_UNSIGNED_INT:
+        return sizeof(unsigned int);
+        break;
+
+    case GL_FLOAT:
+        return sizeof(float);
+        break;
+
+    default:
+        return -1;
+        break;
+    }
 }
 
 GLenum VBO::element_type() {

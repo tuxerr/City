@@ -21,7 +21,7 @@ float terrainheight(float x, float y) {
 }
 
 int main(int argc,char *argv[]) {
-    Display disp(1024,1024,false);     disp.init();     
+    Display disp(1024,1024,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
     disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
@@ -33,8 +33,8 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(-30,-30,2);
-    sce.set_camera(camerapos,Vec3<float>(0,0,1),Vec3<float>(0,1,0));
+    Vec3<float> camerapos(-30,-30,3.5);
+    sce.set_camera(camerapos,Vec3<float>(-5,-5,2),Vec3<float>(0,0,1));
     sce.set_perspective(FOV,1,100);
 
     Timer timer;
@@ -70,10 +70,10 @@ int main(int argc,char *argv[]) {
     Object *o=sce.new_object();
     o->set_program("phong");
     spaceship.load_in_object(o);
-    o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    o->set_draw_mode(OBJECT_DRAW_LINES);
     o->translate(-5,-5,2);
 
-    int terrain_detail=10;
+    int terrain_detail=5;
     for(int i=-40;i<40;i+=terrain_detail) {
         for(int j=-40;j<40;j+=terrain_detail) {
             Object *t=sce.new_object();

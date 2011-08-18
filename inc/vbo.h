@@ -7,7 +7,7 @@
 
 class VBO {
 public:
-    VBO(GLenum target,GLenum mode,int element_size,GLenum element_type);
+    VBO(GLenum target,GLenum mode,GLenum element_type);
     ~VBO();
     void create();
     bool iscreated();
