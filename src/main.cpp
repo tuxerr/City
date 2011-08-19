@@ -70,7 +70,7 @@ int main(int argc,char *argv[]) {
     Object *o=sce.new_object();
     o->set_program("phong");
     spaceship.load_in_object(o);
-    o->set_draw_mode(OBJECT_DRAW_LINES);
+    o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->translate(-5,-5,2);
 
     float terrain_detail=5;
