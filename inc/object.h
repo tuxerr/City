@@ -15,6 +15,8 @@
 typedef struct ObjectPart {
     VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo,tbo,nbo;
     float lodmindist; /* for LOD purposes, minimum display distance */
+    float bounding_sphere_size;
+    int bounding_sphere_weight;
 } ObjectPart;
 
 typedef enum Object_Draw_Modes {
@@ -34,6 +36,7 @@ public:
     void update_quads_index_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
     void update_color_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
     void update_texture_buffer(void *data,int size,unsigned int part_number=0,unsigned int lod_number=0);
+    float bounding_size();
     bool need_to_update_matrices();
     void update_matrices(Matrix4 *perspective,Matrix4 *camera);
     void enable_color(bool color);
@@ -65,6 +68,9 @@ private:
     Matrix4 projection_modelview;
     Matrix4 normal_mat;
     Vec3<float> pos;
+
+    float bounding_sphere_size;
+    void calculate_bounding_sphere();
 };
 
 #endif

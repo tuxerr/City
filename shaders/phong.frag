@@ -58,7 +58,7 @@ vec4 spotlight(int lightID) {
          float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
          float specular_mult_factor = max(dot(normalize(eye_ray),reflected_ray),0.0);
          diffuse = diffuse_mult_factor*globalcolor*0.4;
-         specular = pow(specular_mult_factor,500)*1*globalcolor;
+         specular = pow(specular_mult_factor,500.0)*1*globalcolor;
          specular = specular/(distance*Light[lightID].spot_values.x);
          
          if(spot_angle<max_illu_angle) {
@@ -119,7 +119,7 @@ float directional_shadowing(int lightID) {
     float zdelta = (distance(vert_pos.xyz,GlobalValues.camera_pos)*dotprod)-1;
     float cascaded_layer=5;
     for(int i=0;i<4;i++) {
-        if(zdelta<=cascaded_shading_zdelta*(pow(2,i+1)-1)) {
+        if(zdelta<=cascaded_shading_zdelta*(pow(2.0,i+1.0)-1)) {
             cascaded_layer=i;
             break;
         }        

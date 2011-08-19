@@ -73,7 +73,7 @@ int main(int argc,char *argv[]) {
     o->set_draw_mode(OBJECT_DRAW_LINES);
     o->translate(-5,-5,2);
 
-    int terrain_detail=5;
+    float terrain_detail=5;
     for(int i=-40;i<40;i+=terrain_detail) {
         for(int j=-40;j<40;j+=terrain_detail) {
             Object *t=sce.new_object();

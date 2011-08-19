@@ -36,8 +36,6 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
         std::vector< int > line_index_buffer;
         std::vector< int > triangles_index_buffer;
 
-        std::cout<<"Generating "<<matrix_width*matrix_height<<" vertices terrain (LOD "<<lod<<")"<<std::endl;
-
         pos_matrix.reserve(matrix_width*matrix_height);
         color_matrix.reserve(matrix_width*matrix_height);
         normal_matrix.reserve(matrix_width*matrix_height);

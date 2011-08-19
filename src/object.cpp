@@ -6,7 +6,8 @@ Object::Object() :
     ena_draw(true),
     obj_draw_mode(OBJECT_DRAW_LINES),
     program_name("default"),
-    modelview_changed(true)
+    modelview_changed(true),
+    bounding_sphere_size(0)
 {
     new_part();                 // create part 0.
     obj_modelview.identity();
@@ -38,7 +39,9 @@ int Object::new_part() {
             VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // cbo
             VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // tbo
             VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // nbo
-            -1                          // minimum viewing distance for the LOD
+            -1,                          // minimum viewing distance for the LOD
+            0,
+            0
         };
         v.push_back(part);
 
@@ -53,7 +56,9 @@ int Object::new_part() {
                 VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // cbo
                 VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // tbo
                 VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // nbo
-                parts[0][i].lodmindist                          // minimum viewing distance for the LOD
+                parts[0][i].lodmindist,                          // minimum viewing distance for the LOD
+                0,
+                0
             };
             v.push_back(part);
         }
@@ -84,7 +89,9 @@ int Object::new_lod(float lodmindist) {
             VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // cbo
             VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // tbo
             VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // nbo
-            lodmindist                                      // minimum viewing distance for the LOD
+            lodmindist,                                      // minimum viewing distance for the LOD
+            0,
+            0
         };  
         parts[i].insert(parts[i].begin()+lod_iter,part);
     }
@@ -96,7 +103,37 @@ void Object::update_vertices_buffer(void *data,int size,unsigned int part_number
         if(!parts[part_number][lod_number].vbo.iscreated())
             parts[part_number][lod_number].vbo.create();
         parts[part_number][lod_number].vbo.update(data,size);
+        
+        if(lod_number==0) {
+            float currentmax=-1;
+            for(int i=0;i<size/12;i++) {
+                float *ptr=(float*)data;
+                Vec3<float> point(ptr[3*i],ptr[3*i+1],ptr[3*i+2]);
+                float norm = point.norm();
+                if(norm>currentmax) {
+                    currentmax=norm;
+                }
+            }
+
+            parts[part_number][0].bounding_sphere_weight=size/12;
+            parts[part_number][0].bounding_sphere_size=currentmax;
+        }
     }
+    calculate_bounding_sphere();
+}
+
+void Object::calculate_bounding_sphere() {
+    int total_weight=0;
+    bounding_sphere_size=0;
+    for(unsigned int i=0;i<parts.size();i++) {
+        total_weight+=parts[i][0].bounding_sphere_weight;
+        bounding_sphere_size+=(parts[i][0].bounding_sphere_weight*parts[i][0].bounding_sphere_size);
+    }
+    bounding_sphere_size/=total_weight;
+}
+
+float Object::bounding_size() {
+    return bounding_sphere_size;
 }
 
 void Object::update_normals_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
