@@ -9,6 +9,9 @@
 #include "vbo.h"
 #include "matrix4.h"
 #include "shader_program.h"
+#include "utils.h"
+
+class Octree;
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
@@ -25,7 +28,7 @@ typedef enum Object_Draw_Modes {
 
 class Object {
 public:
-    Object();
+    Object(Octree *tree);
     void destroy();
     int new_part();
     int new_lod(float lodmindist);
@@ -68,8 +71,10 @@ private:
     Matrix4 projection_modelview;
     Matrix4 normal_mat;
     Vec3<float> pos;
+    Octree *tree;
 
     float bounding_sphere_size;
+    float bounding_scale_factor;
     void calculate_bounding_sphere();
 };
 

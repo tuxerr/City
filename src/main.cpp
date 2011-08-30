@@ -43,29 +43,6 @@ int main(int argc,char *argv[]) {
     
     Controls c;
 
-    float v2[]= { -10, -10, 0, 
-                  -10, 10, 0,
-                  10, 10, 0,
-                  10, -10, 0};
-    float c2[]= { 1, 0, 0,
-                  1, 0, 0,
-                  1, 0, 0,
-                  1, 0, 0 };
-
-    float n2[]= { 0, 0, 1,
-                  0, 0, 1,
-                  0, 0, 1,
-                  0, 0, 1 };
-
-    Object *o1=sce.new_object();
-    o1->set_program("phong");
-    o1->set_draw_mode(OBJECT_DRAW_QUADS);
-    o1->update_vertices_buffer(v2,sizeof(v2));
-    o1->update_color_buffer(c2,sizeof(c2));
-    o1->update_normals_buffer(n2,sizeof(n2));
-    o1->scale(10,10,10);
-    o1->set_enable_draw(false);
-
     ObjFile spaceship("data/spaceship.obj");
 
     Object *o=sce.new_object();
@@ -73,12 +50,6 @@ int main(int argc,char *argv[]) {
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->translate(2,1,1.9);
-
-    Octree oct(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096));
-    oct.add_object(o);
-    oct.delete_object(o);
-
-    std::cout<<"bounding size : "<<o->bounding_size()<<std::endl;
 
     float terrain_detail=5;
     for(int i=-40;i<40;i+=terrain_detail) {

@@ -23,8 +23,6 @@ void Octree::add_object(Object *o) {
 
         if(size.x*2<=OCTREE_PRECISION) {
             objects.push_back(o);
-            std::cout<<"object was added in ";
-            print();
         } else {
             for(int i=0;i<8;i++) {
                 if(generate_node((Octree_Nodes)i).contains_object(o)) {
@@ -55,7 +53,6 @@ int Octree::delete_object(Object *o) {
         for(int i=0;i<8;i++) {
             if(nodes[i]!=NULL) {
                 if(nodes[i]->delete_object(o)) {
-                    nodes[i]->print();
                     delete nodes[i];
                     nodes[i]=NULL;
                 }
@@ -81,6 +78,9 @@ bool Octree::contains_object(Object *o) {
                  fabs(center_vector.scalar(Vec3<float>(1,0,0)))),
             fabs(center_vector.scalar(Vec3<float>(0,1,0))));
     
+    if(scalar==0) {
+        return true;
+    }
     float center_side_cube_size = size.x/scalar;
 
     return (center_position-object_pos).norm()<center_side_cube_size+object_bsize;

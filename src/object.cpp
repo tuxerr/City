@@ -1,13 +1,16 @@
 #include "object.h"
+#include "octree.h"
 
-Object::Object() : 
+Object::Object(Octree *tree) : 
     ena_colors(true),
     ena_textures(true),
     ena_draw(true),
     obj_draw_mode(OBJECT_DRAW_LINES),
     program_name("default"),
     modelview_changed(true),
-    bounding_sphere_size(0)
+    tree(tree),
+    bounding_sphere_size(0),
+    bounding_scale_factor(1)
 {
     new_part();                 // create part 0.
     obj_modelview.identity();
@@ -120,6 +123,10 @@ void Object::update_vertices_buffer(void *data,int size,unsigned int part_number
         }
     }
     calculate_bounding_sphere();
+    if(lod_number==0) {
+        tree->delete_object(this);
+        tree->add_object(this);
+    }
 }
 
 void Object::calculate_bounding_sphere() {
@@ -133,7 +140,7 @@ void Object::calculate_bounding_sphere() {
 }
 
 float Object::bounding_size() {
-    return bounding_sphere_size;
+    return bounding_sphere_size*bounding_scale_factor;
 }
 
 void Object::update_normals_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
@@ -296,11 +303,16 @@ void Object::translate(float x, float y, float z) {
     obj_modelview.translate(x,y,z);
     pos=pos+Vec3<float>(x,y,z);
     modelview_changed=true;
+    tree->delete_object(this);
+    tree->add_object(this);
 }
 
 void Object::scale(float x, float y, float z) {
     obj_modelview.scale(x,y,z);
     modelview_changed=true;
+    bounding_scale_factor*=maxf(maxf(x,y),z);
+    tree->delete_object(this);
+    tree->add_object(this);
 }
 
 void Object::rotate(float angle,float x, float y, float z) {

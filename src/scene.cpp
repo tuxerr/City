@@ -1,6 +1,9 @@
 #include "scene.h"
 
-Scene::Scene(Display *disp,UniformBlock *matrices) : light_number(0), disp(disp), matrices(matrices), camera_changed(false), perspective_changed(false) {
+Scene::Scene(Display *disp,UniformBlock *matrices) : 
+    light_number(0), disp(disp), matrices(matrices), camera_changed(false), 
+    perspective_changed(false), octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096)) 
+{
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
     }
@@ -70,12 +73,14 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector
 }
 
 Object* Scene::new_object() {
-    Object *o=new Object();
+    Object *o=new Object(&octree);
     objects.insert(o);
     return o;
 }
 
 void Scene::delete_object(Object *o) {
+    octree.delete_object(o);
+
     if(o!=NULL) {
         o->destroy();
         delete o;

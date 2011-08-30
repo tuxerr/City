@@ -14,6 +14,7 @@
 #include "fbo.h"
 #include "texture.h"
 #include "utils.h"
+#include "octree.h"
 
 class Scene {
 public:
@@ -52,6 +53,8 @@ private:
     Matrix4 perspective;
     bool camera_changed;
     bool perspective_changed;
+
+    Octree octree;
 };
 
 #endif
