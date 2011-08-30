@@ -18,6 +18,7 @@ public:
     Octree(Vec3<float> pos,Vec3<float> size,Octree *parent=NULL);
     ~Octree();
     void add_object(Object *o);
+    void print();
 
     Vec3<float> center_position;
     Vec3<float> size;

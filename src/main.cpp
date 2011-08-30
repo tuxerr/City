@@ -13,6 +13,7 @@
 #include "fbo.h"
 #include "terrain.h"
 #include "math.h"
+#include "octree.h"
 
 using namespace std;
 
@@ -71,7 +72,9 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->translate(-5,-5,2);
+
+    Octree oct(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096));
+    oct.add_object(o);
 
     float terrain_detail=5;
     for(int i=-40;i<40;i+=terrain_detail) {
