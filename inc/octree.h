@@ -7,6 +7,7 @@
 #include "vec2.h"
 #include "constants.h"
 #include "object.h"
+#include "utils.h"
 
 typedef enum {
     TOP_XY=0, TOP_XMY=1, TOP_MXMY=2, TOP_MXY=3,
@@ -18,6 +19,7 @@ public:
     Octree(Vec3<float> pos,Vec3<float> size,Octree *parent=NULL);
     ~Octree();
     void add_object(Object *o);
+    int delete_object(Object *o);
     void print();
 
     Vec3<float> center_position;

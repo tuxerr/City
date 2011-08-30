@@ -72,9 +72,13 @@ int main(int argc,char *argv[]) {
     o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    o->translate(2,1,1.9);
 
     Octree oct(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096));
     oct.add_object(o);
+    oct.delete_object(o);
+
+    std::cout<<"bounding size : "<<o->bounding_size()<<std::endl;
 
     float terrain_detail=5;
     for(int i=-40;i<40;i+=terrain_detail) {

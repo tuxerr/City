@@ -4,6 +4,7 @@ Octree::Octree(Vec3<float> pos,Vec3<float> size,Octree *parent) : center_positio
     for(int i=0;i<8;i++) {
         nodes[i]=NULL;
     }
+    objects.clear();
 
 }
 
@@ -11,6 +12,7 @@ Octree::~Octree() {
     for(int i=0;i<8;i++) {
         if(nodes[i]!=NULL) {
             delete nodes[i];
+            nodes[i]=NULL;
         }
     }
 }
@@ -19,36 +21,19 @@ void Octree::add_object(Object *o) {
     if(contains_object(o)) {
         // if the object is in our current octree
 
-        if(size.x*2<OCTREE_PRECISION) {
+        if(size.x*2<=OCTREE_PRECISION) {
             objects.push_back(o);
             std::cout<<"object was added in ";
             print();
         } else {
-
-            bool all_contain=true;
             for(int i=0;i<8;i++) {
-                Octree node = generate_node((Octree_Nodes)i);
-                if(!node.contains_object(o)) {
-                    all_contain=false;
-                    break;
-                }
-            }
-        
-            if(all_contain) {
-                objects.push_back(o);
-                std::cout<<"object was added in";
-                print();
-            } else {
-                for(int i=0;i<8;i++) {
-                    if(generate_node((Octree_Nodes)i).contains_object(o)) {
+                if(generate_node((Octree_Nodes)i).contains_object(o)) {
+                    if(nodes[i]==NULL) {
                         Octree *node = new Octree(Vec3<float>(0,0,0),Vec3<float>(0,0,0));
                         (*node)=generate_node((Octree_Nodes)i);
                         nodes[i]=node;
-                        std::cout<<"recursive pattern "<<i<<" : ";
-                        print();
-                        node->add_object(o);
-                        break;
                     }
+                    nodes[i]->add_object(o);
                 }
             }
         }
@@ -57,27 +42,48 @@ void Octree::add_object(Object *o) {
 
 }
 
-bool Octree::contains_object(Object *o) {
-    Vec3<float> objectpos = o->position();
-    std::cout<<"Object position : "<<objectpos.x<<objectpos.y<<objectpos.z<<std::endl;
-    float bsize = o->bounding_size();
-    Vec3<float> center_vector = center_position-objectpos;
-    center_vector.normalize();
-    std::cout<<"Center vector : "<<center_vector.x<<":"<<center_vector.y<<":"<<center_vector.z<<std::endl;
-    float scalar = center_vector.scalar(Vec3<float>(0,0,1));
-    scalar=fabs(scalar);
-    std::cout<<"scalar : "<<scalar<<std::endl;
-    if(scalar<0.707) {
-        float angle = acos(scalar);
-        std::cout<<"angle : "<<angle<<std::endl;
-        scalar=fabs(sin(angle));
-        std::cout<<"scalar : "<<scalar<<std::endl;
+int Octree::delete_object(Object *o) {
+    if(objects.size()!=0) {
+        objects.remove(o);
+        if(objects.size()==0) {
+            return 1;           // this node has to be erased now (it's empty)
+        } else {
+            return 0;
+        }
+    } else {
+        bool to_erase = true;
+        for(int i=0;i<8;i++) {
+            if(nodes[i]!=NULL) {
+                if(nodes[i]->delete_object(o)) {
+                    nodes[i]->print();
+                    delete nodes[i];
+                    nodes[i]=NULL;
+                }
+                if(nodes[i]!=NULL) {
+                    to_erase=false;
+                }
+            }
+        }
+        return to_erase;
     }
+}
 
+bool Octree::contains_object(Object *o) {
+    Vec3<float> object_pos = o->position();
+    float object_bsize = o->bounding_size();
+
+    Vec3<float> center_vector = center_position-object_pos;
+    center_vector.normalize();
+
+    float scalar = 
+        maxf(
+            maxf(fabs(center_vector.scalar(Vec3<float>(0,0,1))),
+                 fabs(center_vector.scalar(Vec3<float>(1,0,0)))),
+            fabs(center_vector.scalar(Vec3<float>(0,1,0))));
+    
     float center_side_cube_size = size.x/scalar;
-    std::cout<<"cube size :"<<(center_position-objectpos).norm()<<std::endl;
 
-    return (center_position-objectpos).norm()<center_side_cube_size+bsize;
+    return (center_position-object_pos).norm()<center_side_cube_size+object_bsize;
 }
 
 Octree Octree::generate_node(Octree_Nodes node) {
