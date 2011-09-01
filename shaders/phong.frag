@@ -93,25 +93,7 @@ vec4 pointlight(int lightID) {
     return ambiant+diffuse+specular;
 }
 
-vec4 directionallight(int lightID) {
-    vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
-    
-    vec3 light_ray = Light[lightID].direction;
-    vec3 norm_normal = normalize(vert_normal.xyz);
-    vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
-    vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
 
-    float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
-    float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
-
-    vec4 ambiant = globalcolor*0.1;
-    vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
-    vec4 specular = pow(specular_mult_factor,500)*globalcolor;
-    specular = specular/3*Light[lightID].spot_values.x;
-    
-//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
-    return ambiant+diffuse+specular;
-}
 
 float directional_shadowing(int lightID) {
     float dotprod = dot(normalize(vert_pos.xyz-GlobalValues.camera_pos),normalize(GlobalValues.eye_vector));
@@ -168,6 +150,31 @@ float directional_shadowing(int lightID) {
     return 0.0;
 }
 
+vec4 directionallight(int lightID) {
+    vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
+    
+    vec3 light_ray = Light[lightID].direction;
+    vec3 norm_normal = normalize(vert_normal.xyz);
+    vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
+    vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
+
+    float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
+    float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+
+    vec4 ambiant = globalcolor*0.1;
+    vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
+    vec4 specular = pow(specular_mult_factor,500)*globalcolor;
+    specular = specular/3*Light[lightID].spot_values.x;
+    
+//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
+    if(directional_shadowing(lightID)==1) {
+        return ambiant+diffuse+specular;
+    } else {
+        return ambiant+(diffuse/3);
+    }
+
+}
+
 void main(void) {
      vec4 res = vec4(0,0,0,0);
      for(int i=0;i<lightnumber;i++) {
@@ -187,7 +194,7 @@ void main(void) {
              res+=spotlight(i);
          } else if(Light[i].light_type==3) {
              if(Light[i].render_shadows) {
-                 res += directionallight(i)*directional_shadowing(i);
+                 res += directionallight(i);
              } else {
                  res += directionallight(i);
              }

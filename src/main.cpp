@@ -24,7 +24,7 @@ float terrainheight(float x, float y) {
 
 int main(int argc,char *argv[]) {
 
-    PerlinNoise noise(1,0.6,8,2,42);
+    PerlinNoise noise(1,0.6,3,2,42);
     Display disp(1024,1024,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
@@ -55,8 +55,8 @@ int main(int argc,char *argv[]) {
     o->translate(2,1,1.9);
 
     float terrain_detail=5;
-    for(int i=0;i<80;i+=terrain_detail) {
-        for(int j=0;j<80;j+=terrain_detail) {
+    for(int i=0;i<150;i+=terrain_detail) {
+        for(int j=0;j<150;j+=terrain_detail) {
             Object *t=sce.new_object();
             terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t);
             t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
@@ -67,8 +67,10 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
-    l1->enable_shadows(false);
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(2,2,-0.4),Vec3<float>(1,1,1));
+    l1->enable_shadows(true);
+
+//    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
     int i=0;
     timer.init();

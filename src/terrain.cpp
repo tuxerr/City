@@ -60,7 +60,7 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
 
                 res.normalize();
                 float pente = res.scalar(Vec3<float>(0,0,1));
-                if(pente<0.6) {
+                if(pente<0.8) {
                     color_matrix.push_back(Vec3<float>(0.35,0.23,0.06));
                 } else if(cz>1.8) {
                     color_matrix.push_back(Vec3<float>(1,1,1));
