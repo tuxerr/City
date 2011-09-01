@@ -2,6 +2,7 @@
 #include "octree.h"
 
 Object::Object(Octree *tree) : 
+    has_been_drawn(false),
     ena_colors(true),
     ena_textures(true),
     ena_draw(true),

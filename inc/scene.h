@@ -28,6 +28,7 @@ public:
     void render();
     void render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni);
     void draw_scene(std::string program_name = "");
+    void draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn,std::string program_name);
     void draw_object(Object *o,bool use_shaders);
     PointLight* new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity=1);
     SpotLight* new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity=1);
@@ -55,6 +56,7 @@ private:
     bool perspective_changed;
 
     Octree octree;
+    Frustum frustum;
 };
 
 #endif

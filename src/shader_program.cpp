@@ -137,40 +137,44 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
 }
 
 void Program::use() {
-    std::list<Texture*>::iterator it = textures.begin();
-    int tex_index=0;
-    for(;it!=textures.end();it++) {
-        if( (*it) != NULL) {
-            (*it)->bind(tex_index);
+    if(!binded) {
+        std::list<Texture*>::iterator it = textures.begin();
+        int tex_index=0;
+        for(;it!=textures.end();it++) {
+            if( (*it) != NULL) {
+                (*it)->bind(tex_index);
+            }
+            tex_index++;
         }
-        tex_index++;
-    }
 
-    glUseProgram(program_id);
+        glUseProgram(program_id);
 
-    std::map<Uniform*,bool>::iterator uni_it=uniforms.begin();
-    for(;uni_it!=uniforms.end();uni_it++) {
-	// if the uniform has been modified since the last time
-        if(uni_it->second==false) {
-            (uni_it->first)->send_value(id());
-            uni_it->second=true;
+        std::map<Uniform*,bool>::iterator uni_it=uniforms.begin();
+        for(;uni_it!=uniforms.end();uni_it++) {
+            // if the uniform has been modified since the last time
+            if(uni_it->second==false) {
+                (uni_it->first)->send_value(id());
+                uni_it->second=true;
+            }
         }
-    }
     
-    binded=true;
+        binded=true;
+    }
 }
 
 void Program::unuse() {
-    std::list<Texture*>::iterator it = textures.begin();
-    for(;it!=textures.end();it++) {
-        if( (*it) != NULL) {
-            (*it)->unbind();
+    if(binded) {
+        std::list<Texture*>::iterator it = textures.begin();
+        for(;it!=textures.end();it++) {
+            if( (*it) != NULL) {
+                (*it)->unbind();
+            }
         }
+
+        glUseProgram(0);
+
+        binded=false;
     }
-
-    glUseProgram(0);
-
-    binded=false;
 }
 
 GLuint Program::id() {

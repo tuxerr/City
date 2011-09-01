@@ -70,6 +70,32 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector
     eye_vector = direction-pos;
     matrices->set_value(eye_vector,"eye_vector");
     camera_changed=true;
+    Vec3<float> eye_vec_norm = eye_vector;
+    eye_vec_norm.normalize();
+
+    // new frustum calculation for the octree
+    Vec3<float> farpoint = pos+(eye_vec_norm*FAR);
+    Vec3<float> rightvec = eye_vector.cross(up_vector);
+    rightvec.normalize();
+    rightvec=rightvec*(tan(FOV_RAD/2)*FAR);
+
+    up_vector.normalize();
+    up_vector=up_vector*( rightvec.norm()*(float)disp->get_height()/disp->get_width());
+
+    // topright, topleft, lowright and low-left vectors in the far plane of the frustum
+    Vec3<float> tr = (farpoint+rightvec+up_vector)-pos;
+    Vec3<float> tl = (farpoint-rightvec+up_vector)-pos;
+    Vec3<float> lr = (farpoint+rightvec-up_vector)-pos;
+    Vec3<float> ll = (farpoint-rightvec-up_vector)-pos;
+
+    // the 5 normals of the 5 plans of the pyramidal frustum (oriented towards the EXTERIOR of the frustum)
+    frustum.normal[0]=eye_vec_norm;
+    frustum.normal[1]=(tr.cross(tl)).normalize();
+    frustum.normal[2]=(lr.cross(tr)).normalize();
+    frustum.normal[3]=(ll.cross(lr)).normalize();
+    frustum.normal[4]=(tl.cross(ll)).normalize();
+    frustum.farpoint=farpoint;
+    frustum.origin=pos;
 }
 
 Object* Scene::new_object() {
@@ -266,20 +292,17 @@ void Scene::draw_scene(std::string program_name) {
         program->use();
     }
 
-    std::set<Object*>::iterator it;
-    for(it=objects.begin();it!=objects.end();it++) {
+    std::list<Object*> drawn;
+    draw_octree(octree,true,drawn,program_name);
+ 
+    int i=0;
+    std::list<Object*>::iterator it;
+    for(it=drawn.begin();it!=drawn.end();it++) {
         Object *o=*it;
-        if(o->need_to_update_matrices() || perspective_changed || camera_changed) {
-            o->update_matrices(&perspective,&camera);
-        }
-
-        if(program_name!="") {
-            draw_object(o,false);
-        } else {
-            draw_object(o,true);
-        }
-
+        o->has_been_drawn=false;
+        i++;
     }
+    std::cout<<"number of objects displayed : "<<i<<std::endl;
 
     if(program_name!="") {
         program->unuse();
@@ -292,6 +315,57 @@ void Scene::draw_scene(std::string program_name) {
         camera_changed=false;
     }
 
+}
+
+void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn,std::string program_name) {
+    if(oct.objects.size()!=0) {
+
+        std::list<Object*>::iterator it;
+        for(it=oct.objects.begin();it!=oct.objects.end();it++) {
+            Object *o=*it;
+            if(!o->has_been_drawn) {
+
+                if(o->need_to_update_matrices() || perspective_changed || camera_changed) {
+                    o->update_matrices(&perspective,&camera);
+                }
+
+                if(program_name!="") {
+                    draw_object(o,false);
+                } else {
+                    draw_object(o,true);
+                }
+                drawn.push_back(o);
+                o->has_been_drawn=true;
+
+            }
+        }
+
+    } else {
+
+        if(testcollision) {
+            Octree_Collisions col = oct.frustum_collision(frustum);
+            if(col==FULL_IN) {
+                for(int i=0;i<8;i++) {
+                    if(oct.nodes[i]!=NULL) {
+                        draw_octree(*oct.nodes[i],false,drawn,program_name);
+                    }
+                }
+            } else if(col==IN) {
+                for(int i=0;i<8;i++) {
+                    if(oct.nodes[i]!=NULL) {
+                        draw_octree(*oct.nodes[i],true,drawn,program_name);
+                    }
+                }
+            } 
+        } else {
+            for(int i=0;i<8;i++) {
+                if(oct.nodes[i]!=NULL) {
+                    draw_octree(*oct.nodes[i],false,drawn,program_name);
+                }
+            }
+        }
+
+    }
 }
 
 void Scene::draw_object(Object *o,bool use_shaders) {

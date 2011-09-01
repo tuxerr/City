@@ -34,7 +34,7 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(-30,-30,3.5);
+    Vec3<float> camerapos(-60,-60,3.5);
     sce.set_camera(camerapos,Vec3<float>(-5,-5,2),Vec3<float>(0,0,1));
     sce.set_perspective(FOV,1,100);
 
@@ -65,7 +65,7 @@ int main(int argc,char *argv[]) {
     spaceship.close();
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,-2,-2),Vec3<float>(1,0,1));
-    l1->enable_shadows(true);
+    l1->enable_shadows(false);
     
     int i=0;
     timer.init();

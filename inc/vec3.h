@@ -11,7 +11,7 @@ public:
     number y;
     number z;
     number norm();
-    void normalize();
+    Vec3<number> normalize();
     Vec3<number> cross(Vec3<number> n);
     number scalar(Vec3<number> n);
     Vec3<number> operator+(Vec3<number> n);
@@ -31,13 +31,14 @@ number Vec3<number>::norm() {
 }
 
 template <class number>
-void Vec3<number>::normalize() {
+Vec3<number> Vec3<number>::normalize() {
     number val=norm();
     if(val!=0) {
         x/=val;
         y/=val;
         z/=val;
     }
+    return Vec3<number>(x,y,z);
 }
 
 template <class number>

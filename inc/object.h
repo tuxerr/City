@@ -57,6 +57,8 @@ public:
     void scale(float x, float y, float z);
     void rotate(float angle,float x, float y, float z);
     Vec3<float> position();
+
+    bool has_been_drawn;
     
 private:
     std::vector< std::vector<ObjectPart> > parts; /* parts[PART][LOD] */
