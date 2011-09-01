@@ -302,7 +302,6 @@ void Scene::draw_scene(std::string program_name) {
         o->has_been_drawn=false;
         i++;
     }
-    std::cout<<"number of objects displayed : "<<i<<std::endl;
 
     if(program_name!="") {
         program->unuse();

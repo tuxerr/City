@@ -14,6 +14,7 @@
 #include "terrain.h"
 #include "math.h"
 #include "octree.h"
+#include "perlin.h"
 
 using namespace std;
 
@@ -22,6 +23,8 @@ float terrainheight(float x, float y) {
 }
 
 int main(int argc,char *argv[]) {
+
+    PerlinNoise noise(1,0.6,8,2,42);
     Display disp(1024,1024,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
@@ -34,12 +37,12 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp,matrices);
     
-    Vec3<float> camerapos(-60,-60,3.5);
-    sce.set_camera(camerapos,Vec3<float>(-5,-5,2),Vec3<float>(0,0,1));
+    Vec3<float> camerapos(0,0,3.5);
+    sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
     sce.set_perspective(FOV,1,100);
 
     Timer timer;
-    Terrain terrain(&terrainheight,0.2);
+    Terrain terrain(terrainheight,0.1,&noise);
     
     Controls c;
 
@@ -52,11 +55,11 @@ int main(int argc,char *argv[]) {
     o->translate(2,1,1.9);
 
     float terrain_detail=5;
-    for(int i=-40;i<40;i+=terrain_detail) {
-        for(int j=-40;j<40;j+=terrain_detail) {
+    for(int i=0;i<80;i+=terrain_detail) {
+        for(int j=0;j<80;j+=terrain_detail) {
             Object *t=sce.new_object();
-            terrain.generate_terrain(Vec2<float>(-terrain_detail/2,-terrain_detail/2),terrain_detail,terrain_detail,t);
-            t->set_draw_mode(OBJECT_DRAW_LINES);
+            terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t);
+            t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
             t->set_program("phong");
             t->translate(i+terrain_detail/2,j+terrain_detail/2,0); 
         }
@@ -64,7 +67,7 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,-2,-2),Vec3<float>(1,0,1));
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
     l1->enable_shadows(false);
     
     int i=0;
@@ -73,7 +76,7 @@ int main(int argc,char *argv[]) {
         i++;
         sce.render();
 
-        camerapos=camerapos+Vec3<float>(0.03,0.03,0);
+        camerapos=camerapos+Vec3<float>(0.06,0.06,0);
         sce.set_camera(camerapos,camerapos+Vec3<float>(10,10,-3),Vec3<float>(0,0,1));
 
         c.refresh();

@@ -10,7 +10,7 @@
 #define FOV 70
 #define FOV_RAD (FOV*M_PI/180)
 #define EPS 0.01
-#define TERRAIN_LOD_DEPTH 4
+#define TERRAIN_LOD_DEPTH 1
 #define OCTREE_SIZE 4096
 #define OCTREE_PRECISION 4      /* 12 recursive patterns max for (4096/2) */
 

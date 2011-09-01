@@ -1,6 +1,6 @@
 #include "terrain.h"
 
-Terrain::Terrain(float (*height_func)(float,float),float precision) : height_func(height_func), precision(precision), scalar(Vec3<float>(1,1,1)) {
+Terrain::Terrain(float (*height_func)(float,float),float precision,PerlinNoise *noise) : height_func(height_func), precision(precision), scalar(Vec3<float>(1,1,1)), noise(noise) {
     
 }
 
@@ -11,7 +11,7 @@ void Terrain::scale(float x,float y,float z) {
 }
 
 float Terrain::height(float x,float y) {
-    return scalar.z*height_func(x*scalar.x,y*scalar.y);
+    return scalar.z*noise->GetHeight(x*scalar.x,y*scalar.y);
 }
 
 void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object) {
@@ -44,19 +44,28 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
         for(int i=0;i<matrix_width;i++) {
             for(int j=0;j<matrix_height;j++) {
 
-                float cx=coord.x+i*lod_precision,cy=coord.y+j*lod_precision;
-                float cz=height(cx,cy);
+                float cx=i*lod_precision-xlength/2,cy=j*lod_precision-ylength/2;
+                float cz=height(cx+coord.x,cy+coord.y);
 
                 pos_matrix.push_back(Vec3<float>(cx,cy,cz));
-                color_matrix.push_back(Vec3<float>(1,1,1));
-
-                Vec3<float> n1(EPS,0,height(cx+EPS,cy)-cz);
-                Vec3<float> n2(0,EPS,height(cx,cy+EPS)-cz);
+                
+                Vec3<float> n1(EPS,0,height(cx+coord.x+EPS,cy+coord.y)-cz);
+                Vec3<float> n2(0,EPS,height(cx+coord.x,cy+coord.y+EPS)-cz);
                 n1=n1*10;
                 n2=n2*10;
                 Vec3<float> res = n1.cross(n2);
                 if(res.z<0) {
                     res=res*-1;
+                }
+
+                res.normalize();
+                float pente = res.scalar(Vec3<float>(0,0,1));
+                if(pente<0.6) {
+                    color_matrix.push_back(Vec3<float>(0.35,0.23,0.06));
+                } else if(cz>1.8) {
+                    color_matrix.push_back(Vec3<float>(1,1,1));
+                } else {
+                    color_matrix.push_back(Vec3<float>(0,1,0));
                 }
 
                 normal_matrix.push_back(res);
