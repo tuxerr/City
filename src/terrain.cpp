@@ -11,7 +11,7 @@ void Terrain::scale(float x,float y,float z) {
 }
 
 float Terrain::height(float x,float y) {
-    return scalar.z*noise->GetHeight(x*scalar.x,y*scalar.y);
+    return scalar.z*noise->GetHeight(x/scalar.x,y/scalar.y);
 }
 
 void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object) {

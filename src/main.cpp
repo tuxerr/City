@@ -43,6 +43,7 @@ int main(int argc,char *argv[]) {
 
     Timer timer;
     Terrain terrain(terrainheight,0.1,&noise);
+//    terrain.scale(3,3,3);
     
     Controls c;
 
@@ -54,9 +55,9 @@ int main(int argc,char *argv[]) {
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->translate(2,1,1.9);
 
-    float terrain_detail=5;
-    for(int i=0;i<150;i+=terrain_detail) {
-        for(int j=0;j<150;j+=terrain_detail) {
+    float terrain_detail=30;
+    for(int i=0;i<100;i+=terrain_detail) {
+        for(int j=0;j<100;j+=terrain_detail) {
             Object *t=sce.new_object();
             terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t);
             t->set_draw_mode(OBJECT_DRAW_TRIANGLES);

@@ -1,5 +1,7 @@
 #version 330
 
+#define FOG_DENSITY 0.02
+
 out vec4 pixel_color;
 
 in vec3 color;
@@ -167,12 +169,29 @@ vec4 directionallight(int lightID) {
     specular = specular/3*Light[lightID].spot_values.x;
     
 //    return ambiant+(diffuse+specular)*Light[lightID].intensity;
-    if(directional_shadowing(lightID)==1) {
-        return ambiant+diffuse+specular;
+    if(Light[lightID].render_shadows) {
+        if(directional_shadowing(lightID)==1) {
+            return ambiant+diffuse+specular;
+        } else {
+            return ambiant+(diffuse/3);
+        }
     } else {
-        return ambiant+(diffuse/3);
+        return ambiant+diffuse+specular;
     }
 
+}
+
+vec4 apply_fog(vec4 color,float distance) {
+
+    const float LOG2 = 1.442695;
+    float fogFactor = exp2( -FOG_DENSITY * 
+				   FOG_DENSITY * 
+				   distance * 
+				   distance * 
+				   LOG2 );
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+
+    return mix(vec4(1,0.9,0.7,1), color, fogFactor);
 }
 
 void main(void) {
@@ -193,13 +212,9 @@ void main(void) {
          } else if(Light[i].light_type==2) {
              res+=spotlight(i);
          } else if(Light[i].light_type==3) {
-             if(Light[i].render_shadows) {
-                 res += directionallight(i);
-             } else {
-                 res += directionallight(i);
-             }
-
+             res += directionallight(i);
          }
      }
-     pixel_color = res;
+
+     pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
 }       
