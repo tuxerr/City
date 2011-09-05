@@ -64,38 +64,17 @@ void Scene::set_perspective_ortho(float width,float near,float far) {
     perspective_changed=true;
 }
 
-void Scene::set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {
+void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vector) {
     camera.camera(pos,direction,up_vector);
     camera_pos = pos;
     eye_vector = direction-pos;
+    this->up_vector=up_vector;
     matrices->set_value(eye_vector,"eye_vector");
     camera_changed=true;
     Vec3<float> eye_vec_norm = eye_vector;
     eye_vec_norm.normalize();
 
-    // new frustum calculation for the octree
-    Vec3<float> farpoint = pos+(eye_vec_norm*FAR);
-    Vec3<float> rightvec = eye_vector.cross(up_vector);
-    rightvec.normalize();
-    rightvec=rightvec*(tan(FOV_RAD/2)*FAR);
-
-    up_vector.normalize();
-    up_vector=up_vector*( rightvec.norm()*(float)disp->get_height()/disp->get_width());
-
-    // topright, topleft, lowright and low-left vectors in the far plane of the frustum
-    Vec3<float> tr = (farpoint+rightvec+up_vector)-pos;
-    Vec3<float> tl = (farpoint-rightvec+up_vector)-pos;
-    Vec3<float> lr = (farpoint+rightvec-up_vector)-pos;
-    Vec3<float> ll = (farpoint-rightvec-up_vector)-pos;
-
-    // the 5 normals of the 5 plans of the pyramidal frustum (oriented towards the EXTERIOR of the frustum)
-    frustum.normal[0]=eye_vec_norm;
-    frustum.normal[1]=(tr.cross(tl)).normalize();
-    frustum.normal[2]=(lr.cross(tr)).normalize();
-    frustum.normal[3]=(ll.cross(lr)).normalize();
-    frustum.normal[4]=(tl.cross(ll)).normalize();
-    frustum.farpoint=farpoint;
-    frustum.origin=pos;
+    frustum.perspective_frustum(pos,eye_vec_norm,up_vector,(float)disp->get_width()/disp->get_height());
 }
 
 Object* Scene::new_object() {
@@ -212,12 +191,12 @@ void Scene::render() {
             }
         }
     }
+    
+    frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,(float)disp->get_width()/disp->get_height());
     draw_scene();
-
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
-
     UniformBlock *uni = dirlight->get_uniformblock();
     Matrix4 light_mat;
     Matrix4 camera_mat;
@@ -239,8 +218,8 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         float zmax=(pow(2,cascaded_layer+1)-1)*min_z_iter+NEAR;
 
         float zdelta = zmax-zmin;
-        float f = tanf(FOV_RAD/2)*zmax;
-        float n = tanf(FOV_RAD/2)*zmin;
+        float f = tanf(FOV_RAD)/2*zmax;
+        float n = tanf(FOV_RAD)/2*zmin;
         float vn = n * ((float)disp->get_height()/(float)disp->get_width());
         float vf = f * ((float)disp->get_height()/(float)disp->get_width());
         float ratio = (f*f-n*n)/(2*zdelta*zdelta);
@@ -255,7 +234,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         cam_pos = camera_pos + eye_norm*zmin + eye_norm*zdelta*ratio;
 
         camera_mat.camera(cam_pos-ldir_norm*FAR,cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
-        light_mat.perspective_ortho(layer_length*3,NEAR,FAR*2,1);
+        light_mat.perspective_ortho(layer_length,NEAR,FAR*2,1);
         light_mat = light_mat*camera_mat;
     
         std::stringstream uniform_name;
@@ -267,7 +246,13 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         if(fbo.iscomplete()) {
             fbo.bind();
             uniform_light_projection->set_value(light_mat,"matrix");
+
+            // save the current frustum
+
+//            frustum.orthogonal_frustum(cam_pos-ldir_norm*FAR,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),layer_length*3,1);
+
             draw_scene("depth_creation");
+
             fbo.unbind();
         }  else {
             std::cout<<"FBO incomplete for the render of directional light "<<std::endl;
@@ -302,6 +287,7 @@ void Scene::draw_scene(std::string program_name) {
         o->has_been_drawn=false;
         i++;
     }
+    std::cout<<drawn.size()<<std::endl;
 
     if(program_name!="") {
         program->unuse();

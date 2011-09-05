@@ -1,9 +1,6 @@
 #version 330
 
 in vec3 in_Vertex;
-in vec3 in_Color;
-
-out vec3 color;
 
 uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
@@ -19,5 +16,4 @@ uniform Light_properties_ {
 
 void main() {
     gl_Position = Light_properties.matrix*GlobalValues.modelview*vec4(in_Vertex,1.0);
-    color = in_Color;
 }

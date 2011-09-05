@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "object.h"
 #include "utils.h"
+#include "frustum.h"
 
 typedef enum {
     OUT, IN, FULL_IN

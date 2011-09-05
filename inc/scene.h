@@ -15,6 +15,7 @@
 #include "texture.h"
 #include "utils.h"
 #include "octree.h"
+#include "frustum.h"
 
 class Scene {
 public:
@@ -50,6 +51,7 @@ private:
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;
     Vec3<float> eye_vector;
+    Vec3<float> up_vector;
     Matrix4 camera;
     Matrix4 perspective;
     bool camera_changed;

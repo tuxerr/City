@@ -3,11 +3,7 @@
 
 #include "vec3.h"
 
-typedef struct Frustum {
-    Vec3<float> normal[5];
-    Vec3<float> farpoint;
-    Vec3<float> origin;
-} Frustum;
+Vec3<float> mixvec(Vec3<float> v1,Vec3<float> v2,float mixrate); /* v1*(1-mixrate)+mixrate*v2 */
 
 float maxf(float v1, float v2);
 

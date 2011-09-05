@@ -1,6 +1,6 @@
 #version 330
 
-#define FOG_DENSITY 0.02
+#define FOG_DENSITY 0.005
 
 out vec4 pixel_color;
 

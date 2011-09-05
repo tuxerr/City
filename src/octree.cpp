@@ -42,17 +42,30 @@ void Octree::add_object(Object *o) {
 
 Octree_Collisions Octree::frustum_collision(Frustum &frust) {
     float boundingradius = size.norm();
-    float distance[5];
-    distance[0]=((center_position-frust.farpoint).scalar(frust.normal[0]));
-    distance[1]=((center_position-frust.origin).scalar(frust.normal[1]));
-    distance[2]=((center_position-frust.origin).scalar(frust.normal[2]));
-    distance[3]=((center_position-frust.origin).scalar(frust.normal[3]));
-    distance[4]=((center_position-frust.origin).scalar(frust.normal[4]));
+    float distance[6];
+    int distmax;
+
+    if(frust.ortho_frustum) {
+        distance[0]=((center_position-frust.farpoint).scalar(frust.normal[0]));
+        distance[1]=((center_position-frust.origin).scalar(frust.normal[1]));
+        distance[2]=((center_position-(frust.origin+frust.ortho_right_vec)).scalar(frust.normal[2]));
+        distance[3]=((center_position-(frust.origin-frust.ortho_right_vec)).scalar(frust.normal[3]));
+        distance[4]=((center_position-(frust.origin+frust.ortho_up_vec)).scalar(frust.normal[4]));
+        distance[5]=((center_position-(frust.origin-frust.ortho_up_vec)).scalar(frust.normal[5]));
+        distmax=6;
+    } else {
+        distance[0]=((center_position-frust.farpoint).scalar(frust.normal[0]));
+        distance[1]=((center_position-frust.origin).scalar(frust.normal[1]));
+        distance[2]=((center_position-frust.origin).scalar(frust.normal[2]));
+        distance[3]=((center_position-frust.origin).scalar(frust.normal[3]));
+        distance[4]=((center_position-frust.origin).scalar(frust.normal[4]));
+        distmax=5;
+    }
 
     bool fullin=true;
     bool in=true;
 
-    for(int i=0;i<5;i++) {
+    for(int i=0;i<distmax;i++) {
         if(distance[i]+boundingradius>0) {
             fullin=false;
         }
@@ -68,6 +81,7 @@ Octree_Collisions Octree::frustum_collision(Frustum &frust) {
     } else {
         return OUT;
     }
+
 }
 
 int Octree::delete_object(Object *o) {

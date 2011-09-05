@@ -1,6 +1,6 @@
 #include "terrain.h"
 
-Terrain::Terrain(float (*height_func)(float,float),float precision,PerlinNoise *noise) : height_func(height_func), precision(precision), scalar(Vec3<float>(1,1,1)), noise(noise) {
+Terrain::Terrain(float precision,PerlinNoise *noise) : precision(precision), scalar(Vec3<float>(1,1,1)), noise(noise) {
     
 }
 
@@ -60,13 +60,18 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
 
                 res.normalize();
                 float pente = res.scalar(Vec3<float>(0,0,1));
-                if(pente<0.8) {
+                pente=1-pente;
+//                pente=pente*pente*pente;
+                pente=1-pente;
+                
+                color_matrix.push_back(mixvec(Vec3<float>(0.35,0.23,0.06),
+                                              mixvec(Vec3<float>(0,1,0),Vec3<float>(1,1,1),cz/2),
+                                              pente));
+/*                if(pente<0.65) {
                     color_matrix.push_back(Vec3<float>(0.35,0.23,0.06));
-                } else if(cz>1.8) {
+                } else if(cz>0.7) {
                     color_matrix.push_back(Vec3<float>(1,1,1));
-                } else {
-                    color_matrix.push_back(Vec3<float>(0,1,0));
-                }
+                    }*/
 
                 normal_matrix.push_back(res);
 
