@@ -72,7 +72,6 @@ private:
     Matrix4 total_modelview;
     Matrix4 projection_modelview;
     Matrix4 normal_mat;
-    Vec3<float> pos;
     Octree *tree;
 
     float bounding_sphere_size;

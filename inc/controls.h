@@ -9,6 +9,10 @@ public:
     Controls();
     void refresh();
     bool quit;
+    bool up;
+    bool down;
+    bool right;
+    bool left;
     
 private:
 };

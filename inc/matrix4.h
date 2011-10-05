@@ -20,6 +20,7 @@ public:
     void transpose();
     void invert();
     Matrix4 operator*(const Matrix4 &mat);
+    Vec3<float> operator*(Vec3<float> vector);
     void translate(float x, float y, float z);
     void scale(float x, float y, float z);
     void rotate(float angle,float x, float y, float z);

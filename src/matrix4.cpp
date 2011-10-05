@@ -60,6 +60,14 @@ Matrix4 Matrix4::operator*(const Matrix4 &mat) {
     return res;
 }
 
+Vec3<float> Matrix4::operator*(Vec3<float> vector) {
+    Vec3<float> res;
+    res.x=val[0]*vector.x+val[1]*vector.y+val[2]*vector.z+val[3]*1;
+    res.y=val[4]*vector.x+val[5]*vector.y+val[6]*vector.z+val[7]*1;
+    res.z=val[8]*vector.x+val[9]*vector.y+val[10]*vector.z+val[11]*1;
+    return res;
+}
+
 void Matrix4::translate(float x,float y,float z) {
     Matrix4 t;
     t.identity();

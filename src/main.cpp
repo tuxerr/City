@@ -15,6 +15,7 @@
 #include "math.h"
 #include "octree.h"
 #include "perlin.h"
+#include "spaceship.h"
 
 using namespace std;
 
@@ -58,10 +59,12 @@ int main(int argc,char *argv[]) {
     spaceship.load_in_object(o);
     std::cout<<"after obj loading"<<std::endl;
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->translate(2,1,1.9);
+    o->rotate(180,0,0,1);
+
+    Spaceship ship(o);
 
     std::cout<<"b4 terrain"<<std::endl;
-    float terrain_detail=15;
+    float terrain_detail=10;
     for(int i=0;i<200;i+=terrain_detail) {
         for(int j=0;j<200;j+=terrain_detail) {
             Object *t=sce.new_object();
@@ -75,8 +78,8 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(3,3,-1),Vec3<float>(1,1,1));
-    l1->enable_shadows(true);
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
+    l1->enable_shadows(false);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
@@ -87,7 +90,10 @@ int main(int argc,char *argv[]) {
         sce.render();
 
         camerapos=camerapos+Vec3<float>(0.06,0.06,0);
-        sce.set_camera(camerapos,camerapos+Vec3<float>(10,10,-3),Vec3<float>(0,0,1));
+        ship.move(c.up,c.down,c.right,c.left);
+        Vec3<float> position,direction,up_vector;
+        ship.camera_config(position,direction,up_vector);
+        sce.set_camera(position,direction,up_vector);
 
 /*        if(i==150) {
             l1->enable_shadows(true);

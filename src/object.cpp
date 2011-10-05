@@ -302,7 +302,6 @@ void Object::draw(float distance_from_camera) {
 
 void Object::translate(float x, float y, float z) {
     obj_modelview.translate(x,y,z);
-    pos=pos+Vec3<float>(x,y,z);
     modelview_changed=true;
     tree->delete_object(this);
     tree->add_object(this);
@@ -342,5 +341,5 @@ void Object::update_matrices(Matrix4 *perspective,Matrix4 *camera) {
 }
 
 Vec3<float> Object::position() {
-    return pos;
+    return Vec3<float>(obj_modelview.val[3],obj_modelview.val[7],obj_modelview.val[11]);
 }
