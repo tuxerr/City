@@ -160,7 +160,7 @@ void Scene::delete_light(Light* l) {
 void Scene::render() {
     FBO fbo;
     Texture tex_color(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
-    fbo.attach_texture(&tex_color,FBO_COLOR0);
+    fbo.attach_texture(&tex_color,FBO_COLOR0); // useless in this case but necessary tex
 
     for(int i=0;i<MAX_LIGHTS;i++) {
 

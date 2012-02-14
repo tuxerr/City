@@ -21,7 +21,7 @@ using namespace std;
 
 int main(int argc,char *argv[]) {
 
-    PerlinNoise noise(0.5,1,1,8,42);
+//    PerlinNoise noise(0.5,2,1,4,42);
     Display disp(1680,1050,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
@@ -38,32 +38,50 @@ int main(int argc,char *argv[]) {
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
     sce.set_perspective(FOV,1,FAR);
 
-    std::cout<<"after perspective"<<std::endl;
-
     Timer timer;
 
-    Terrain terrain(0.1,&noise);
+//    Terrain terrain(0.4,&noise);
 
-    std::cout<<"after terrain class"<<std::endl;
-
-    terrain.scale(6,6,15);
-
+//    terrain.scale(60,60,150);
     
     Controls c;
 
     ObjFile spaceship("data/spaceship.obj");
 
-    std::cout<<"b4 obj loading"<<std::endl;
     Object *o=sce.new_object();
     o->set_program("phong");
     spaceship.load_in_object(o);
-    std::cout<<"after obj loading"<<std::endl;
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->rotate(180,0,0,1);
+    o->translate(0,0,30);
 
     Spaceship ship(o);
+    float vert[] = {-1, -1, 0,
+                    1, -1, 0, 
+                    1, 1, 0, 
+                    -1, 1, 0};
 
-    std::cout<<"b4 terrain"<<std::endl;
+    float norms[] = {0, 0, 1, 
+                     0, 0, 1, 
+                     0, 0, 1, 
+                     0, 0, 1};
+
+    int index[] = {0, 1, 2, 3};
+
+    float color[] = {1, 1, 1,
+                     1, 1, 1,
+                     1, 1, 1,
+                     1, 1, 1};
+
+    Object *t = sce.new_object();
+    t->set_draw_mode(OBJECT_DRAW_QUADS);
+    t->set_program("default");
+    t->update_vertices_buffer(&vert[0],sizeof(vert));
+    t->update_normals_buffer(&norms[0],sizeof(norms));
+    t->update_quads_index_buffer(&index[0],sizeof(index));
+    t->update_color_buffer(&color[0],sizeof(color));
+    t->scale(100,100,100);
+/*
     float terrain_detail=10;
     for(int i=0;i<200;i+=terrain_detail) {
         for(int j=0;j<200;j+=terrain_detail) {
@@ -74,12 +92,13 @@ int main(int argc,char *argv[]) {
             t->translate(i+terrain_detail/2,j+terrain_detail/2,0); 
         }
     }
-    std::cout<<"after terrain"<<std::endl;
+
+*/
 
     spaceship.close();
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1),Vec3<float>(1,1,1));
-    l1->enable_shadows(false);
+    l1->enable_shadows(true);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
@@ -94,12 +113,6 @@ int main(int argc,char *argv[]) {
         Vec3<float> position,direction,up_vector;
         ship.camera_config(position,direction,up_vector);
         sce.set_camera(position,direction,up_vector);
-
-/*        if(i==150) {
-            l1->enable_shadows(true);
-        } else if(i==400) {
-            l1->enable_shadows(false);
-            }*/
 
         c.refresh();
         disp.refresh();

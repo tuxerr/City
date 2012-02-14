@@ -1,7 +1,7 @@
 #include "spaceship.h"
 
 Spaceship::Spaceship(Object *o) :
-    object(o), speed(0.05)
+    object(o), speed(0.3)
 {
     
 }

@@ -4,9 +4,9 @@
 #include "vec3.h"
 #include "object.h"
 
-#define ROLL_SPEED 1
-#define YAW_SPEED 1
-#define PITCH_SPEED 1
+#define ROLL_SPEED 3
+#define YAW_SPEED 3
+#define PITCH_SPEED 3
 
 class Spaceship {
 public:
