@@ -2,7 +2,7 @@
 EXEC = city
 # source files
 CXX = g++
-CXXFLAGS  = `sdl-config --cflags` -Wall -W -O2 -g -Wunused -I./inc -DUSE_GLEW
+CXXFLAGS  = `sdl-config --cflags` -Wall -W -O2 -g -Wunused -I./inc -DUSE_GLEW -std=c++0x
 LDFLAGS = -lm -lrt -lGLEW -lGL -lGLU `sdl-config --libs`
 SRCS = $(wildcard src/*.cpp)
 INCS = $(wildcard inc/*.h)

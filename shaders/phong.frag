@@ -153,7 +153,7 @@ float directional_shadowing(int lightID) {
 }
 
 vec4 directionallight(int lightID) {
-    vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
+    vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
     
     vec3 light_ray = Light[lightID].direction;
     vec3 norm_normal = normalize(vert_normal.xyz);
@@ -163,9 +163,9 @@ vec4 directionallight(int lightID) {
     float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
     float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
 
-    vec4 ambiant = globalcolor*0.1;
-    vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
-    vec4 specular = pow(specular_mult_factor,500)*globalcolor;
+    vec4 ambiant = globalcolor*0.3;
+    vec4 diffuse = diffuse_mult_factor*globalcolor*0.7;
+    vec4 specular = pow(specular_mult_factor,500)*vec4(Light[lightID].color,1.0);
     specular = specular/3*Light[lightID].spot_values.x;
     
 //    return ambiant+(diffuse+specular)*Light[lightID].intensity;
@@ -173,7 +173,8 @@ vec4 directionallight(int lightID) {
         if(directional_shadowing(lightID)==1) {
             return ambiant+diffuse+specular;
         } else {
-            return ambiant+(diffuse/3);
+            return ambiant+diffuse/5;
+//            return ambiant+diffuse+specular/2;
         }
     } else {
         return ambiant+diffuse+specular;
@@ -185,10 +186,10 @@ vec4 apply_fog(vec4 color,float distance) {
 
     const float LOG2 = 1.442695;
     float fogFactor = exp2( -FOG_DENSITY * 
-				   FOG_DENSITY * 
-				   distance * 
-				   distance * 
-				   LOG2 );
+                            FOG_DENSITY * 
+                            distance * 
+                            distance * 
+                            LOG2 );
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
     return mix(vec4(1,0.9,0.7,1), color, fogFactor);
@@ -216,5 +217,6 @@ void main(void) {
          }
      }
 
-     pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
+     pixel_color=res;
+//     pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
 }       

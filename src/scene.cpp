@@ -104,7 +104,7 @@ PointLight* Scene::new_pointlight(Vec3<float> pos,Vec3<float> color,float intens
         }
     }
     
-    std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+    Logger::log()<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
     return NULL;
 }
 
@@ -119,7 +119,7 @@ SpotLight* Scene::new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> di
         }
     }
     
-    std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+    Logger::log()<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
     return NULL;
 }
 
@@ -134,7 +134,7 @@ DirectionalLight* Scene::new_directionallight(Vec3<float> direction,Vec3<float> 
         }
     }
     
-    std::cout<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
+    Logger::log()<<"Could not create a new light : maximum number of lights are already created ("<<MAX_LIGHTS<<")"<<std::endl;
     return NULL;
 }
 
@@ -160,7 +160,7 @@ void Scene::delete_light(Light* l) {
 void Scene::render() {
     FBO fbo;
     Texture tex_color(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
-    fbo.attach_texture(&tex_color,FBO_COLOR0); // useless in this case but necessary tex
+    fbo.attach_texture(&tex_color,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be used
 
     for(int i=0;i<MAX_LIGHTS;i++) {
 
@@ -255,7 +255,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
             fbo.unbind();
         }  else {
-            std::cout<<"FBO incomplete for the render of directional light "<<std::endl;
+            Logger::log()<<"FBO incomplete for the render of directional light "<<std::endl;
         }  
         
     }
@@ -287,7 +287,6 @@ void Scene::draw_scene(std::string program_name) {
         o->has_been_drawn=false;
         i++;
     }
-    std::cout<<drawn.size()<<std::endl;
 
     if(program_name!="") {
         program->unuse();
@@ -310,9 +309,9 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
             Object *o=*it;
             if(!o->has_been_drawn) {
 
-                if(o->need_to_update_matrices() || perspective_changed || camera_changed) {
+//                if(o->need_to_update_matrices() || perspective_changed || camera_changed) {
                     o->update_matrices(&perspective,&camera);
-                }
+//                }
 
                 if(program_name!="") {
                     draw_object(o,false);
