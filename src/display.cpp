@@ -91,7 +91,7 @@ void Display::new_program(const char *vertex_shader_path,const char *fragment_sh
     
     // creates the new program with both vertex and fragment shaders.
     programs[name].load_shaders(vertex_shader_path,fragment_shader_path);
-    std::cout<<"Program "<<name<<" was created"<<std::endl;
+    Logger::log()<<"Program "<<name<<" was created"<<std::endl;
 }
 
 bool Display::has_program(std::string name) {
@@ -120,7 +120,7 @@ UniformBlock* Display::new_uniformblock(std::string uniformblock_name) {
     int max_uniforms;
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS,&max_uniforms);
     if(uniformblocks.size()==(unsigned int)max_uniforms) {
-        std::cout<<"MAX_UNIFORM_BLOCKS is "<<max_uniforms<<" : you can't create anymore UniformBlocks"<<std::endl;
+        Logger::log()<<"MAX_UNIFORM_BLOCKS is "<<max_uniforms<<" : you can't create anymore UniformBlocks"<<std::endl;
         return NULL;
     } else {
         UniformBlock *uni=new UniformBlock(uniformblock_name,uniformblocks.size()+1);
@@ -134,7 +134,7 @@ void Display::link_program_to_uniform(std::string program_name,Uniform *uni) {
       // subscribe the program to the uniform
         programs[program_name].subscribe_to_uniform(uni);
     } else {
-	std::cout<<"Program "<<program_name<<" does not exist"<<std::endl;
+	Logger::log()<<"Program "<<program_name<<" does not exist"<<std::endl;
     }
 }
 
@@ -143,7 +143,7 @@ void Display::link_program_to_uniformblock(std::string program_name,UniformBlock
       // subscribe the program to the uniform
         programs[program_name].subscribe_to_uniformblock(uni);
     } else {
-	std::cout<<"Program "<<program_name<<" does not exist"<<std::endl;
+	Logger::log()<<"Program "<<program_name<<" does not exist"<<std::endl;
     }
 }
 

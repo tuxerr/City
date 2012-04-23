@@ -8,6 +8,7 @@
 #include "matrix4.hpp"
 #include "vec3.hpp"
 #include "vec2.hpp"
+#include "logger.hpp"
 
 class UniformBlock {
 public:

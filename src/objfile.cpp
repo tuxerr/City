@@ -3,7 +3,7 @@
 ObjFile::ObjFile(std::string path) : path(path), part_number(0), isclosed(false) {
     file.open(path.c_str(),ios::in);
     if(!file) {
-        cout<<".obj file "<<path<<" couldn't be opened"<<endl;
+        Logger::log()<<".obj file "<<path<<" couldn't be opened"<<endl;
     } else {
         load();
     }
@@ -170,7 +170,7 @@ void ObjFile::load() {
         }
     }
 
-    cout<<"Total OpenGL vertices in the .obj : "<<total_vertices<<endl;
+    Logger::log()<<"Total OpenGL vertices in the .obj : "<<total_vertices<<endl;
     part_number=act_part;
 }
 

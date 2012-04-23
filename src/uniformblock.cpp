@@ -14,7 +14,7 @@ UniformBlock::UniformBlock(std::string name,int attachpoint) :
 
 void UniformBlock::create() {
     if(size==-1) {
-        std::cout<<"Invalid UBO size"<<std::endl;
+        Logger::log()<<"Invalid UBO size"<<std::endl;
         return;
     } else {
         glGenBuffers(1,&ubo);
@@ -47,7 +47,7 @@ void UniformBlock::bind_to_attach_point(GLuint program_id) {
         size=ubo_size;
         create();
     } else if(size!=ubo_size) {
-        std::cout<<"Size mismatch for UBO "<<get_ubo()<<" : UBO size is "<<size
+        Logger::log()<<"Size mismatch for UBO "<<get_ubo()<<" : UBO size is "<<size
                  <<" and needed size is "<<ubo_size<<std::endl;
     }
     glBindBuffer(GL_UNIFORM_BUFFER,ubo);
@@ -73,7 +73,7 @@ GLint UniformBlock::get_value_from_pname(std::string sub_name,GLenum pname) {
 
     glGetUniformIndices(program_id,1,&str_ptr,&indice);
     if(indice==GL_INVALID_INDEX) {
-        std::cout<<"Subuniform "<<real_name<<" doesn't exist in program "<<program_id<<std::endl;
+        Logger::log()<<"Subuniform "<<real_name<<" doesn't exist in program "<<program_id<<std::endl;
         return -1;
     } else {
         GLint value;
@@ -87,12 +87,12 @@ GLint UniformBlock::get_offset(std::string sub_name) {
         GLuint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
 
         if(offset==-1) {
-            std::cout<<sub_name<<" has a negative offset in the uniformblock "<<complete_name<<std::endl;            
+            Logger::log()<<sub_name<<" has a negative offset in the uniformblock "<<complete_name<<std::endl;            
         } else {
             std::map<std::string,GLuint>::iterator it=offsets.begin();
             for(;it!=offsets.end();it++) {
                 if(offset==it->second) {
-                    std::cout<<sub_name<<" has the same offset as "<<it->first<<" in uniformblock "<<complete_name<<std::endl;
+                    Logger::log()<<sub_name<<" has the same offset as "<<it->first<<" in uniformblock "<<complete_name<<std::endl;
                 }
             }
         }
@@ -201,10 +201,10 @@ void UniformBlock::print_contents() {
     glBindBuffer(GL_UNIFORM_BUFFER,ubo);
     float *map_ubo = (float*)glMapBuffer(GL_UNIFORM_BUFFER,GL_READ_ONLY);
     if(map_ubo==NULL) {
-        std::cout<<"UBO contents are not accessible"<<std::endl;
+        Logger::log()<<"UBO contents are not accessible"<<std::endl;
     } else {
         for(int i=0;i<size/4;i++) {
-            std::cout<<i<<" : "<<map_ubo[i]<<std::endl;
+            Logger::log()<<i<<" : "<<map_ubo[i]<<std::endl;
         }
     }
     glUnmapBuffer(GL_UNIFORM_BUFFER);

@@ -12,6 +12,7 @@
 #include "uniformblock.hpp"
 #include "matrix4.hpp"
 #include "constants.hpp"
+#include "logger.hpp"
 
 class Display{
 public:

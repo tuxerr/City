@@ -22,8 +22,9 @@ void Timer::wait() {
         // if the new image is too quick
         SDL_Delay(needed_time-act_time+last_time);
     } else {
-        cout<<"Performance issues : program cannot keep up to "<<fps
-            <<" fps (act "<<act_time-last_time<<" ms or "<<act_fps
+        Logger::log(LOG_WARNING)
+            <<"Performance issues : program cannot keep up to "<<fps
+            <<" fps (act "<<act_time-last_time<<" ms or "<<1000/(act_time-last_time)
             <<" fps)"<<endl;
     } 
 

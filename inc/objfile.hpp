@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include "object.hpp"
+#include "logger.hpp"
 
 using namespace std;
 

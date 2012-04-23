@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <SDL/SDL.h>
+#include "logger.hpp"
 
 using namespace std;
 
