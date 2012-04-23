@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <map>
-#include "vec2.h"
-#include "part.h"
-#include "object.h"
+#include "vec2.hpp"
+#include "part.hpp"
+#include "object.hpp"
 
 class Building {
 public:

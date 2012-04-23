@@ -2,7 +2,7 @@
 #define DEF_PART
 
 #include <iostream>
-#include "vec3.h"
+#include "vec3.hpp"
 #include <vector>
 
 typedef enum Draw_Modes {

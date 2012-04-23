@@ -2,12 +2,12 @@
 #define DEF_LIGHT
 
 #include <iostream>
-#include "math.h"
-#include "vec3.h"
-#include "uniformblock.h"
-#include "texture.h"
-#include "matrix4.h"
-#include "constants.h"
+#include <math.h>
+#include "vec3.hpp"
+#include "uniformblock.hpp"
+#include "texture.hpp"
+#include "matrix4.hpp"
+#include "constants.hpp"
 
 typedef enum Light_Types {
     OFF = 0,
@@ -25,6 +25,9 @@ public:
     void set_uniform(UniformBlock *uniform);
     void enable_shadows(bool shadow);
     bool enable_shadows();
+    void set_shadow_range(float min,float max=-1);
+    float get_shadow_min_range();
+    float get_shadow_max_range();
     void activate();
     void desactivate();
     Texture* get_depth_texture();
@@ -39,6 +42,8 @@ protected:
     float linear_dissipation;
     Texture shadowmap;
     bool render_shadows;
+    int shadow_min_range;
+    int shadow_max_range;
 };
 
 class PointLight : public Light {

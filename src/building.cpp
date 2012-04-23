@@ -1,4 +1,4 @@
-#include "building.h"
+#include "building.hpp"
 
 Building::Building(float height,Vec2<float> pos,Vec2<float> size) : 
     height(height), pos(pos), size(size)

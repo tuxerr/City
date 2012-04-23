@@ -8,9 +8,9 @@
 #include <GL/glew.h>
 #include <stdio.h>
 #include <string.h>
-#include "matrix4.h"
-#include "uniform.h"
-#include "uniformblock.h"
+#include "matrix4.hpp"
+#include "uniform.hpp"
+#include "uniformblock.hpp"
 
 enum Shader_Attribs {
     SHADER_VERTEX_ATTRIB, SHADER_COLOR_ATTRIB, SHADER_TEXTURE_ATTRIB, SHADER_NORMAL_ATTRIB

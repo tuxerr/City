@@ -1,4 +1,4 @@
-#include "terrain.h"
+#include "terrain.hpp"
 
 Terrain::Terrain(float precision,PerlinNoise *noise) : precision(precision), scalar(Vec3<float>(1,1,1)), noise(noise) {
     

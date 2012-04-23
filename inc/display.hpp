@@ -7,11 +7,11 @@
 #include <set>
 #include <SDL/SDL.h>
 #include <GL/glew.h>
-#include "shader_program.h"
-#include "uniform.h"
-#include "uniformblock.h"
-#include "matrix4.h"
-#include "constants.h"
+#include "shader_program.hpp"
+#include "uniform.hpp"
+#include "uniformblock.hpp"
+#include "matrix4.hpp"
+#include "constants.hpp"
 
 class Display{
 public:

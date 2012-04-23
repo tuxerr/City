@@ -4,11 +4,11 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include "vec2.h"
-#include "vec3.h"
-#include "constants.h"
-#include "object.h"
-#include "perlin.h"
+#include "vec2.hpp"
+#include "vec3.hpp"
+#include "constants.hpp"
+#include "object.hpp"
+#include "perlin.hpp"
 
 typedef enum Fill_Modes {
     SIDE_UP_FILL, SIDE_RIGHT_FILL, EDGE_FILL

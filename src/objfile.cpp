@@ -1,4 +1,4 @@
-#include "objfile.h"
+#include "objfile.hpp"
 
 ObjFile::ObjFile(std::string path) : path(path), part_number(0), isclosed(false) {
     file.open(path.c_str(),ios::in);

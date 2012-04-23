@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "utils.hpp"
 
 Vec3<float> mixvec(Vec3<float> v1,Vec3<float> v2,float mixrate) {
     if(mixrate>1) {

@@ -1,4 +1,4 @@
-#include "display.h"
+#include "display.hpp"
 
 Display::Display(int width,int height,bool fullscreen,bool aa) : 
     width(width), height(height), fullscreen(fullscreen), antialiasing(aa)

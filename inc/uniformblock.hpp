@@ -5,9 +5,9 @@
 #include <string>
 #include <map>
 #include <GL/glew.h>
-#include "matrix4.h"
-#include "vec3.h"
-#include "vec2.h"
+#include "matrix4.hpp"
+#include "vec3.hpp"
+#include "vec2.hpp"
 
 class UniformBlock {
 public:

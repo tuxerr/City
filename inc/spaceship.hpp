@@ -1,8 +1,8 @@
 #ifndef DEF_SPACESHIP
 #define DEF_SPACESHIP
 
-#include "vec3.h"
-#include "object.h"
+#include "vec3.hpp"
+#include "object.hpp"
 
 #define ROLL_SPEED 3
 #define YAW_SPEED 3

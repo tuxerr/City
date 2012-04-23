@@ -1,8 +1,8 @@
-#include "scene.h"
+#include "scene.hpp"
 
 Scene::Scene(Display *disp,UniformBlock *matrices) : 
     light_number(0), disp(disp), matrices(matrices), camera_changed(false), 
-    perspective_changed(false), octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096)) 
+    octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096)) 
 {
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
@@ -56,12 +56,10 @@ Scene::~Scene() {
 
 void Scene::set_perspective(float angle,float near,float far) {
     perspective.perspective(angle,near,far,(float)disp->get_width()/disp->get_height());
-    perspective_changed=true;
 }
 
 void Scene::set_perspective_ortho(float width,float near,float far) {
     perspective.perspective_ortho(width,near,far,(float)disp->get_width()/disp->get_height());
-    perspective_changed=true;
 }
 
 void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vector) {
@@ -292,9 +290,6 @@ void Scene::draw_scene(std::string program_name) {
         program->unuse();
     }
 
-    if(perspective_changed) {
-        perspective_changed=false;
-    } 
     if(camera_changed) {
         camera_changed=false;
     }
@@ -309,9 +304,7 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
             Object *o=*it;
             if(!o->has_been_drawn) {
 
-//                if(o->need_to_update_matrices() || perspective_changed || camera_changed) {
-                    o->update_matrices(&perspective,&camera);
-//                }
+                o->update_matrices(&perspective,&camera);
 
                 if(program_name!="") {
                     draw_object(o,false);

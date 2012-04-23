@@ -6,16 +6,16 @@
 #include <string>
 #include <sstream>
 #include <math.h>
-#include "display.h"
-#include "object.h"
-#include "light.h"
-#include "vec3.h"
-#include "constants.h"
-#include "fbo.h"
-#include "texture.h"
-#include "utils.h"
-#include "octree.h"
-#include "frustum.h"
+#include "display.hpp"
+#include "object.hpp"
+#include "light.hpp"
+#include "vec3.hpp"
+#include "constants.hpp"
+#include "fbo.hpp"
+#include "texture.hpp"
+#include "utils.hpp"
+#include "octree.hpp"
+#include "frustum.hpp"
 #include "logger.hpp"
 
 class Scene {
@@ -56,7 +56,6 @@ private:
     Matrix4 camera;
     Matrix4 perspective;
     bool camera_changed;
-    bool perspective_changed;
 
     Octree octree;
     Frustum frustum;

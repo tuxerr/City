@@ -1,4 +1,4 @@
-#include "frustum.h"
+#include "frustum.hpp"
 
 void Frustum::perspective_frustum(Vec3<float> pos, Vec3<float> eye_vec_norm, Vec3<float> up_vector,float ratio) {
 

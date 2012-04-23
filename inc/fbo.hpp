@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <GL/glew.h>
-#include "texture.h"
+#include "texture.hpp"
 
 typedef enum FBO_Type {
     FBO_DRAW, FBO_READ, FBO_BOTH

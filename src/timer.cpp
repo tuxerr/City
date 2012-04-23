@@ -1,4 +1,4 @@
-#include "timer.h"
+#include "timer.hpp"
 
 Timer::Timer(int fps) : fps(fps) , act_fps(fps) {
 }

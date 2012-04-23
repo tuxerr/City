@@ -3,12 +3,12 @@
 
 #include <iostream>
 #include <list>
-#include "vec3.h"
-#include "vec2.h"
-#include "constants.h"
-#include "object.h"
-#include "utils.h"
-#include "frustum.h"
+#include "vec3.hpp"
+#include "vec2.hpp"
+#include "constants.hpp"
+#include "object.hpp"
+#include "utils.hpp"
+#include "frustum.hpp"
 
 typedef enum {
     OUT, IN, FULL_IN

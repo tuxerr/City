@@ -21,6 +21,8 @@ uniform Light_ {
     mat4 matrix3;
     mat4 matrix4;
     bool render_shadows;
+    float shadow_min_range;
+    float shadow_max_range;
 } Light[8];
 
 uniform GlobalValues_ {

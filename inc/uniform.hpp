@@ -5,10 +5,10 @@
 #include <map>
 #include <string>
 #include <GL/glew.h>
-#include "texture.h"
-#include "matrix4.h"
-#include "vec3.h"
-#include "vec2.h"
+#include "texture.hpp"
+#include "matrix4.hpp"
+#include "vec3.hpp"
+#include "vec2.hpp"
 
 typedef enum Uniform_Type {
     UNIFORM_BOOL, UNIFORM_INT, UNIFORM_FLOAT, UNIFORM_MAT4, UNIFORM_FLOAT3, 

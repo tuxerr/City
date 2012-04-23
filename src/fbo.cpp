@@ -1,4 +1,4 @@
-#include "fbo.h"
+#include "fbo.hpp"
 
 FBO::FBO() {
     glGenFramebuffers(1,&fbo_id);

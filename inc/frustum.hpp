@@ -2,8 +2,8 @@
 #define DEF_FRUSTUM
 
 #include <iostream>
-#include "vec3.h"
-#include "constants.h"
+#include "vec3.hpp"
+#include "constants.hpp"
 
 class Frustum {
 public:

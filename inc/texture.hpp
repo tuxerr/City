@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <GL/glew.h>
-#include "constants.h"
+#include "constants.hpp"
 
 typedef enum Texture_Types {
     TEXTURE_DEPTH, TEXTURE_RGBA, TEXTURE_DEPTH_LAYERED

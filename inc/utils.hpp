@@ -1,7 +1,7 @@
 #ifndef DEF_UTILS
 #define DEF_UTILS
 
-#include "vec3.h"
+#include "vec3.hpp"
 
 Vec3<float> mixvec(Vec3<float> v1,Vec3<float> v2,float mixrate); /* v1*(1-mixrate)+mixrate*v2 */
 

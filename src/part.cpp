@@ -1,4 +1,4 @@
-#include "part.h"
+#include "part.hpp"
 
 Part::Part(Vec3<float> pos,float length,float width,float height) : 
     pos(pos), height(height), length(length), width(width) 

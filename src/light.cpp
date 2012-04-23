@@ -1,4 +1,4 @@
-#include "light.h"
+#include "light.hpp"
 
 Light::Light(UniformBlock *uniform,float intensity,Vec3<float> color) : 
     uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1), 
@@ -28,6 +28,21 @@ void Light::desactivate() {
 void Light::enable_shadows(bool shadow) {
     render_shadows=shadow;
     uniform->set_value(render_shadows,"render_shadows");
+}
+
+void Light::set_shadow_range(float min,float max) {
+    shadow_min_range=min;
+    shadow_max_range=max;
+    uniform->set_value(shadow_min_range,"shadow_min_range");
+    uniform->set_value(shadow_max_range,"shadow_max_range");
+}
+
+float Light::get_shadow_min_range() {
+    return shadow_min_range;
+}
+
+float Light::get_shadow_max_range() {
+    return shadow_max_range;
 }
 
 bool Light::enable_shadows() {

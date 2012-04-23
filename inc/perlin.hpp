@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include <iostream>
-#include "utils.h"
+#include "utils.hpp"
 
 class PerlinNoise
 {

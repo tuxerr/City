@@ -1,4 +1,4 @@
-#include "spaceship.h"
+#include "spaceship.hpp"
 
 Spaceship::Spaceship(Object *o) :
     object(o), speed(0.3)

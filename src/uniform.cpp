@@ -1,4 +1,4 @@
-#include "uniform.h"
+#include "uniform.hpp"
 
 Uniform::Uniform(std::string name,Uniform_Type type) : uniform_name(name), type(type) {
 }

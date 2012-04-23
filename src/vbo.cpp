@@ -1,4 +1,4 @@
-#include "vbo.h"
+#include "vbo.hpp"
 
 VBO::VBO(GLenum target,GLenum mode,GLenum element_type)  : 
     vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0),

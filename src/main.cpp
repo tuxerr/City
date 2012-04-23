@@ -1,21 +1,21 @@
 #include <iostream>
 #include <string>
+#include <math.h>
 #include <GL/glew.h>
-#include "display.h"
-#include "timer.h"
-#include "controls.h"
-#include "scene.h"
-#include "object.h"
-#include "light.h"
-#include "uniform.h"
-#include "uniformblock.h"
-#include "objfile.h"
-#include "fbo.h"
-#include "terrain.h"
-#include "math.h"
-#include "octree.h"
-#include "perlin.h"
-#include "spaceship.h"
+#include "display.hpp"
+#include "timer.hpp"
+#include "controls.hpp"
+#include "scene.hpp"
+#include "object.hpp"
+#include "light.hpp"
+#include "uniform.hpp"
+#include "uniformblock.hpp"
+#include "objfile.hpp"
+#include "fbo.hpp"
+#include "terrain.hpp"
+#include "octree.hpp"
+#include "perlin.hpp"
+#include "spaceship.hpp"
 #include "logger.hpp"
 
 using namespace std;
@@ -39,7 +39,7 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(FOV,1,FAR);
+    sce.set_perspective(FOV,NEAR,FAR);
 
     Timer timer;
 

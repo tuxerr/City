@@ -6,10 +6,10 @@
 #include <string>
 #include <list>
 #include <GL/glew.h>
-#include "vbo.h"
-#include "matrix4.h"
-#include "shader_program.h"
-#include "utils.h"
+#include "vbo.hpp"
+#include "matrix4.hpp"
+#include "shader_program.hpp"
+#include "utils.hpp"
 
 class Octree;
 

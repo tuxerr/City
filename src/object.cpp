@@ -1,5 +1,5 @@
-#include "object.h"
-#include "octree.h"
+#include "object.hpp"
+#include "octree.hpp"
 
 Object::Object(Octree *tree) : 
     has_been_drawn(false),

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
-#include "vec3.h"
+#include "vec3.hpp"
 
 class Matrix4 {
 public:

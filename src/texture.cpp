@@ -1,4 +1,4 @@
-#include "texture.h"
+#include "texture.hpp"
 
 Texture::Texture(int width,int height,Texture_Types type) : width(width), height(height), texture_type(type), gl_texture_type(GL_TEXTURE_2D) {
     glGenTextures(1,&texture_id);

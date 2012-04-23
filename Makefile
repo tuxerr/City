@@ -3,9 +3,9 @@ EXEC = city
 # source files
 CXX = g++
 CXXFLAGS  = `sdl-config --cflags` -Wall -W -O2 -g -Wunused -I./inc -DUSE_GLEW -std=c++0x
-LDFLAGS = -lm -lrt -lGLEW -lGL -lGLU `sdl-config --libs`
+LDFLAGS = -lm -lrt -lGLEW -lGL -lGLU `sdl-config --libs` -ltinyxml
 SRCS = $(wildcard src/*.cpp)
-INCS = $(wildcard inc/*.h)
+INCS = $(wildcard inc/*.hpp)
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(EXEC)

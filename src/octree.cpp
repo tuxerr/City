@@ -1,4 +1,4 @@
-#include "octree.h"
+#include "octree.hpp"
 
 Octree::Octree(Vec3<float> pos,Vec3<float> size,Octree *parent) : center_position(pos), size(size), parent(parent) {
     for(int i=0;i<8;i++) {

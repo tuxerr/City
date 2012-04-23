@@ -1,4 +1,4 @@
-#include "controls.h"
+#include "controls.hpp"
 
 Controls::Controls() : quit(false), up(false), down(false), right(false), left(false) {
 }

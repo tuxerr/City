@@ -1,4 +1,4 @@
-#include "uniformblock.h"
+#include "uniformblock.hpp"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
