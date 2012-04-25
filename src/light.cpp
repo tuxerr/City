@@ -2,7 +2,8 @@
 
 Light::Light(UniformBlock *uniform,float intensity,Vec3<float> color) : 
     uniform(uniform), type(OFF), color(color), intensity(intensity), linear_dissipation(1), 
-    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH_LAYERED),render_shadows(false)
+    shadowmap(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_DEPTH_LAYERED),render_shadows(false),
+    shadow_min_range(-1), shadow_max_range(-1)
 {
     set_uniform(uniform);
 }
@@ -61,6 +62,7 @@ void Light::set_uniform(UniformBlock *uniform) {
     set_color(color);
     set_intensity(intensity);
     set_linear_dissipation(linear_dissipation);
+    set_shadow_range(shadow_min_range,shadow_max_range);
     enable_shadows(render_shadows);
 }
 

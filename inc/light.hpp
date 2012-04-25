@@ -42,8 +42,9 @@ protected:
     float linear_dissipation;
     Texture shadowmap;
     bool render_shadows;
-    int shadow_min_range;
-    int shadow_max_range;
+    float shadow_min_range;
+    float shadow_max_range;
+
 };
 
 class PointLight : public Light {

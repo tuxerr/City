@@ -1,7 +1,7 @@
 #include "scene.hpp"
 
-Scene::Scene(Display *disp,UniformBlock *matrices) : 
-    light_number(0), disp(disp), matrices(matrices), camera_changed(false), 
+Scene::Scene(Display *disp,UniformBlock *globalvalues) : 
+    light_number(0), disp(disp), globalvalues(globalvalues), camera_changed(false), 
     octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096)) 
 {
     for(int i=0;i<MAX_LIGHTS;i++) {
@@ -56,10 +56,18 @@ Scene::~Scene() {
 
 void Scene::set_perspective(float angle,float near,float far) {
     perspective.perspective(angle,near,far,(float)disp->get_width()/disp->get_height());
+    scene_near=near;
+    scene_far=far;
+    globalvalues->set_value(scene_near,"near");
+    globalvalues->set_value(scene_far,"far");
 }
 
 void Scene::set_perspective_ortho(float width,float near,float far) {
     perspective.perspective_ortho(width,near,far,(float)disp->get_width()/disp->get_height());
+    scene_near=near;
+    scene_far=far;
+    globalvalues->set_value(scene_near,"near");
+    globalvalues->set_value(scene_far,"far");
 }
 
 void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vector) {
@@ -67,7 +75,7 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vect
     camera_pos = pos;
     eye_vector = direction-pos;
     this->up_vector=up_vector;
-    matrices->set_value(eye_vector,"eye_vector");
+    globalvalues->set_value(eye_vector,"eye_vector");
     camera_changed=true;
     Vec3<float> eye_vec_norm = eye_vector;
     eye_vec_norm.normalize();
@@ -199,47 +207,61 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     Matrix4 light_mat;
     Matrix4 camera_mat;
 
-    Vec3<float> ldir_norm;
-    ldir_norm = dirlight->get_direction(); 
+    Vec3<float> ldir_norm = dirlight->get_direction(); 
     ldir_norm.normalize();
 
-    Vec3<float> eye_norm;
-    eye_norm = eye_vector;
+    Vec3<float> eye_norm = eye_vector;
     eye_norm.normalize();
 
-    float min_z_iter = (FAR-NEAR)/(powf(2,CASCADED_SHADING_DEPTH)-1);
-    uniform_cascaded_shading_zdelta->set_value(min_z_iter);
+    //shadowing depth and resolution calculations
+    int cascaded_depth=0;
+    float shadow_min_range = dirlight->get_shadow_min_range(), shadow_max_range=dirlight->get_shadow_max_range();
+    if(shadow_max_range==-1)
+        shadow_max_range=scene_far;
+    if(shadow_min_range==-1)
+        shadow_min_range=scene_near;
+    float shadow_range = shadow_max_range-shadow_min_range;
 
-    for(int cascaded_layer=0;cascaded_layer<CASCADED_SHADING_DEPTH;cascaded_layer++) {
-
-        float zmin=(pow(2,cascaded_layer)-1)*min_z_iter+NEAR;
-        float zmax=(pow(2,cascaded_layer+1)-1)*min_z_iter+NEAR;
-
-        float zdelta = zmax-zmin;
-        float f = tanf(FOV_RAD)/2*zmax;
-        float n = tanf(FOV_RAD)/2*zmin;
-        float vn = n * ((float)disp->get_height()/(float)disp->get_width());
-        float vf = f * ((float)disp->get_height()/(float)disp->get_width());
-        float ratio = (f*f-n*n)/(2*zdelta*zdelta);
-        if(ratio>1) {
-            ratio=1;
+    float min_shadow_resolution = (log2(((shadow_min_range-scene_near)/SHADOWING_NEAR_RANGE)+1)+1)*SHADOWING_NEAR_RANGE; //resolution at the nearest distance of the camera. Then go as planned
+    float act_shadow_distance=0;
+    for(int i=1;i<=SHADOWING_MAX_LAYERS;i++) {
+        act_shadow_distance+=pow(2,i-1)*min_shadow_resolution;
+        if(act_shadow_distance>shadow_range) {
+            cascaded_depth=i;
+            break;
         }
+    }
 
-        float layer_length=maxf(sqrtf(sqrt(n*n + vn*vn) + pow((ratio*zdelta),2)),
-                                sqrtf(sqrt(f*f + vf*vf) + pow(((1-ratio)*zdelta),2)));
+    uniform_cascaded_shading_zdelta->set_value(min_shadow_resolution);
+    uni->set_value(cascaded_depth,"casc_shading_depth");
 
-        Vec3<float> cam_pos;
-        cam_pos = camera_pos + eye_norm*zmin + eye_norm*zdelta*ratio;
+    for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 
-        camera_mat.camera(cam_pos-ldir_norm*FAR,cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
-        light_mat.perspective_ortho(layer_length*3,NEAR,FAR*2,1);
+        float zmin=(pow(2,cascaded_layer)-1)*min_shadow_resolution+shadow_min_range;
+        float zmax=(pow(2,cascaded_layer+1)-1)*min_shadow_resolution+shadow_min_range;
+        if(cascaded_layer==SHADOWING_MAX_LAYERS-1) {
+            zmax=shadow_max_range;
+        }
+        float zdelta = zmax-zmin;
+
+        float f = tanf(FOV_RAD/2)*zmax;
+        float vf = f * ((float)disp->get_height()/(float)disp->get_width());
+        float circle_radius = sqrtf(f*f + vf*vf + (zdelta*zdelta/4));
+
+        Vec3<float> cam_pointing_pos = camera_pos + eye_norm*zmin + eye_norm*(zdelta/2);
+
+        Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*scene_far;
+
+        camera_mat.camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+        light_mat.perspective_ortho(circle_radius,scene_near,scene_far*2,1);
         light_mat = light_mat*camera_mat;
-    
+
         std::stringstream uniform_name;
         uniform_name<<"matrix"<<(cascaded_layer+1);
         uni->set_value(light_mat,uniform_name.str());
 
         fbo.attach_texture(dirlight->get_depth_texture(),FBO_DEPTH,cascaded_layer);
+
 
         if(fbo.iscomplete()) {
             fbo.bind();
@@ -247,14 +269,19 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
             // save the current frustum
 
-            frustum.orthogonal_frustum(cam_pos-ldir_norm*(FAR/2),ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),layer_length*3,1);
+            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),circle_radius,1);
 
             draw_scene("depth_creation");
+            
+//            set_camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+//            set_perspective_ortho(circle_radius*2,scene_near,scene_far*2);
+
 
             fbo.unbind();
         }  else {
             Logger::log()<<"FBO incomplete for the render of directional light "<<std::endl;
         }  
+//        draw_scene("depth_creation");
         
     }
 
@@ -267,7 +294,7 @@ void Scene::draw_scene(std::string program_name) {
     Program *program=NULL;
 
     if(camera_changed) {
-        matrices->set_value(camera_pos,"camera_pos");
+        globalvalues->set_value(camera_pos,"camera_pos");
     }
 
     if(program_name!="") {
@@ -356,11 +383,11 @@ void Scene::draw_object(Object *o,bool use_shaders) {
                                     (o->modelview_matrix()).val[11]);
         Vec3<float> objminuscam = object_position - camera_pos;
 
-        matrices->set_value(o->modelview_matrix(),"modelview");
+        globalvalues->set_value(o->modelview_matrix(),"modelview");
 
-        matrices->set_value(o->projection_modelview_matrix(),"projection_modelview");
+        globalvalues->set_value(o->projection_modelview_matrix(),"projection_modelview");
 
-        matrices->set_value(o->normal_matrix(),"normal_matrix");
+        globalvalues->set_value(o->normal_matrix(),"normal_matrix");
 
         if(use_shaders) {
             program->use();

@@ -42,7 +42,7 @@ private:
     Light* lights[MAX_LIGHTS];
     int light_number;
     Display *disp;
-    UniformBlock *matrices;
+    UniformBlock *globalvalues;
     UniformBlock *uniform_lights[MAX_LIGHTS];
     Uniform *uniform_light_sampler[MAX_LIGHTS];
     Uniform *uniform_light_samplercube[MAX_LIGHTS];
@@ -56,6 +56,9 @@ private:
     Matrix4 camera;
     Matrix4 perspective;
     bool camera_changed;
+
+    float scene_near;
+    float scene_far;
 
     Octree octree;
     Frustum frustum;

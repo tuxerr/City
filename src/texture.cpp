@@ -19,7 +19,7 @@ Texture::Texture(int width,int height,Texture_Types type) : width(width), height
     case TEXTURE_DEPTH_LAYERED:
         gl_texture_type=GL_TEXTURE_2D_ARRAY;
         glBindTexture(gl_texture_type,texture_id);
-        glTexImage3D(gl_texture_type,0,GL_DEPTH_COMPONENT24,width,height,CASCADED_SHADING_DEPTH,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+        glTexImage3D(gl_texture_type,0,GL_DEPTH_COMPONENT24,width,height,SHADOWING_MAX_LAYERS,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
         break;
 
     default:

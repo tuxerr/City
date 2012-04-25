@@ -24,8 +24,8 @@ int main(int argc,char *argv[]) {
 
     Logger::init("city.log");
 
-    PerlinNoise noise(0.5,2,1,4,42);
-    Display disp(1680,1050,false,true);     disp.init();     
+//    PerlinNoise noise(0.5,2,1,4,42);
+    Display disp(1024,1024,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
     disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
@@ -39,13 +39,13 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(FOV,NEAR,FAR);
+    sce.set_perspective(FOV,1,100);
 
     Timer timer;
 
-    Terrain terrain(0.4,&noise);
+//    Terrain terrain(0.4,&noise);
 
-    terrain.scale(60,60,150);
+//    terrain.scale(60,60,150);
     
     Controls c;
 
@@ -78,8 +78,8 @@ int main(int argc,char *argv[]) {
 
     float vert2[] = {0,0,0,
                      0,1,0,
-                     0,1,1,
-                     0,0,1};
+                     -0.5,1,1,
+                     -0.5,0,1};
 
 
     float norms2[] = {-1,0,0,
@@ -128,7 +128,7 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,0,-1));
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1));
     l1->enable_shadows(true);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
@@ -138,7 +138,7 @@ int main(int argc,char *argv[]) {
     Vec3<float> position(5,5,5),up_vector(0,0,1);
     Vec3<float> direction=Vec3<float>(0,0,0)-position;
     
-    o->translate(-40,-40,30);
+    o->translate(10,10,1);
 
     while(!c.quit) {
         i++;
@@ -162,6 +162,7 @@ int main(int argc,char *argv[]) {
 
         ship.camera_config(position,direction,up_vector);
         sce.set_camera(position,direction,up_vector);
+        sce.set_perspective(FOV,1,100);
 
         c.refresh();
         disp.refresh();
