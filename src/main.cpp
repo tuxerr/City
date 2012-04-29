@@ -25,7 +25,7 @@ int main(int argc,char *argv[]) {
     Logger::init("city.log");
 
 //    PerlinNoise noise(0.5,2,1,4,42);
-    Display disp(1024,1024,false,true);     disp.init();     
+    Display disp(1680,1050,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
     disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
@@ -39,7 +39,7 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(FOV,1,100);
+    sce.set_perspective(FOV,1,250);
 
     Timer timer;
 
@@ -135,17 +135,17 @@ int main(int argc,char *argv[]) {
     
     int i=0;
     timer.init();
-    Vec3<float> position(5,5,5),up_vector(0,0,1);
-    Vec3<float> direction=Vec3<float>(0,0,0)-position;
+    Vec3<float> position(0,0,1),up_vector(0,0,1);
+    Vec3<float> target(100,0,1);
     
-    o->translate(10,10,1);
+    o->translate(20,0,1);
 
     while(!c.quit) {
         i++;
         sce.render();
 
-        camerapos=camerapos+Vec3<float>(0.06,0.06,0);
         ship.move(c.up,c.down,c.right,c.left);
+
 
 /*        if(c.down) {
             l1->enable_shadows(false);
@@ -160,9 +160,8 @@ int main(int argc,char *argv[]) {
             o->rotate(2,0,0,1);
             } */
 
-        ship.camera_config(position,direction,up_vector);
-        sce.set_camera(position,direction,up_vector);
-        sce.set_perspective(FOV,1,100);
+        ship.camera_config(position,target,up_vector);
+        sce.set_camera(position,target,up_vector);
 
         c.refresh();
         disp.refresh();

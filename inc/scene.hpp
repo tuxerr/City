@@ -38,6 +38,8 @@ public:
     void delete_light(Light* l);
 
 private:
+    Vec3<float> calculate_shadowing_optimal_point(Vec3<float> near_values[4],Vec3<float> far_values[4],float &radius);
+
     std::set<Object*> objects;
     Light* lights[MAX_LIGHTS];
     int light_number;

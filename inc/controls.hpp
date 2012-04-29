@@ -13,6 +13,8 @@ public:
     bool down;
     bool right;
     bool left;
+    bool m;
+    bool s;
     
 private:
 };

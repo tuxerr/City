@@ -71,6 +71,10 @@ int Display::get_height() {
     return height;
 }
 
+float Display::get_ratio() {
+    return (float)width/(float)height;
+}
+
 void Display::viewport(int new_width,int new_height) {
     if(new_width==-1) {
         new_width=width;

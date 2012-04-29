@@ -110,7 +110,7 @@ float directional_shadowing(int lightID) {
     float dotprod = dot(normalize(vert_pos.xyz-GlobalValues.camera_pos),normalize(GlobalValues.eye_vector));
 
     float zdelta = (distance(vert_pos.xyz,GlobalValues.camera_pos)*dotprod)-1;
-    int cascaded_layer=7;
+    int cascaded_layer=9;
 /*    if(Light[lightID].shadow_max_range != -1 && zdelta>=Light[lightID].shadow_max_range) {
         return 1.0;
         }*/

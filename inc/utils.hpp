@@ -7,4 +7,6 @@ Vec3<float> mixvec(Vec3<float> v1,Vec3<float> v2,float mixrate); /* v1*(1-mixrat
 
 float maxf(float v1, float v2);
 
+float minf(float v1, float v2);
+
 #endif

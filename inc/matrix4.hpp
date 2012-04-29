@@ -5,6 +5,7 @@
 #include <vector>
 #include <math.h>
 #include "vec3.hpp"
+#include "logger.hpp"
 
 class Matrix4 {
 public:

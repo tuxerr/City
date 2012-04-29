@@ -2,7 +2,7 @@
 
 Scene::Scene(Display *disp,UniformBlock *globalvalues) : 
     light_number(0), disp(disp), globalvalues(globalvalues), camera_changed(false), 
-    octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096)) 
+    octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096))
 {
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
@@ -71,6 +71,7 @@ void Scene::set_perspective_ortho(float width,float near,float far) {
 }
 
 void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vector) {
+    up_vector.normalize();
     camera.camera(pos,direction,up_vector);
     camera_pos = pos;
     eye_vector = direction-pos;
@@ -232,28 +233,73 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         }
     }
 
+    // calculation of the general projection matrix (global light) to calculate subfrustum borders
+    Matrix4 global_light_projection;
+    Vec3<float> global_cam_pos = camera_pos + eye_norm*(shadow_min_range+shadow_range*0.5);
+    float gf = tanf(FOV_RAD/2)*shadow_max_range;
+    float vgf = gf / disp->get_ratio();
+    float global_radius = sqrt(gf*gf + vgf*vgf + (shadow_min_range+shadow_range)*(shadow_min_range+shadow_range)*0.25);
+    camera_mat.camera((global_cam_pos-ldir_norm*scene_far),global_cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+    global_light_projection.perspective_ortho(global_radius*2,scene_near,scene_far*2,1);
+    global_light_projection = global_light_projection * camera_mat;
+
+    Matrix4 global_light_projection_inv = global_light_projection;
+    global_light_projection_inv.invert();
+
+    // vector containing subfrustum positions near the camera (each iteration put their far pos into this for the next iteration)
+    Vec3<float> subfrustum_near_position[4];
+    float sf = tanf(FOV_RAD/2)*shadow_min_range;
+    float vsf = sf / disp->get_ratio();
+    Vec3<float> mid_position = camera_pos + eye_norm*shadow_min_range;
+    Vec3<float> third_eye_vector = eye_vector.cross(up_vector);
+    third_eye_vector.normalize();
+    subfrustum_near_position[0] = mid_position + up_vector*vsf + third_eye_vector*sf;
+    subfrustum_near_position[1] = mid_position + up_vector*vsf - third_eye_vector*sf;
+    subfrustum_near_position[2] = mid_position - up_vector*vsf + third_eye_vector*sf;
+    subfrustum_near_position[3] = mid_position - up_vector*vsf - third_eye_vector*sf;
+
+    for(int i=0;i<4;i++) {
+        subfrustum_near_position[i] = global_light_projection*subfrustum_near_position[i];
+    }
+
     uniform_cascaded_shading_zdelta->set_value(min_shadow_resolution);
     uni->set_value(cascaded_depth,"casc_shading_depth");
 
     for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 
-        float zmin=(pow(2,cascaded_layer)-1)*min_shadow_resolution+shadow_min_range;
         float zmax=(pow(2,cascaded_layer+1)-1)*min_shadow_resolution+shadow_min_range;
         if(cascaded_layer==SHADOWING_MAX_LAYERS-1) {
             zmax=shadow_max_range;
         }
-        float zdelta = zmax-zmin;
 
         float f = tanf(FOV_RAD/2)*zmax;
-        float vf = f * ((float)disp->get_height()/(float)disp->get_width());
-        float circle_radius = sqrtf(f*f + vf*vf + (zdelta*zdelta/4));
+        float vf = f / disp->get_ratio();
 
-        Vec3<float> cam_pointing_pos = camera_pos + eye_norm*zmin + eye_norm*(zdelta/2);
+        // calculate the 4 zmax points and project them into 2D light_space
+        Vec3<float> subfrustum_far_position[4];
+        Vec3<float> far_position = camera_pos + eye_norm*zmax;
+        subfrustum_far_position[0] = far_position + up_vector*vf + third_eye_vector*f;
+        subfrustum_far_position[1] = far_position + up_vector*vf - third_eye_vector*f;
+        subfrustum_far_position[2] = far_position - up_vector*vf + third_eye_vector*f;
+        subfrustum_far_position[3] = far_position - up_vector*vf - third_eye_vector*f;
+
+        for(int i=0;i<4;i++) {
+            subfrustum_far_position[i] = global_light_projection*subfrustum_far_position[i];
+        }
+        float optimal_radius;
+        Vec3<float> optimal_center = calculate_shadowing_optimal_point(subfrustum_near_position,subfrustum_far_position,optimal_radius);
+        optimal_radius*=(global_radius);
+
+        for(int i=0;i<4;i++) {
+            subfrustum_near_position[i] = subfrustum_far_position[i];
+        }
+
+        Vec3<float> cam_pointing_pos = global_light_projection_inv*optimal_center;
 
         Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*scene_far;
 
         camera_mat.camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
-        light_mat.perspective_ortho(circle_radius,scene_near,scene_far*2,1);
+        light_mat.perspective_ortho(optimal_radius,scene_near,scene_far*2,1);
         light_mat = light_mat*camera_mat;
 
         std::stringstream uniform_name;
@@ -269,7 +315,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
             // save the current frustum
 
-            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),circle_radius,1);
+            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1);
 
             draw_scene("depth_creation");
             
@@ -286,6 +332,28 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     }
 
     shadowmap_uni->set_value(dirlight->get_depth_texture());
+}
+
+Vec3<float> Scene::calculate_shadowing_optimal_point(Vec3<float> near_values[4],Vec3<float> far_values[4], float &radius) {
+    float max_top=near_values[0].y,max_bot=near_values[0].y,max_right=near_values[0].x,max_left=near_values[0].x;
+
+    for(int i=0;i<4;i++) {
+        float cur_max_right = maxf(near_values[i].x,far_values[i].x);
+        float cur_max_left = minf(near_values[i].x,far_values[i].x);
+        float cur_max_top = maxf(near_values[i].y,far_values[i].y);
+        float cur_max_bot = minf(near_values[i].y,far_values[i].y);
+
+        max_top=maxf(max_top,cur_max_top);
+        max_bot=minf(max_bot,cur_max_bot);
+        max_right=maxf(max_right,cur_max_right);
+        max_left=minf(max_left,cur_max_left);
+    }
+
+    float max_height=max_top-max_bot;
+    float max_width=max_right-max_left;
+    
+    radius=maxf(max_height,max_width);
+    return Vec3<float>((max_right+max_left)/2,(max_top+max_bot)/2,near_values[0].z);
 }
 
 void Scene::draw_scene(std::string program_name) {

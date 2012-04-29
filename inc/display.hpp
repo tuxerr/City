@@ -22,6 +22,7 @@ public:
     void viewport(int new_width = -1, int new_height = -1);
     int get_width();
     int get_height();
+    float get_ratio();
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
     bool has_program(std::string name);
     Program *get_program(std::string name);
