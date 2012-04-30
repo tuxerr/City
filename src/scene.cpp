@@ -81,7 +81,7 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vect
     Vec3<float> eye_vec_norm = eye_vector;
     eye_vec_norm.normalize();
 
-    frustum.perspective_frustum(pos,eye_vec_norm,up_vector,(float)disp->get_width()/disp->get_height());
+    frustum.perspective_frustum(pos,eye_vec_norm,up_vector,disp->get_ratio(),scene_far);
 }
 
 Object* Scene::new_object() {
@@ -184,7 +184,6 @@ void Scene::render() {
 
                 case DIRECTION_LIGHT:
                     render_directional_shadowmap((DirectionalLight*) lights[i],fbo,uniform_light_sampler[i]);
-
                     break;
 
                 case OFF:
@@ -199,7 +198,7 @@ void Scene::render() {
         }
     }
     
-    frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,(float)disp->get_width()/disp->get_height());
+    frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far);
     draw_scene();
 }
 
@@ -219,6 +218,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     float shadow_min_range = dirlight->get_shadow_min_range(), shadow_max_range=dirlight->get_shadow_max_range();
     if(shadow_max_range==-1)
         shadow_max_range=scene_far;
+
     if(shadow_min_range==-1)
         shadow_min_range=scene_near;
     float shadow_range = shadow_max_range-shadow_min_range;
@@ -299,6 +299,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*scene_far;
 
         camera_mat.camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+
         light_mat.perspective_ortho(optimal_radius,scene_near,scene_far*2,1);
         light_mat = light_mat*camera_mat;
 
@@ -308,14 +309,13 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
         fbo.attach_texture(dirlight->get_depth_texture(),FBO_DEPTH,cascaded_layer);
 
-
         if(fbo.iscomplete()) {
             fbo.bind();
             uniform_light_projection->set_value(light_mat,"matrix");
 
             // save the current frustum
 
-            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1);
+//            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1,scene_far*2);
 
             draw_scene("depth_creation");
             
@@ -337,6 +337,8 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 Vec3<float> Scene::calculate_shadowing_optimal_point(Vec3<float> near_values[4],Vec3<float> far_values[4], float &radius) {
     float max_top=near_values[0].y,max_bot=near_values[0].y,max_right=near_values[0].x,max_left=near_values[0].x;
 
+    float depth=0;
+
     for(int i=0;i<4;i++) {
         float cur_max_right = maxf(near_values[i].x,far_values[i].x);
         float cur_max_left = minf(near_values[i].x,far_values[i].x);
@@ -347,13 +349,15 @@ Vec3<float> Scene::calculate_shadowing_optimal_point(Vec3<float> near_values[4],
         max_bot=minf(max_bot,cur_max_bot);
         max_right=maxf(max_right,cur_max_right);
         max_left=minf(max_left,cur_max_left);
+        
+        depth+=(near_values[0].z+far_values[0].z);
     }
 
     float max_height=max_top-max_bot;
     float max_width=max_right-max_left;
-    
+
     radius=maxf(max_height,max_width);
-    return Vec3<float>((max_right+max_left)/2,(max_top+max_bot)/2,near_values[0].z);
+    return Vec3<float>((max_right+max_left)/2,(max_top+max_bot)/2,depth/8);
 }
 
 void Scene::draw_scene(std::string program_name) {

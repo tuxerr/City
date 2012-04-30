@@ -8,8 +8,8 @@
 class Frustum {
 public:
     
-    void perspective_frustum(Vec3<float> pos, Vec3<float> direction, Vec3<float> up_vector,float ratio);
-    void orthogonal_frustum(Vec3<float> pos, Vec3<float> direction, Vec3<float> up_vector,float width,float ratio);
+    void perspective_frustum(Vec3<float> pos, Vec3<float> direction, Vec3<float> up_vector,float ratio,float scene_far);
+    void orthogonal_frustum(Vec3<float> pos, Vec3<float> direction, Vec3<float> up_vector,float width,float ratio,float scene_far);
 
     Vec3<float> normal[6];
     Vec3<float> farpoint;

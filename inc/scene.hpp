@@ -18,6 +18,8 @@
 #include "frustum.hpp"
 #include "logger.hpp"
 
+#define DIRECTIONAL_LIGHT_HEIGHT 50
+
 class Scene {
 public:
     Scene(Display *disp,UniformBlock *matrices);

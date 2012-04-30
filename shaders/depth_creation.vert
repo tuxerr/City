@@ -1,7 +1,6 @@
 #version 330
 
 in vec3 in_Vertex;
-
 smooth out vec4 pos;
 
 uniform GlobalValues_ {
@@ -19,6 +18,6 @@ uniform Light_properties_ {
 } Light_properties;
 
 void main() {
-    pos = Light_properties.matrix*GlobalValues.modelview*vec4(in_Vertex,1.0);
-    gl_Position = pos;
+    gl_Position = Light_properties.matrix*GlobalValues.modelview*vec4(in_Vertex,1.0);   
+    pos = gl_Position;
 }

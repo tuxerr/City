@@ -1,9 +1,9 @@
 #version 330
 
-smooth in vec4 pos;
 out vec4 outcol;
+smooth in vec4 pos;
 
 void main(void) {
-     float in_depth = (pos.z/pos.w)/2+0.5;
-     outcol=vec4(in_depth,in_depth,in_depth,1);
+     outcol=vec4(1,1,1,1);
+     gl_FragDepth = pos.z*0.5+0.5;
 }

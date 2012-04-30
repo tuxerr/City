@@ -41,7 +41,7 @@ private:
     GLuint ubo;
     GLuint program_id;
     GLuint ubo_loc_in_program;
-    std::map<std::string,GLuint> offsets;
+    std::map<std::string,GLint> offsets;
     std::map<std::string,GLuint> matrix_strides;
 };
 

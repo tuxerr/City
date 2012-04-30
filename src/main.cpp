@@ -25,7 +25,7 @@ int main(int argc,char *argv[]) {
     Logger::init("city.log");
 
 //    PerlinNoise noise(0.5,2,1,4,42);
-    Display disp(1680,1050,false,true);     disp.init();     
+    Display disp(1024,1024,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
     disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
@@ -39,7 +39,7 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(FOV,1,250);
+    sce.set_perspective(FOV,1,400);
 
     Timer timer;
 
@@ -128,7 +128,7 @@ int main(int argc,char *argv[]) {
 
     spaceship.close();
 
-    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(0,0,-1));
+    DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
@@ -140,12 +140,12 @@ int main(int argc,char *argv[]) {
     
     o->translate(20,0,1);
 
+    int far=100;
     while(!c.quit) {
         i++;
         sce.render();
 
         ship.move(c.up,c.down,c.right,c.left);
-
 
 /*        if(c.down) {
             l1->enable_shadows(false);

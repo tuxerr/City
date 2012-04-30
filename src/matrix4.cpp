@@ -191,6 +191,8 @@ void Matrix4::perspective_ortho(float width,float near,float far, float ratio) {
     val[10]=-2/(far-near);
     val[11]=-(far+near)/(far-near);
     val[15]=1;
+
+//    res.z=val[10]*vector.z+val[11];
 }
 
 void Matrix4::camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector) {

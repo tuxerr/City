@@ -84,12 +84,12 @@ GLint UniformBlock::get_value_from_pname(std::string sub_name,GLenum pname) {
 
 GLint UniformBlock::get_offset(std::string sub_name) {
     if(offsets.find(sub_name)==offsets.end()) {
-        GLuint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
+        GLint offset= get_value_from_pname(sub_name,GL_UNIFORM_OFFSET);
 
         if(offset==-1) {
             Logger::log(LOG_ERROR)<<sub_name<<" has a negative offset in the uniformblock "<<complete_name<<std::endl;            
         } else {
-            std::map<std::string,GLuint>::iterator it=offsets.begin();
+            std::map<std::string,GLint>::iterator it=offsets.begin();
             for(;it!=offsets.end();it++) {
                 if(offset==it->second) {
                     Logger::log(LOG_WARNING)<<sub_name<<" has the same offset as "<<it->first<<" in uniformblock "<<complete_name<<std::endl;
