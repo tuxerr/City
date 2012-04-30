@@ -11,9 +11,9 @@ uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
+    float near;
     vec3 camera_pos;
     vec3 eye_vector;
-    float near;
     float far;
 } GlobalValues;
 

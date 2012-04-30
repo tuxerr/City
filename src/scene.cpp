@@ -263,7 +263,6 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     }
 
     uniform_cascaded_shading_zdelta->set_value(min_shadow_resolution);
-    uni->set_value(cascaded_depth,"casc_shading_depth");
 
     for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 

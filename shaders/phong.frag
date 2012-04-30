@@ -25,8 +25,9 @@ uniform Light_ {
     mat4 matrix7;
     mat4 matrix8;
     bool render_shadows;
-    int casc_shading_depth;
+    vec4 offset2;
     float shadow_min_range;
+    vec4 offset;
     float shadow_max_range;
 } Light[8];
 
@@ -34,9 +35,9 @@ uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
+    float near;
     vec3 camera_pos;
     vec3 eye_vector;
-    float near;
     float far;
 } GlobalValues;
 
@@ -107,23 +108,24 @@ vec4 pointlight(int lightID) {
 
 
 float directional_shadowing(int lightID) {
-    float distance_from_cam = length(vert_pos.xyz-GlobalValues.camera_pos);
-    float dotprod = dot(normalize(vert_pos.xyz-GlobalValues.camera_pos),normalize(GlobalValues.eye_vector));
-
-    float zdelta = (distance(vert_pos.xyz,GlobalValues.camera_pos)*dotprod)-1;
-    int cascaded_layer=9;
-/*    if(Light[lightID].shadow_max_range != -1 && zdelta>=Light[lightID].shadow_max_range) {
-        return 1.0;
-        }*/
-
-/*    float shadow_min_range = Light[lightID].shadow_min_range;
+    float shadow_min_range = Light[lightID].shadow_min_range;
     if(shadow_min_range==-1) {
         shadow_min_range=GlobalValues.near;
-        } */
-//    for(int i=0;i<Light[lightID].casc_shading_depth;i++) {
-//        if(zdelta<=cascaded_shading_zdelta*(pow(2.0,i+1.0)-Light[lightID].shadow_min_range)) {
+    }
+
+    float distance_from_cam = length(vert_pos.xyz-GlobalValues.camera_pos);
+    float zdelta = dot(vert_pos.xyz-GlobalValues.camera_pos,normalize(GlobalValues.eye_vector))-shadow_min_range;
+
+    if(Light[lightID].shadow_max_range != -1 && zdelta>=Light[lightID].shadow_max_range) {
+        return 1.0;
+    }
+    if(zdelta<=Light[lightID].shadow_min_range) {
+        return 1.0;
+    }
+
+    int cascaded_layer=9;
     for(int i=0;i<8;i++) {
-        if(zdelta<=cascaded_shading_zdelta*(pow(2.0,i+1.0)-1)) {
+        if(zdelta<=cascaded_shading_zdelta*(pow(2.0,i+1.0)-shadow_min_range)) {
             cascaded_layer=i;
             break;
         }        

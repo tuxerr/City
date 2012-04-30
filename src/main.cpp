@@ -130,6 +130,7 @@ int main(int argc,char *argv[]) {
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);
+    l1->set_shadow_range(1,-1);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
