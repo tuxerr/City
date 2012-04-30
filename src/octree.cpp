@@ -46,12 +46,19 @@ Octree_Collisions Octree::frustum_collision(Frustum &frust) {
     int distmax;
 
     if(frust.ortho_frustum) {
-        distance[0]=((center_position-frust.farpoint).scalar(frust.normal[0]));
+        Vec3<float> frust_middle=(frust.farpoint+frust.origin)*0.5;
+/*        distance[0]=((center_position-frust.farpoint).scalar(frust.normal[0]));
         distance[1]=((center_position-frust.origin).scalar(frust.normal[1]));
         distance[2]=((center_position-(frust.origin+frust.ortho_right_vec)).scalar(frust.normal[2]));
         distance[3]=((center_position-(frust.origin-frust.ortho_right_vec)).scalar(frust.normal[3]));
         distance[4]=((center_position-(frust.origin+frust.ortho_up_vec)).scalar(frust.normal[4]));
-        distance[5]=((center_position-(frust.origin-frust.ortho_up_vec)).scalar(frust.normal[5]));
+        distance[5]=((center_position-(frust.origin-frust.ortho_up_vec)).scalar(frust.normal[5])); */
+        distance[0]=(center_position-frust.farpoint).scalar(frust.normal[0]);
+        distance[1]=(center_position-frust.origin).scalar(frust.normal[1]);
+        distance[2]=(center_position-(frust_middle+frust.ortho_right_vec)).scalar(frust.normal[2]);
+        distance[3]=(center_position-(frust_middle-frust.ortho_right_vec)).scalar(frust.normal[3]);
+        distance[4]=(center_position-(frust_middle+frust.ortho_up_vec)).scalar(frust.normal[4]);
+        distance[5]=(center_position-(frust_middle-frust.ortho_up_vec)).scalar(frust.normal[5]);
         distmax=6;
     } else {
         distance[0]=((center_position-frust.farpoint).scalar(frust.normal[0]));

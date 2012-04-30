@@ -313,16 +313,10 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
             fbo.bind();
             uniform_light_projection->set_value(light_mat,"matrix");
 
-            // save the current frustum
-
-//            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1,scene_far*2);
+            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1,scene_far*2);
 
             draw_scene("depth_creation");
             
-//            set_camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
-//            set_perspective_ortho(circle_radius*2,scene_near,scene_far*2);
-
-
             fbo.unbind();
         }  else {
             Logger::log()<<"FBO incomplete for the render of directional light "<<std::endl;

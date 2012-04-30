@@ -37,17 +37,17 @@ void Frustum::orthogonal_frustum(Vec3<float> pos, Vec3<float> eye_vec_norm, Vec3
     rightvec=rightvec*(width/2);
 
     up_vector.normalize();
-    up_vector=up_vector*(rightvec.norm()/ratio);
+    up_vector=up_vector*(width/(ratio*2));
 
-    // the 5 normals of the 5 plans of the pyramidal frustum (oriented towards the EXTERIOR of the frustum)
+    // the 6 normals of the rectangular frustum 
     normal[0]=eye_vec_norm;
     normal[1]=Vec3<float>(0,0,0)-eye_vec_norm;
     normal[2]=rightvec;
     normal[2].normalize();
-    normal[3]=(Vec3<float>(0,0,0)-rightvec).normalize();
+    normal[3]=Vec3<float>(0,0,0)-normal[2];
     normal[4]=up_vector;
     normal[4].normalize();
-    normal[5]=(Vec3<float>(0,0,0)-up_vector).normalize();
+    normal[5]=Vec3<float>(0,0,0)-normal[4];
 
     this->farpoint=farpoint;
     origin=pos;
