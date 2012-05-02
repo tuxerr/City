@@ -24,8 +24,8 @@ int main(int argc,char *argv[]) {
 
     Logger::init("city.log");
 
-//    PerlinNoise noise(0.5,2,1,4,42);
-    Display disp(1024,1024,false,true);     disp.init();     
+    PerlinNoise noise(0.5,2,1,4,42);
+    Display disp(1680,1050,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
     disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
@@ -39,13 +39,13 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(FOV,1,400);
+    sce.set_perspective(90,1,800);
 
     Timer timer;
 
-//    Terrain terrain(0.4,&noise);
+    Terrain terrain(0.4,&noise);
 
-//    terrain.scale(60,60,150);
+    terrain.scale(60,60,150);
     
     Controls c;
 
@@ -110,10 +110,10 @@ int main(int argc,char *argv[]) {
     t2->update_color_buffer(&color2[0],sizeof(color2));
     t2->scale(10,10,10);
 
-//    t->set_enable_draw(false);
-//    t2->set_enable_draw(false);
+    t->set_enable_draw(false);
+    t2->set_enable_draw(false);
 
-/*    float terrain_detail=10;
+    float terrain_detail=40;
     for(int i=0;i<200;i+=terrain_detail) {
         for(int j=0;j<200;j+=terrain_detail) {
             Object *t=sce.new_object();
@@ -122,7 +122,7 @@ int main(int argc,char *argv[]) {
             t->set_program("phong");
             t->translate(i+terrain_detail/2,j+terrain_detail/2,0); 
         }
-        }*/
+    }
 
 
 
@@ -130,7 +130,7 @@ int main(int argc,char *argv[]) {
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);
-    l1->set_shadow_range(1,-1);
+//    l1->set_shadow_range(1,-1);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
@@ -138,15 +138,20 @@ int main(int argc,char *argv[]) {
     timer.init();
     Vec3<float> position(0,0,1),up_vector(0,0,1);
     Vec3<float> target(100,0,1);
+    bool stop=false;
     
     o->translate(20,0,1);
 
-    int far=100;
     while(!c.quit) {
         i++;
         sce.render();
 
-        ship.move(c.up,c.down,c.right,c.left);
+        if(c.s) {
+            stop=!stop;
+        }
+        if(!stop) {
+            ship.move(c.up,c.down,c.right,c.left);
+        }
 
 /*        if(c.down) {
             l1->enable_shadows(false);
@@ -160,6 +165,7 @@ int main(int argc,char *argv[]) {
         if(c.left) {
             o->rotate(2,0,0,1);
             } */
+
 
         ship.camera_config(position,target,up_vector);
         sce.set_camera(position,target,up_vector);

@@ -63,6 +63,7 @@ private:
 
     float scene_near;
     float scene_far;
+    float scene_fov_rad;
 
     Octree octree;
     Frustum frustum;

@@ -168,11 +168,15 @@ void Matrix4::rotate(float angle,float x, float y, float z) {
     *this=Matrix4(val)*rot;
 }
 
-void Matrix4::perspective(float angle, float near, float far, float ratio) {
+void Matrix4::perspective(float fovx, float near, float far, float ratio) {
     clear();
-    float f = 1.0 / tan(angle * M_PI / 360); 
-    val[0]=f/ratio;
-    val[5]=f;
+
+    float fovx_rad = fovx*M_PI/180;
+    float v0 = 1/tan(fovx_rad/2);
+    float v5 = ratio*v0;
+
+    val[0]=v0;
+    val[5]=v5;
     val[10]=(far + near)/(near-far);
     val[11]=2*far*near/(near-far);
     val[14]=-1;

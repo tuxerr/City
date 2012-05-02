@@ -55,15 +55,16 @@ Scene::~Scene() {
 }
 
 void Scene::set_perspective(float angle,float near,float far) {
-    perspective.perspective(angle,near,far,(float)disp->get_width()/disp->get_height());
+    perspective.perspective(angle,near,far,disp->get_ratio());
     scene_near=near;
     scene_far=far;
+    scene_fov_rad=(angle*M_PI/180);                                            
     globalvalues->set_value(scene_near,"near");
     globalvalues->set_value(scene_far,"far");
 }
 
 void Scene::set_perspective_ortho(float width,float near,float far) {
-    perspective.perspective_ortho(width,near,far,(float)disp->get_width()/disp->get_height());
+    perspective.perspective_ortho(width,near,far,disp->get_ratio());
     scene_near=near;
     scene_far=far;
     globalvalues->set_value(scene_near,"near");
@@ -236,7 +237,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     // calculation of the general projection matrix (global light) to calculate subfrustum borders
     Matrix4 global_light_projection;
     Vec3<float> global_cam_pos = camera_pos + eye_norm*(shadow_min_range+shadow_range*0.5);
-    float gf = tanf(FOV_RAD/2)*shadow_max_range;
+    float gf = tanf(scene_fov_rad/2)*shadow_max_range;
     float vgf = gf / disp->get_ratio();
     float global_radius = sqrt(gf*gf + vgf*vgf + (shadow_min_range+shadow_range)*(shadow_min_range+shadow_range)*0.25);
     camera_mat.camera((global_cam_pos-ldir_norm*scene_far),global_cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
@@ -248,7 +249,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
     // vector containing subfrustum positions near the camera (each iteration put their far pos into this for the next iteration)
     Vec3<float> subfrustum_near_position[4];
-    float sf = tanf(FOV_RAD/2)*shadow_min_range;
+    float sf = tanf(scene_fov_rad/2)*shadow_min_range;
     float vsf = sf / disp->get_ratio();
     Vec3<float> mid_position = camera_pos + eye_norm*shadow_min_range;
     Vec3<float> third_eye_vector = eye_vector.cross(up_vector);
@@ -271,7 +272,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
             zmax=shadow_max_range;
         }
 
-        float f = tanf(FOV_RAD/2)*zmax;
+        float f = tanf(scene_fov_rad/2)*zmax;
         float vf = f / disp->get_ratio();
 
         // calculate the 4 zmax points and project them into 2D light_space
