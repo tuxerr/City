@@ -82,7 +82,7 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vect
     Vec3<float> eye_vec_norm = eye_vector;
     eye_vec_norm.normalize();
 
-    frustum.perspective_frustum(pos,eye_vec_norm,up_vector,disp->get_ratio(),scene_far);
+    frustum.perspective_frustum(pos,eye_vec_norm,up_vector,disp->get_ratio(),scene_far,scene_fov_rad);
 }
 
 Object* Scene::new_object() {
@@ -199,7 +199,7 @@ void Scene::render() {
         }
     }
     
-    frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far);
+    frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far,scene_fov_rad);
     draw_scene();
 }
 

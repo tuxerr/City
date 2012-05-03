@@ -1,12 +1,13 @@
+
 #include "frustum.hpp"
 
-void Frustum::perspective_frustum(Vec3<float> pos, Vec3<float> eye_vec_norm, Vec3<float> up_vector,float ratio,float scene_far) {
+void Frustum::perspective_frustum(Vec3<float> pos, Vec3<float> eye_vec_norm, Vec3<float> up_vector,float ratio,float scene_far,float scene_fov) {
 
      // new frustum calculation for the octree
     Vec3<float> farpoint = pos+(eye_vec_norm*scene_far);
     Vec3<float> rightvec = eye_vec_norm.cross(up_vector);
     rightvec.normalize();
-    rightvec=rightvec*((tan(FOV_RAD)*scene_far)/2);
+    rightvec=rightvec*((tan(scene_fov)*scene_far)/2);
 
     up_vector.normalize();
     up_vector=up_vector*( rightvec.norm()/ratio);

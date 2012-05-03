@@ -24,7 +24,7 @@ int main(int argc,char *argv[]) {
 
     Logger::init("city.log");
 
-    PerlinNoise noise(0.5,2,1,4,42);
+    PerlinNoise noise(0.5,2,2,8,42424237);
     Display disp(1680,1050,false,true);     disp.init();     
     disp.new_program("shaders/default.vert","shaders/default.frag");
     disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
@@ -45,7 +45,7 @@ int main(int argc,char *argv[]) {
 
     Terrain terrain(0.4,&noise);
 
-    terrain.scale(60,60,150);
+    terrain.scale(60,60,60);
     
     Controls c;
 
