@@ -18,7 +18,7 @@
 #include "frustum.hpp"
 #include "logger.hpp"
 
-#define DIRECTIONAL_LIGHT_HEIGHT 50
+#define DIRECTIONAL_LIGHT_HEIGHT 200
 
 class Scene {
 public:

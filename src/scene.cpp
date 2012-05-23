@@ -205,8 +205,7 @@ void Scene::render() {
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
     UniformBlock *uni = dirlight->get_uniformblock();
-    Matrix4 light_mat;
-    Matrix4 camera_mat;
+    Matrix4 light_mat,camera_mat;
 
     Vec3<float> ldir_norm = dirlight->get_direction(); 
     ldir_norm.normalize();
@@ -219,12 +218,14 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     float shadow_min_range = dirlight->get_shadow_min_range(), shadow_max_range=dirlight->get_shadow_max_range();
     if(shadow_max_range==-1)
         shadow_max_range=scene_far;
-
     if(shadow_min_range==-1)
         shadow_min_range=scene_near;
     float shadow_range = shadow_max_range-shadow_min_range;
 
-    float min_shadow_resolution = (log2(((shadow_min_range-scene_near)/SHADOWING_NEAR_RANGE)+1)+1)*SHADOWING_NEAR_RANGE; //resolution at the nearest distance of the camera. Then go as planned
+    //resolution at the nearest distance of the camera. Then go as planned
+    float min_shadow_resolution = (log2(((shadow_min_range-scene_near)/SHADOWING_NEAR_RANGE)+1)+1)*SHADOWING_NEAR_RANGE; 
+    uniform_cascaded_shading_zdelta->set_value(min_shadow_resolution);
+    
     float act_shadow_distance=0;
     for(int i=1;i<=SHADOWING_MAX_LAYERS;i++) {
         act_shadow_distance+=pow(2,i-1)*min_shadow_resolution;
@@ -259,12 +260,10 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     subfrustum_near_position[2] = mid_position - up_vector*vsf + third_eye_vector*sf;
     subfrustum_near_position[3] = mid_position - up_vector*vsf - third_eye_vector*sf;
 
+    // project the 3D subfrustum positions into the 2D light-view plane.
     for(int i=0;i<4;i++) {
         subfrustum_near_position[i] = global_light_projection*subfrustum_near_position[i];
     }
-
-    uniform_cascaded_shading_zdelta->set_value(min_shadow_resolution);
-    Logger::log()<<"CASC DEPTH : "<<cascaded_depth<<std::endl;
 
     for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 
@@ -290,33 +289,30 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         float optimal_radius;
         Vec3<float> optimal_center = calculate_shadowing_optimal_point(subfrustum_near_position,subfrustum_far_position,optimal_radius);
 
-
-        // multiply by global radius, as the optimal radius is only valid in the projected 2D space
+        // multiply by global radius, as the optimal radius is only valid in the projected 2D space between 0 and 1
         optimal_radius*=(global_radius); 
         optimal_radius=multiple_of(optimal_radius,2);
 
+        // switch near to far positions for the next layer
         for(int i=0;i<4;i++) {
             subfrustum_near_position[i] = subfrustum_far_position[i];
         }
 
-        float camera_height=200;
+        float camera_height=DIRECTIONAL_LIGHT_HEIGHT;
 
-        //clamping camera coordonnates to move depth_text pixel by depth_text pixel to avoid glitters
-
-        Logger::log()<<"center x : "<<optimal_center.x<<" and clamp : "<<optimal_radius/(global_radius*DEPTH_TEXTURE_SIZE)<<std::endl;
-        optimal_center.x=multiple_of(optimal_center.x,optimal_radius/(global_radius*DEPTH_TEXTURE_SIZE));
-        Logger::log()<<optimal_center.x<<std::endl;
-
-        optimal_center.y=multiple_of(optimal_center.y,optimal_radius/(global_radius*DEPTH_TEXTURE_SIZE));
+        //clamping camera coordonnates to move depth_test pixel by depth_test pixel to avoid shadow glitters 
         Vec3<float> cam_pointing_pos = global_light_projection_inv*optimal_center;
+        cam_pointing_pos.x=multiple_of(cam_pointing_pos.x,optimal_radius/DEPTH_TEXTURE_SIZE);
+        cam_pointing_pos.y=multiple_of(cam_pointing_pos.y,optimal_radius/DEPTH_TEXTURE_SIZE);
 
         Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*camera_height;
 
+        // light-view transformation matrix calculation
         camera_mat.camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
-
         light_mat.perspective_ortho(optimal_radius,scene_near,camera_height*2,1);
         light_mat = light_mat*camera_mat;
 
+        // matrix send to pixel shader (phong)
         std::stringstream uniform_name;
         uniform_name<<"matrix"<<(cascaded_layer+1);
         uni->set_value(light_mat,uniform_name.str());

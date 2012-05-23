@@ -10,6 +10,7 @@
 #include "matrix4.hpp"
 #include "shader_program.hpp"
 #include "utils.hpp"
+#include "logger.hpp"
 
 class Octree;
 

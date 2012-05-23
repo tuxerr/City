@@ -76,13 +76,14 @@ int Object::new_lod(float lodmindist) {
     int lod_iter=parts[0].size();
     for(unsigned int i=0;i<parts[0].size();i++) {
         if(parts[0][i].lodmindist==lodmindist) {
-            std::cout<<"A LOD having "<<lodmindist<<" as a minimum viewing distance already exists"<<std::endl;
+            Logger::log(LOG_WARN)<<"A LOD having "<<lodmindist<<" as a minimum viewing distance already exists"<<std::endl;
         } else if(parts[0][i].lodmindist>lodmindist) {
             lod_iter=i;
             break;
         }
     }
 
+    // for each new lod, we have to create n parts, n being the number of parts in the first LOD
     for(unsigned int i=0;i<parts.size();i++) {
         ObjectPart part = 
         {
