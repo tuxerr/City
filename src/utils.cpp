@@ -28,3 +28,7 @@ float minf(float v1, float v2) {
     }
 }
 
+float multiple_of(float n,float mult) {
+    int coef= (n/mult)+1;
+    return mult*coef;
+}

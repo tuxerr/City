@@ -117,14 +117,12 @@ int main(int argc,char *argv[]) {
     for(int i=0;i<200;i+=terrain_detail) {
         for(int j=0;j<200;j+=terrain_detail) {
             Object *t=sce.new_object();
-            terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t);
+            terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t,false);
             t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
             t->set_program("phong");
-            t->translate(i+terrain_detail/2,j+terrain_detail/2,0); 
+            t->translate(i+terrain_detail/2,j+terrain_detail/2,0);
         }
     }
-
-
 
     spaceship.close();
 

@@ -17,7 +17,7 @@ typedef enum Fill_Modes {
 class Terrain {
 public:
     Terrain(float precision,PerlinNoise *noise);
-    void generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object);
+    void generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object,bool generate_lod);
     void scale(float x,float y,float z);
     float height(float x,float y);
 

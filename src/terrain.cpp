@@ -14,16 +14,21 @@ float Terrain::height(float x,float y) {
     return scalar.z*noise->GetHeight(x/scalar.x,y/scalar.y);
 }
 
-void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object) {
+void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object,bool generate_lod) {
+    int lod_to_generate=1;
     if(object==NULL) {
         std::cout<<"Could not generate terrain: object is NULL"<<std::endl;
         return;
     } else {
-        for(int i=1;i<TERRAIN_LOD_DEPTH;i++) {
-            object->new_lod(5*pow(2,i));
+        if(generate_lod) {
+            lod_to_generate=TERRAIN_LOD_DEPTH;
+            for(int i=1;i<TERRAIN_LOD_DEPTH;i++) {
+                object->new_lod(30*pow(2,i));
+            }
         }
     }
-    for(int lod=0;lod<TERRAIN_LOD_DEPTH;lod++) {
+    
+    for(int lod=0;lod<lod_to_generate;lod++) {
         float lod_precision = precision*pow(2,lod);
         int obj_part = 0;
         int matrix_width = (xlength+lod_precision)/lod_precision;
@@ -41,6 +46,7 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
         normal_matrix.reserve(matrix_width*matrix_height);
         triangles_index_buffer.reserve((matrix_width-1)*(matrix_height)*6);
         line_index_buffer.reserve((matrix_width-1)*(matrix_height)*6);
+        Logger::log()<<"Generating "<<matrix_width*matrix_height<<" LOD for distance "<<30*pow(2,lod)<<std::endl;
         for(int i=0;i<matrix_width;i++) {
             for(int j=0;j<matrix_height;j++) {
 

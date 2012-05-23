@@ -264,6 +264,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     }
 
     uniform_cascaded_shading_zdelta->set_value(min_shadow_resolution);
+    Logger::log()<<"CASC DEPTH : "<<cascaded_depth<<std::endl;
 
     for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 
@@ -288,19 +289,32 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         }
         float optimal_radius;
         Vec3<float> optimal_center = calculate_shadowing_optimal_point(subfrustum_near_position,subfrustum_far_position,optimal_radius);
-        optimal_radius*=(global_radius);
+
+
+        // multiply by global radius, as the optimal radius is only valid in the projected 2D space
+        optimal_radius*=(global_radius); 
+        optimal_radius=multiple_of(optimal_radius,2);
 
         for(int i=0;i<4;i++) {
             subfrustum_near_position[i] = subfrustum_far_position[i];
         }
 
+        float camera_height=200;
+
+        //clamping camera coordonnates to move depth_text pixel by depth_text pixel to avoid glitters
+
+        Logger::log()<<"center x : "<<optimal_center.x<<" and clamp : "<<optimal_radius/(global_radius*DEPTH_TEXTURE_SIZE)<<std::endl;
+        optimal_center.x=multiple_of(optimal_center.x,optimal_radius/(global_radius*DEPTH_TEXTURE_SIZE));
+        Logger::log()<<optimal_center.x<<std::endl;
+
+        optimal_center.y=multiple_of(optimal_center.y,optimal_radius/(global_radius*DEPTH_TEXTURE_SIZE));
         Vec3<float> cam_pointing_pos = global_light_projection_inv*optimal_center;
 
-        Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*scene_far;
+        Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*camera_height;
 
         camera_mat.camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
 
-        light_mat.perspective_ortho(optimal_radius,scene_near,scene_far*2,1);
+        light_mat.perspective_ortho(optimal_radius,scene_near,camera_height*2,1);
         light_mat = light_mat*camera_mat;
 
         std::stringstream uniform_name;
@@ -313,7 +327,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
             fbo.bind();
             uniform_light_projection->set_value(light_mat,"matrix");
 
-            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1,scene_far*2);
+            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1,camera_height*2);
 
             draw_scene("depth_creation");
             

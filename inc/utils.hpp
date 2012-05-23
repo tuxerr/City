@@ -9,4 +9,6 @@ float maxf(float v1, float v2);
 
 float minf(float v1, float v2);
 
+float multiple_of(float n,float mult);
+
 #endif
