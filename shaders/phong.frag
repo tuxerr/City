@@ -149,17 +149,18 @@ float directional_shadowing(int lightID) {
     } else if(cascaded_layer==7) {
         light_point = Light[lightID].matrix8*vert_pos;    
     }
-
     
     // clamping from [1,-1] to [1,0]
     light_point.x = (light_point.x/2)+0.5;
     light_point.y = (light_point.y/2)+0.5;
     light_point.z = (light_point.z/2)+0.5;
     float lightval;
+    float depth_offset_u20=0.0001;
+    float depth_offset_o20=0.001;
     if(distance_from_cam<20) {
-        lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+0.0001;
+        lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_u20;
     } else {
-        lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+0.001;
+        lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_o20;
     }
 
     float soft_offset = 0.0009765625;
@@ -170,15 +171,15 @@ float directional_shadowing(int lightID) {
     float lightval1,lightval2,lightval3,lightval4;
 
     if(distance_from_cam<20) {
-        lightval1 = texture(shadowmap[lightID],v4off1)+0.0001;
-        lightval2 = texture(shadowmap[lightID],v4off2)+0.0001;
-        lightval3 = texture(shadowmap[lightID],v4off3)+0.0001;
-        lightval4 = texture(shadowmap[lightID],v4off4)+0.0001;
+        lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_u20;
+        lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_u20;
+        lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_u20;
+        lightval4 = texture(shadowmap[lightID],v4off4)+depth_offset_u20;
     } else {
-        lightval1 = texture(shadowmap[lightID],v4off1)+0.001;
-        lightval2 = texture(shadowmap[lightID],v4off2)+0.001;
-        lightval3 = texture(shadowmap[lightID],v4off3)+0.001;
-        lightval4 = texture(shadowmap[lightID],v4off4)+0.001;
+        lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_o20;
+        lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_o20;
+        lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_o20;
+        lightval4 = texture(shadowmap[lightID],v4off4)+depth_offset_o20;
     }
 
     if(light_point.z <= lightval) {

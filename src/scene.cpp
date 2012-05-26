@@ -210,6 +210,10 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     Vec3<float> ldir_norm = dirlight->get_direction(); 
     ldir_norm.normalize();
 
+    // vectors defining the light-space plan to project points onto it (for pixel-size only transitions)
+    Vec3<float> lsp_y(0,ldir_norm.z/ldir_norm.y,-1);     lsp_y.normalize();
+    Vec3<float> lsp_x=ldir_norm.cross(lsp_y);    lsp_x.normalize();
+
     Vec3<float> eye_norm = eye_vector;
     eye_norm.normalize();
 
@@ -241,7 +245,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     float gf = tanf(scene_fov_rad/2)*shadow_max_range;
     float vgf = gf / disp->get_ratio();
     float global_radius = sqrt(gf*gf + vgf*vgf + (shadow_min_range+shadow_range)*(shadow_min_range+shadow_range)*0.25);
-    camera_mat.camera((global_cam_pos-ldir_norm*scene_far),global_cam_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+    camera_mat.camera((global_cam_pos-ldir_norm*scene_far),global_cam_pos,lsp_y);
     global_light_projection.perspective_ortho(global_radius*2,scene_near,scene_far*2,1);
     global_light_projection = global_light_projection * camera_mat;
 
@@ -260,7 +264,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     subfrustum_near_position[2] = mid_position - up_vector*vsf + third_eye_vector*sf;
     subfrustum_near_position[3] = mid_position - up_vector*vsf - third_eye_vector*sf;
 
-    // project the 3D subfrustum positions into the 2D light-view plane.
+    // projection of the 3D subfrustum positions into the 2D light-view plane.
     for(int i=0;i<4;i++) {
         subfrustum_near_position[i] = global_light_projection*subfrustum_near_position[i];
     }
@@ -301,14 +305,17 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         float camera_height=DIRECTIONAL_LIGHT_HEIGHT;
 
         //clamping camera coordonnates to move depth_test pixel by depth_test pixel to avoid shadow glitters 
-        Vec3<float> cam_pointing_pos = global_light_projection_inv*optimal_center;
-        cam_pointing_pos.x=multiple_of(cam_pointing_pos.x,optimal_radius/DEPTH_TEXTURE_SIZE);
-        cam_pointing_pos.y=multiple_of(cam_pointing_pos.y,optimal_radius/DEPTH_TEXTURE_SIZE);
+        Vec3<float> cam_pos = global_light_projection_inv*optimal_center-ldir_norm*camera_height;
 
-        Vec3<float> cam_pos = cam_pointing_pos-ldir_norm*camera_height;
+        // projection of the camera position onto the light-view plane, clamping and return to 3D
+        float X=cam_pos.scalar(lsp_x), Y=cam_pos.scalar(lsp_y), Z=cam_pos.scalar(ldir_norm);
+        X=multiple_of(X,optimal_radius/DEPTH_TEXTURE_SIZE);
+        Y=multiple_of(Y,optimal_radius/DEPTH_TEXTURE_SIZE);
+        cam_pos=lsp_x*X+lsp_y*Y+ldir_norm*Z;
 
+        Vec3<float> cam_pointing_pos=cam_pos+ldir_norm*camera_height;
         // light-view transformation matrix calculation
-        camera_mat.camera(cam_pos,cam_pointing_pos,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x));
+        camera_mat.camera(cam_pos,cam_pointing_pos,lsp_x);
         light_mat.perspective_ortho(optimal_radius,scene_near,camera_height*2,1);
         light_mat = light_mat*camera_mat;
 
@@ -323,7 +330,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
             fbo.bind();
             uniform_light_projection->set_value(light_mat,"matrix");
 
-            frustum.orthogonal_frustum(cam_pos,ldir_norm,Vec3<float>(ldir_norm.y,ldir_norm.z,ldir_norm.x),optimal_radius,1,camera_height*2);
+            frustum.orthogonal_frustum(cam_pos,ldir_norm,lsp_y,optimal_radius,1,camera_height*2);
 
             draw_scene("depth_creation");
             
