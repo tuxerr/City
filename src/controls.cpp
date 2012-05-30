@@ -1,6 +1,6 @@
 #include "controls.hpp"
 
-Controls::Controls() : quit(false), up(false), down(false), right(false), left(false), m(false), s(false) {
+Controls::Controls() : quit(false), up(false), down(false), right(false), left(false), m(false), s(false), d(false), e(false) {
 }
 
 void Controls::refresh() {
@@ -40,6 +40,14 @@ void Controls::refresh() {
 
             case SDLK_s:
                 s=keydown;
+                break;
+
+            case SDLK_d:
+                d=keydown;
+                break;
+
+            case SDLK_e:
+                e=keydown;
                 break;
             }
             

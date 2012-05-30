@@ -11,7 +11,8 @@ Object::Object(Octree *tree) :
     modelview_changed(true),
     tree(tree),
     bounding_sphere_size(0),
-    bounding_scale_factor(1)
+    bounding_scale_factor(1),
+    lod_to_draw(-1)
 {
     new_part();                 // create part 0.
     obj_modelview.identity();
@@ -234,15 +235,21 @@ void Object::set_program(std::string name) {
     program_name=name;
 }
 
+void Object::reset_lod_to_draw() {
+    lod_to_draw=-1;
+}
+
 void Object::draw(float distance_from_camera) {
-    int lod=0;
-    for(unsigned int i=0;i<parts[0].size();i++) {
-        if(parts[0][i].lodmindist<=distance_from_camera) {
-            lod=i;
-        } else {
-            break;
+    if(lod_to_draw==-1) {
+        for(unsigned int i=0;i<parts[0].size();i++) {
+            if(parts[0][i].lodmindist<=distance_from_camera) {
+                lod_to_draw=i;
+            } else {
+                break;
+            }
         }
-    }
+    }         
+    int lod=lod_to_draw;
 
     for(unsigned int i=0;i<parts.size();i++) {
         parts[i][lod].vbo.bind();

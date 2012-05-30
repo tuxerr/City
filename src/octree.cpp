@@ -89,6 +89,7 @@ Octree_Collisions Octree::frustum_collision(Frustum &frust) {
         return OUT;
     }
 
+
 }
 
 int Octree::delete_object(Object *o) {

@@ -15,6 +15,8 @@ public:
     bool left;
     bool m;
     bool s;
+    bool d;
+    bool e;
     
 private:
 };

@@ -23,7 +23,8 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
         if(generate_lod) {
             lod_to_generate=TERRAIN_LOD_DEPTH;
             for(int i=1;i<TERRAIN_LOD_DEPTH;i++) {
-                object->new_lod(30*pow(2,i));
+                object->new_lod(100*pow(2,i));
+
             }
         }
     }
@@ -46,7 +47,7 @@ void Terrain::generate_terrain(Vec2<float> coord,float xlength,float ylength,Obj
         normal_matrix.reserve(matrix_width*matrix_height);
         triangles_index_buffer.reserve((matrix_width-1)*(matrix_height)*6);
         line_index_buffer.reserve((matrix_width-1)*(matrix_height)*6);
-        Logger::log()<<"Generating "<<matrix_width*matrix_height<<" LOD for distance "<<30*pow(2,lod)<<std::endl;
+        Logger::log()<<"Generating "<<matrix_width*matrix_height<<" LOD for distance "<<100*pow(2,lod)<<std::endl;
         for(int i=0;i<matrix_width;i++) {
             for(int j=0;j<matrix_height;j++) {
 

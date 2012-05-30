@@ -1,6 +1,6 @@
 #version 330
 
-#define FOG_DENSITY 0.01
+#define FOG_DENSITY 0.001
 
 out vec4 pixel_color;
 
@@ -155,9 +155,9 @@ float directional_shadowing(int lightID) {
     light_point.y = (light_point.y/2)+0.5;
     light_point.z = (light_point.z/2)+0.5;
     float lightval;
-    float depth_offset_u20=0.0001;
+    float depth_offset_u20=0.0003;
     float depth_offset_o20=0.001;
-    if(distance_from_cam<20) {
+    if(distance_from_cam<10) {
         lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_u20;
     } else {
         lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_o20;
@@ -170,7 +170,7 @@ float directional_shadowing(int lightID) {
     vec4 v4off4 = vec4(light_point.xy+vec2(0,-soft_offset),cascaded_layer,cascaded_layer);
     float lightval1,lightval2,lightval3,lightval4;
 
-    if(distance_from_cam<20) {
+    if(distance_from_cam<10) {
         lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_u20;
         lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_u20;
         lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_u20;
@@ -212,7 +212,7 @@ vec4 directionallight(int lightID) {
     vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
     vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
 
-    float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
+    float diffuse_mult_factor = max(dot(normalize(-light_ray),norm_normal),0.0);
     float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
 
     vec4 ambiant = globalcolor*0.3;
@@ -224,7 +224,7 @@ vec4 directionallight(int lightID) {
     if(Light[lightID].render_shadows) {
         float res = directional_shadowing(lightID);
         vec4 fullillu = ambiant+diffuse+specular;
-        vec4 shadowed = ambiant+diffuse/5;
+        vec4 shadowed = ambiant;
         return mix(shadowed,fullillu,res);
     } else {
         return ambiant+diffuse+specular;
@@ -267,6 +267,6 @@ void main(void) {
         }
     }
 
-    pixel_color=res;
-//     pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
+//    pixel_color=res;
+    pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
 }       

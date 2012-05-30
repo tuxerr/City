@@ -200,6 +200,11 @@ void Scene::render() {
     }
     
     frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far,scene_fov_rad);
+
+    // reset all saved lods to unset for the new global render
+    for(Object* o : objects) {
+        o->reset_lod_to_draw();
+    }
     draw_scene();
 }
 
@@ -218,7 +223,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     eye_norm.normalize();
 
     //shadowing depth and resolution calculations
-    int cascaded_depth=0;
+    int cascaded_depth=8;
     float shadow_min_range = dirlight->get_shadow_min_range(), shadow_max_range=dirlight->get_shadow_max_range();
     if(shadow_max_range==-1)
         shadow_max_range=scene_far;
@@ -238,6 +243,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
             break;
         }
     }
+
 
     // calculation of the general projection matrix (global light) to calculate subfrustum borders
     Matrix4 global_light_projection;
@@ -268,6 +274,8 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     for(int i=0;i<4;i++) {
         subfrustum_near_position[i] = global_light_projection*subfrustum_near_position[i];
     }
+
+    Logger::log()<<"Cascaded depth : "<<cascaded_depth<<std::endl;
 
     for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 
@@ -307,7 +315,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         //clamping camera coordonnates to move depth_test pixel by depth_test pixel to avoid shadow glitters 
         Vec3<float> cam_pos = global_light_projection_inv*optimal_center-ldir_norm*camera_height;
 
-        // projection of the camera position onto the light-view plane, clamping and return to 3D
+        // projection of the camera position onto the light-view plane
         float X=cam_pos.scalar(lsp_x), Y=cam_pos.scalar(lsp_y), Z=cam_pos.scalar(ldir_norm);
         X=multiple_of(X,optimal_radius/DEPTH_TEXTURE_SIZE);
         Y=multiple_of(Y,optimal_radius/DEPTH_TEXTURE_SIZE);

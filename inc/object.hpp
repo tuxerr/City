@@ -53,6 +53,7 @@ public:
     Matrix4 &normal_matrix();
     std::string get_program();
     void set_program(std::string name);
+    void reset_lod_to_draw();
     void draw(float distance_from_camera);
     void translate(float x, float y, float z);
     void scale(float x, float y, float z);
@@ -78,6 +79,8 @@ private:
     float bounding_sphere_size;
     float bounding_scale_factor;
     void calculate_bounding_sphere();
+
+    int lod_to_draw;
 };
 
 #endif

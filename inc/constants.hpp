@@ -4,8 +4,8 @@
 #define MAX_LIGHTS 8
 #define TITLE "City"
 #define DEPTH_TEXTURE_SIZE 1024
-#define SHADOWING_NEAR_RANGE 3  // if the shadows begin at NEAR, the first layer will be of distance SHADOWING_NEAR_RANGE
-#define SHADOWING_MAX_LAYERS 8 // max layers
+#define SHADOWING_NEAR_RANGE 4  // if the shadows begin at NEAR, the first layer will be of distance SHADOWING_NEAR_RANGE
+#define SHADOWING_MAX_LAYERS 7 // max layers
 #define EPS 0.01
 #define TERRAIN_LOD_DEPTH 4
 #define OCTREE_SIZE 4096

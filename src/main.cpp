@@ -39,7 +39,7 @@ int main(int argc,char *argv[]) {
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(90,1,800);
+    sce.set_perspective(90,1,1500);
 
     Timer timer;
 
@@ -114,10 +114,10 @@ int main(int argc,char *argv[]) {
     t2->set_enable_draw(false);
 
     float terrain_detail=40;
-    for(int i=0;i<200;i+=terrain_detail) {
-        for(int j=0;j<200;j+=terrain_detail) {
+    for(int i=0;i<1000;i+=terrain_detail) {
+        for(int j=0;j<1000;j+=terrain_detail) {
             Object *t=sce.new_object();
-            terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t,false);
+            terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t,true);
             t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
             t->set_program("phong");
             t->translate(i+terrain_detail/2,j+terrain_detail/2,0);
@@ -128,7 +128,7 @@ int main(int argc,char *argv[]) {
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);
-//    l1->set_shadow_range(1,-1);
+    l1->set_shadow_range(-1,314);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
@@ -139,10 +139,12 @@ int main(int argc,char *argv[]) {
     bool stop=false;
     
     o->translate(20,0,1);
+    
+    float view_distance=1500;
 
     while(!c.quit) {
         i++;
-        sce.render();
+
 
         if(c.s) {
             stop=!stop;
@@ -164,9 +166,19 @@ int main(int argc,char *argv[]) {
             o->rotate(2,0,0,1);
             } */
 
+        if(c.d) {
+            view_distance-=100;
+            sce.set_perspective(90,1,view_distance);
+        }
+
+        if(c.e) {
+            view_distance+=100;
+            sce.set_perspective(90,1,view_distance);
+        }
 
         ship.camera_config(position,target,up_vector);
         sce.set_camera(position,target,up_vector);
+        sce.render();
 
         c.refresh();
         disp.refresh();
