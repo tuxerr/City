@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <GL/glew.h>
+#include "SOIL.h"
 #include "constants.hpp"
 
 typedef enum Texture_Types {
@@ -13,6 +14,7 @@ typedef enum Texture_Types {
 class Texture {
 public:
     Texture(int width,int height,Texture_Types type);
+    Texture(const char *filename);
     ~Texture();
     int get_width();
     int get_height();

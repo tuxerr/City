@@ -31,7 +31,18 @@ Texture::Texture(int width,int height,Texture_Types type) : width(width), height
     glTexParameterf(gl_texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(gl_texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(gl_texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glBindTexture(gl_texture_type,0);
+    unbind();
+}
+
+Texture::Texture(const char *filename) : width(-1), height(-1), texture_type(TEXTURE_RGBA), gl_texture_type(GL_TEXTURE_2D) {
+    texture_id = SOIL_load_OGL_texture
+	(
+            filename,
+            SOIL_LOAD_AUTO,
+            SOIL_CREATE_NEW_ID,
+            SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+            );
+    
 }
 
 Texture::~Texture() {
