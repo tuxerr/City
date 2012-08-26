@@ -26,16 +26,8 @@ int main(int argc,char *argv[]) {
 
     PerlinNoise noise(0.5,2,2,8,42424237);
     Display disp(1680,1050,false,true);     disp.init();     
-    disp.new_program("shaders/default.vert","shaders/default.frag");
-    disp.new_program("shaders/phong.vert","shaders/phong.frag","phong");
-    disp.new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
 
-    UniformBlock *matrices=disp.new_uniformblock("GlobalValues");
-    disp.link_program_to_uniformblock("default",matrices);
-    disp.link_program_to_uniformblock("phong",matrices);
-    disp.link_program_to_uniformblock("depth_creation",matrices);
-
-    Scene sce(&disp,matrices);
+    Scene sce(&disp);
     
     Vec3<float> camerapos(0,0,4);
     sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
@@ -57,7 +49,7 @@ int main(int argc,char *argv[]) {
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->rotate(180,0,0,1);
     o->translate(0,0,5);
-
+    
     Spaceship ship(o);
     float vert[] = {-1, -1, 0,
                     1, -1, 0, 
@@ -122,7 +114,7 @@ int main(int argc,char *argv[]) {
             t->set_program("phong");
             t->translate(i+terrain_detail/2,j+terrain_detail/2,0);
         }
-    }
+    } 
 
     spaceship.close();
 
@@ -141,6 +133,8 @@ int main(int argc,char *argv[]) {
     o->translate(20,0,1);
     
     float view_distance=1500;
+    
+    sce.display_texture(Scene::DT_NONE);
 
     while(!c.quit) {
         i++;

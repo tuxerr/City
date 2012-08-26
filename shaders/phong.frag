@@ -157,11 +157,8 @@ float directional_shadowing(int lightID) {
     float lightval;
     float depth_offset_u20=0.0003;
     float depth_offset_o20=0.001;
-    if(distance_from_cam<10) {
-        lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_u20;
-    } else {
-        lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_o20;
-    }
+    float depth_offset_final = (distance_from_cam<10? depth_offset_u20 : depth_offset_o20);
+    lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_final;
 
     float soft_offset = 0.0009765625;
     vec4 v4off1 = vec4(light_point.xy+vec2(soft_offset,0),cascaded_layer,cascaded_layer);
@@ -170,18 +167,10 @@ float directional_shadowing(int lightID) {
     vec4 v4off4 = vec4(light_point.xy+vec2(0,-soft_offset),cascaded_layer,cascaded_layer);
     float lightval1,lightval2,lightval3,lightval4;
 
-    if(distance_from_cam<10) {
-        lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_u20;
-        lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_u20;
-        lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_u20;
-        lightval4 = texture(shadowmap[lightID],v4off4)+depth_offset_u20;
-    } else {
-        lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_o20;
-        lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_o20;
-        lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_o20;
-        lightval4 = texture(shadowmap[lightID],v4off4)+depth_offset_o20;
-    }
-
+    lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_final;
+    lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_final;
+    lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_final;
+    lightval4 = texture(shadowmap[lightID],v4off4)+depth_offset_final;
     if(light_point.z <= lightval) {
         return 1.0;
     } else {

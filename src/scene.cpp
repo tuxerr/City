@@ -1,9 +1,20 @@
 #include "scene.hpp"
 
-Scene::Scene(Display *disp,UniformBlock *globalvalues) : 
-    light_number(0), disp(disp), globalvalues(globalvalues), camera_changed(false), 
+Scene::Scene(Display *disp) : 
+    light_number(0), disp(disp), camera_changed(false), 
     octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096))
 {
+    // program initialisation
+    disp->new_program("shaders/default.vert","shaders/default.frag");
+    disp->new_program("shaders/phong.vert","shaders/phong.frag","phong");
+    disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
+    disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag","display_texture");
+
+    globalvalues=disp->new_uniformblock("GlobalValues");
+    disp->link_program_to_uniformblock("default",globalvalues);
+    disp->link_program_to_uniformblock("phong",globalvalues);
+    disp->link_program_to_uniformblock("depth_creation",globalvalues);
+
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
     }
@@ -37,7 +48,40 @@ Scene::Scene(Display *disp,UniformBlock *globalvalues) :
         uniform_light_projection=disp->new_uniformblock("Light_properties");
         disp->link_program_to_uniformblock("depth_creation",uniform_light_projection);
     }
+    if(disp->has_program("display_texture")) {
+        uniform_displaytex_tex = disp->new_uniform("tex",UNIFORM_SAMPLER);
+        uniform_displaytex_arraytex = disp->new_uniform("arraytex",UNIFORM_SAMPLER);
+        uniform_displaytex_choice = disp->new_uniform("choice",UNIFORM_INT);
+        disp->link_program_to_uniform("display_texture",uniform_displaytex_tex);
+        disp->link_program_to_uniform("display_texture",uniform_displaytex_arraytex);
+        disp->link_program_to_uniform("display_texture",uniform_displaytex_choice);
+    }
 
+    //generate the fullscreen quad object
+    fullscreen_quad = new_object();
+    fullscreen_quad->set_draw_mode(OBJECT_DRAW_QUADS);
+    fullscreen_quad->set_program("display_texture");
+    fullscreen_quad->set_enable_draw(false);
+    float vert[] = {-1, -1, 0,
+                    1, -1, 0, 
+                    1, 1, 0, 
+                    -1, 1, 0};
+
+    int index[] = {0, 1, 2, 3};
+
+    float color[] = {1, 1, 1,
+                     1, 1, 1,
+                     1, 1, 1,
+                     1, 1, 1};
+
+    fullscreen_quad->update_vertices_buffer(&vert[0],sizeof(vert));
+    fullscreen_quad->update_quads_index_buffer(&index[0],sizeof(index));
+    fullscreen_quad->update_color_buffer(&color[0],sizeof(color));
+
+    testtex = new Texture("testtex.png");
+
+    uniform_displaytex_tex->set_value(testtex);
+    uniform_displaytex_choice->set_value(-1);
 }
 
 Scene::~Scene() {
@@ -166,6 +210,7 @@ void Scene::delete_light(Light* l) {
 }
 
 void Scene::render() {
+    
     FBO fbo;
     Texture tex_color(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
     fbo.attach_texture(&tex_color,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be used
@@ -206,6 +251,10 @@ void Scene::render() {
         o->reset_lod_to_draw();
     }
     draw_scene();
+
+    if(displayed_texture!=DT_NONE) {
+        draw_object(fullscreen_quad,true);
+    }
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
@@ -274,8 +323,6 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
     for(int i=0;i<4;i++) {
         subfrustum_near_position[i] = global_light_projection*subfrustum_near_position[i];
     }
-
-    Logger::log()<<"Cascaded depth : "<<cascaded_depth<<std::endl;
 
     for(int cascaded_layer=0;cascaded_layer<cascaded_depth;cascaded_layer++) {
 
@@ -420,7 +467,7 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
         std::list<Object*>::iterator it;
         for(it=oct.objects.begin();it!=oct.objects.end();it++) {
             Object *o=*it;
-            if(!o->has_been_drawn) {
+            if(!o->has_been_drawn && o->enable_draw()) {
 
                 o->update_matrices(&perspective,&camera);
 
@@ -464,30 +511,56 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
 }
 
 void Scene::draw_object(Object *o,bool use_shaders) {
-    if(o->enable_draw()) {
+    std::string program_name=o->get_program();
+    // if the object's shader doesn't exist, use default one.
+    Program *program=disp->get_program(program_name);
+    Vec3<float> object_position((o->modelview_matrix()).val[3],
+                                (o->modelview_matrix()).val[7],
+                                (o->modelview_matrix()).val[11]);
+    Vec3<float> objminuscam = object_position - camera_pos;
 
-        std::string program_name=o->get_program();
-        // if the object's shader doesn't exist, use default one.
-        Program *program=disp->get_program(program_name);
-        Vec3<float> object_position((o->modelview_matrix()).val[3],
-                                    (o->modelview_matrix()).val[7],
-                                    (o->modelview_matrix()).val[11]);
-        Vec3<float> objminuscam = object_position - camera_pos;
+    globalvalues->set_value(o->modelview_matrix(),"modelview");
 
-        globalvalues->set_value(o->modelview_matrix(),"modelview");
+    globalvalues->set_value(o->projection_modelview_matrix(),"projection_modelview");
 
-        globalvalues->set_value(o->projection_modelview_matrix(),"projection_modelview");
+    globalvalues->set_value(o->normal_matrix(),"normal_matrix");
 
-        globalvalues->set_value(o->normal_matrix(),"normal_matrix");
+    if(use_shaders) {
+        program->use();
+    }
 
-        if(use_shaders) {
-            program->use();
-        }
+    o->draw(objminuscam.norm());
 
-        o->draw(objminuscam.norm());
+    if(use_shaders) {
+        program->unuse();
+    }
+}
 
-        if(use_shaders) {
-            program->unuse();
-        }
+void Scene::display_texture(Display_Texture tex) {
+    displayed_texture=tex;
+    if(tex==DT_CASCADED1) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(0);
+    } else if(tex==DT_CASCADED2) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(1);
+    } else if(tex==DT_CASCADED3) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(2);
+    } else if(tex==DT_CASCADED4) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(3);
+    } else if(tex==DT_CASCADED5) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(4);
+    } else if(tex==DT_CASCADED6) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(5);
+    } else if(tex==DT_CASCADED7) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(6);
+    } else if(tex==DT_CASCADED8) {
+        uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
+        uniform_displaytex_choice->set_value(7);
     }
 }
