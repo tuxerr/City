@@ -25,8 +25,10 @@ public:
     void subscribe_to_uniform(Uniform *uni);
     void subscribe_to_uniformblock(UniformBlock *uni);
     void use();
+    void bind_texture(Texture* tex);
     void unuse();
     GLuint id();
+    bool isBinded();
     
 private:
     GLuint program_id;

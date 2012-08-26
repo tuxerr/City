@@ -114,8 +114,8 @@ int main(int argc,char *argv[]) {
     t2->set_enable_draw(false);
 
     float terrain_detail=40;
-    for(int i=0;i<1000;i+=terrain_detail) {
-        for(int j=0;j<1000;j+=terrain_detail) {
+    for(int i=0;i<200;i+=terrain_detail) {
+        for(int j=0;j<200;j+=terrain_detail) {
             Object *t=sce.new_object();
             terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t,true);
             t->set_draw_mode(OBJECT_DRAW_TRIANGLES);

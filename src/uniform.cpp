@@ -1,4 +1,5 @@
 #include "uniform.hpp"
+#include "shader_program.hpp"
 
 Uniform::Uniform(std::string name,Uniform_Type type) : uniform_name(name), type(type) {
 }
@@ -15,9 +16,10 @@ void Uniform::add_subscriber(bool *uniform_sended,GLuint program_id, bool *state
     programs_status[program_id]=status;
 }
 
-void Uniform::add_texture(Texture **tex,GLuint program_id,int index) {
+void Uniform::add_texture(Texture **tex,Program *shaderprogram,int index) {
     if(type==UNIFORM_SAMPLER) {
-        tex_pointers.push_back(tex);
+        tex_pointers[tex]=shaderprogram;
+        GLuint program_id = shaderprogram->id();
         GLint loc=glGetUniformLocation(program_id,uniform_name.c_str());
         if(loc!=-1) {
             glUseProgram(program_id);
@@ -90,9 +92,10 @@ void Uniform::set_value(Vec2<int> val) {
 }
 
 void Uniform::set_value(Texture *tex) {
-    std::vector<Texture**>::iterator it=tex_pointers.begin();
+    std::map<Texture**,Program*>::iterator it=tex_pointers.begin();
     for(;it!=tex_pointers.end();it++) {
-        *(*it)=tex;
+        *(it->first)=tex;
+        (it->second)->bind_texture(tex);
     }
 }
 

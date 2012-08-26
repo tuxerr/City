@@ -10,6 +10,8 @@
 #include "vec3.hpp"
 #include "vec2.hpp"
 
+class Program;
+
 typedef enum Uniform_Type {
     UNIFORM_BOOL, UNIFORM_INT, UNIFORM_FLOAT, UNIFORM_MAT4, UNIFORM_FLOAT3, 
     UNIFORM_INT3, UNIFORM_FLOAT2, UNIFORM_INT2, UNIFORM_SAMPLER
@@ -24,7 +26,7 @@ class Uniform {
 public:
     Uniform(std::string name,Uniform_Type type);
     void add_subscriber(bool *uniform_sended,GLuint program_id,bool *state);
-    void add_texture(Texture **tex,GLuint program_id,int index);
+    void add_texture(Texture **tex,Program *shaderprogram,int index);
     Uniform_Type get_type();
     void set_value(bool val);
     void set_value(int val);
@@ -53,7 +55,7 @@ private:
     Vec2<int> i2val;
     std::map<GLuint,Program_Status> programs_status; /* binded/not binded */
     std::map<GLuint,GLint> uniform_locations;
-    std::vector<Texture**> tex_pointers;
+    std::map<Texture**,Program*> tex_pointers;
 };
 
 #endif

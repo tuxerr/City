@@ -114,7 +114,7 @@ void Program::subscribe_to_uniform(Uniform *uni) {
             std::cout<<max_size<<" Textures are already binded to program "<<id()<<std::endl;
         } else {
             textures.push_back(NULL);
-            uni->add_texture(&textures.back(),program_id,textures.size()-1);
+            uni->add_texture(&textures.back(),this,textures.size()-1);
         }
     } else {
         uniforms[uni]=false;
@@ -162,6 +162,25 @@ void Program::use() {
     }
 }
 
+
+void Program::bind_texture(Texture* tex) {
+    // function is used for texture hotswapping while the same program is being used. if the program is nob binded, his texture array will anyway be changed by the set_value Uniform function and texture will be changed when the program will be used.
+
+    if(binded) {
+    
+        std::list<Texture*>::iterator it = textures.begin();
+        int tex_index=0;
+        for(;it!=textures.end();it++) {
+            if( (*it) == tex ) {
+                tex->bind(tex_index);
+                break;
+            }
+            tex_index++;
+        }
+
+    }
+}
+
 void Program::unuse() {
     if(binded) {
         std::list<Texture*>::iterator it = textures.begin();
@@ -175,6 +194,10 @@ void Program::unuse() {
 
         binded=false;
     }
+}
+
+bool Program::isBinded() {
+    return binded;
 }
 
 GLuint Program::id() {
