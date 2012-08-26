@@ -100,7 +100,9 @@ void ObjFile::load() {
 
             for(int i=0;i<4;i++) { // load data structure
                 data[i]=parse_face_string(str[i]);
-                if(vert_indexes[act_part].find(data[i])==vert_indexes[act_part].end()) {
+
+                if(vert_indexes[act_part].find(data[i])==vert_indexes[act_part].end() && data[i].pos!=-1) { 
+                     // if the vertex/texture/normal combination was never used before (and is a real one, not the 4th component of a triangle face), add it into the VBOs
                     total_vertices++;
 
                     vbo_vertices[act_part].push_back(vertices[(data[i].pos-1)*3]);
@@ -211,17 +213,21 @@ ObjData ObjFile::parse_face_string(string substr) {
 void ObjFile::load_in_object(Object *o) {
 
     for(int i=0;i<=part_number;i++) {
+        
         vector<float> colors=vbo_vertices[i];
         colors.assign(colors.size(),0.8);
+        
         if(i!=0) {
             o->new_part();
         }
-        
+
         o->update_vertices_buffer(&vbo_vertices[i][0],vbo_vertices[i].size()*sizeof(float),i);
         o->update_normals_buffer(&vbo_normals[i][0],vbo_normals[i].size()*sizeof(float),i);
         o->update_texture_buffer(&vbo_texcoord[i][0],vbo_texcoord[i].size()*sizeof(float),i);
         o->update_lines_index_buffer(&line_index[i][0],line_index[i].size()*sizeof(int),i);
         o->update_triangles_index_buffer(&tri_index[i][0],tri_index[i].size()*sizeof(int),i);
         o->update_color_buffer(&colors[0],colors.size()*sizeof(float),i);
+
     }
+
 }

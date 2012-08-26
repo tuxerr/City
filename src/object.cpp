@@ -105,27 +105,32 @@ int Object::new_lod(float lodmindist) {
 }
 
 void Object::update_vertices_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
+    
     if(part_number<parts.size() && lod_number<parts[0].size()) {
         if(!parts[part_number][lod_number].vbo.iscreated())
             parts[part_number][lod_number].vbo.create();
         parts[part_number][lod_number].vbo.update(data,size);
-        
+
         if(lod_number==0) {
             float currentmax=-1;
-            for(int i=0;i<size/12;i++) {
-                float *ptr=(float*)data;
+            float *ptr=(float*)data;
+
+            for(int i=0;i<((size/sizeof(Vec3<float>))-2);i++) {
+
                 Vec3<float> point(ptr[3*i],ptr[3*i+1],ptr[3*i+2]);
-                float norm = point.norm();
-                if(norm>currentmax) {
-                    currentmax=norm;
+
+                if(point.norm()>currentmax) {
+                    currentmax=point.norm();
                 }
             }
 
             parts[part_number][0].bounding_sphere_weight=size/12;
             parts[part_number][0].bounding_sphere_size=currentmax;
         }
+
     }
     calculate_bounding_sphere();
+
     if(lod_number==0) {
         tree->delete_object(this);
         tree->add_object(this);
