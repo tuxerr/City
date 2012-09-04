@@ -1,0 +1,27 @@
+#version 410
+
+layout(vertices = 4) out;
+
+in vec3 vPosition[];
+out vec3 tcPosition[];
+
+uniform GlobalValues_ {
+    mat4 modelview; // camera*modelview
+    mat4 projection_modelview; //perspective*camera*modelview
+    mat4 normal_matrix; // transpose(inverse(modelview))
+    float near;
+    vec3 camera_pos;
+    vec3 eye_vector;
+    float far;
+} GlobalValues;
+
+#define ID gl_InvocationID;
+
+// to set :   gl_TessLevelInner; gl_TessLevelOuter;
+
+void main() {
+    tcPosition[ID]=vPosition[ID];
+    if(ID==0) {
+        
+    }
+}

@@ -276,7 +276,7 @@ void Object::draw(float distance_from_camera) {
         if(ena_textures && parts[i][lod].tbo.size()>0) {
             parts[i][lod].tbo.bind();
             glEnableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
-            glVertexAttribPointer(SHADER_TEXTURE_ATTRIB,3,parts[i][lod].tbo.element_type(),GL_FALSE,0,0);
+            glVertexAttribPointer(SHADER_TEXTURE_ATTRIB,4,parts[i][lod].tbo.element_type(),GL_FALSE,0,0);
         }
 
         if(obj_draw_mode==OBJECT_DRAW_LINES && parts[i][lod].ibo_lines.size()>0) {

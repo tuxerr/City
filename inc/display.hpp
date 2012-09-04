@@ -23,7 +23,7 @@ public:
     int get_width();
     int get_height();
     float get_ratio();
-    void new_program(const char *vertex_shader_path,const char *fragment_shader_path,std::string name="default");
+    void new_program(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path,std::string name="default");
     bool has_program(std::string name);
     Program *get_program(std::string name);
     Uniform* new_uniform(std::string uniform_name,Uniform_Type type);

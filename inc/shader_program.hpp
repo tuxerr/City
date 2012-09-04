@@ -20,7 +20,7 @@ class Program {
 public:
     Program();
     ~Program();
-    void load_shaders(const char *vertex_shader_path,const char *fragment_shader_path);
+    void load_shaders(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path);
     GLuint compile_shader(const char *path,GLenum shader_type);
     void subscribe_to_uniform(Uniform *uni);
     void subscribe_to_uniformblock(UniformBlock *uni);

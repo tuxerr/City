@@ -7,7 +7,7 @@ Program::~Program() {
     glDeleteProgram(program_id);
 }
 
-void Program::load_shaders(const char *vertex_shader_path,const char *fragment_shader_path) {
+void Program::load_shaders(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path) {
     program_id=glCreateProgram();
 
     if(vertex_shader_path!=NULL) {
@@ -24,6 +24,22 @@ void Program::load_shaders(const char *vertex_shader_path,const char *fragment_s
             glAttachShader(program_id,fragment_shader);
         }
         glDeleteShader(fragment_shader);
+    }
+
+    if(tessellation_control_shader_path!=NULL) {
+        GLuint tesscontrol_shader=compile_shader(tessellation_control_shader_path, GL_TESS_CONTROL_SHADER);
+        if(tesscontrol_shader!=0) {
+            glAttachShader(program_id,tesscontrol_shader);
+        }
+        glDeleteShader(tesscontrol_shader);
+    }
+
+    if(tessellation_evaluator_shader_path!=NULL) {
+        GLuint tesseval_shader=compile_shader(tessellation_evaluator_shader_path,GL_TESS_EVALUATION_SHADER);
+        if(tesseval_shader!=0) {
+            glAttachShader(program_id,tesseval_shader);
+        }
+        glDeleteShader(tesseval_shader);
     }
     
     // linking attributes

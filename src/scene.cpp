@@ -5,10 +5,11 @@ Scene::Scene(Display *disp) :
     octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096))
 {
     // program initialisation
-    disp->new_program("shaders/default.vert","shaders/default.frag");
-    disp->new_program("shaders/phong.vert","shaders/phong.frag","phong");
-    disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag","depth_creation");
-    disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag","display_texture");
+    disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL);
+    disp->new_program("shaders/phong.vert","shaders/phong.frag",NULL,NULL,"phong");
+    disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,"depth_creation");
+    disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,"display_texture");
+//    disp->new_program("shaders/phong.vert","shaders/phong.frag","shaders/terrain_tc.tess","terrain_te.tess","phong");
 
     globalvalues=disp->new_uniformblock("GlobalValues");
     disp->link_program_to_uniformblock("default",globalvalues);
