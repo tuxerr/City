@@ -1,5 +1,7 @@
 #include "scene.hpp"
 
+static GLenum bufs[]={GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
+
 Scene::Scene(Display *disp) : 
     light_number(0), disp(disp), camera_changed(false), 
     octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096))
@@ -10,11 +12,16 @@ Scene::Scene(Display *disp) :
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,"depth_creation");
     disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,"display_texture");
 //    disp->new_program("shaders/phong.vert","shaders/phong.frag","shaders/terrain_tc.tess","terrain_te.tess","phong");
+    disp->new_program("shaders/deferred.vert","shaders/deferred.frag",NULL,NULL,"deferred");
+
+    int screen_width=disp->get_width();
+    int screen_height=disp->get_height();
 
     globalvalues=disp->new_uniformblock("GlobalValues");
     disp->link_program_to_uniformblock("default",globalvalues);
     disp->link_program_to_uniformblock("phong",globalvalues);
     disp->link_program_to_uniformblock("depth_creation",globalvalues);
+    disp->link_program_to_uniformblock("deferred",globalvalues);
 
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
@@ -79,9 +86,14 @@ Scene::Scene(Display *disp) :
     fullscreen_quad->update_quads_index_buffer(&index[0],sizeof(index));
     fullscreen_quad->update_color_buffer(&color[0],sizeof(color));
 
-    testtex = new Texture("testtex.png");
+    // textures initialization
+    null_colortex=new Texture(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
+    deferred_normalmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
+    deferred_colormap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
+    deferred_texcoordmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
+    deferred_depthmap=new Texture(screen_width,screen_height,TEXTURE_DEPTH);
 
-    uniform_displaytex_tex->set_value(testtex);
+    uniform_displaytex_tex->set_value(deferred_normalmap);
     uniform_displaytex_choice->set_value(-1);
 }
 
@@ -97,6 +109,12 @@ Scene::~Scene() {
             delete lights[i];
         }
     }
+
+    delete null_colortex;
+    delete deferred_normalmap;
+    delete deferred_colormap;
+    delete deferred_texcoordmap;
+    delete deferred_depthmap;
 }
 
 void Scene::set_perspective(float angle,float near,float far) {
@@ -212,9 +230,8 @@ void Scene::delete_light(Light* l) {
 
 void Scene::render() {
     
-    FBO fbo;
-    Texture tex_color(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
-    fbo.attach_texture(&tex_color,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be used
+    FBO fbo_shadows,fbo_deferred;
+    fbo_shadows.attach_texture(null_colortex,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be complete
 
     for(int i=0;i<MAX_LIGHTS;i++) {
 
@@ -230,7 +247,7 @@ void Scene::render() {
                     break;
 
                 case DIRECTION_LIGHT:
-                    render_directional_shadowmap((DirectionalLight*) lights[i],fbo,uniform_light_sampler[i]);
+                    render_directional_shadowmap((DirectionalLight*) lights[i],fbo_shadows,uniform_light_sampler[i]);
                     break;
 
                 case OFF:
@@ -244,15 +261,31 @@ void Scene::render() {
             }
         }
     }
+    fbo_shadows.unbind();
     
     frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far,scene_fov_rad);
 
+    
     // reset all saved lods to unset for the new global render
     for(Object* o : objects) {
         o->reset_lod_to_draw();
     }
-    draw_scene();
 
+    // deferred rendering : first pass
+    fbo_deferred.attach_texture(deferred_normalmap,FBO_COLOR0);
+    fbo_deferred.attach_texture(deferred_colormap,FBO_COLOR1);
+    fbo_deferred.attach_texture(deferred_texcoordmap,FBO_COLOR2);
+    fbo_deferred.attach_texture(deferred_depthmap,FBO_DEPTH);
+    if(fbo_deferred.iscomplete()) {
+        fbo_deferred.bind();
+        glDrawBuffers(3,&(bufs[0]));
+        draw_scene("deferred");
+        fbo_deferred.unbind();
+    } else {
+        Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO"<<std::endl;
+    }
+
+    disp->new_draw();
     if(displayed_texture!=DT_NONE) {
         draw_object(fullscreen_quad,true);
     }
@@ -563,5 +596,17 @@ void Scene::display_texture(Display_Texture tex) {
     } else if(tex==DT_CASCADED8) {
         uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
         uniform_displaytex_choice->set_value(7);
+    } else if(tex==DT_DEPTH) {
+        uniform_displaytex_tex->set_value(deferred_depthmap);
+        uniform_displaytex_choice->set_value(-1);
+    } else if(tex==DT_NORMAL) {
+        uniform_displaytex_tex->set_value(deferred_normalmap);
+        uniform_displaytex_choice->set_value(-1);
+    } else if(tex==DT_COLOR) {
+        uniform_displaytex_tex->set_value(deferred_colormap);
+        uniform_displaytex_choice->set_value(-1);
+    } else if(tex==DT_TEXCOORD) {
+        uniform_displaytex_tex->set_value(deferred_texcoordmap);
+        uniform_displaytex_choice->set_value(-1);
     }
 }

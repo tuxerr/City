@@ -13,5 +13,5 @@ out vec3 color;
 void main() {
      texcoord = in_Vertex/2+0.5;
      color = in_Color;
-     gl_Position = vec4(in_Vertex,1.0);
+     gl_Position = vec4(in_Vertex.xy,0.,1.0);
 }

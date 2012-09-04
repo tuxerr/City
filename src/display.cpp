@@ -154,8 +154,7 @@ void Display::link_program_to_uniformblock(std::string program_name,UniformBlock
 }
 
 void Display::new_draw() {
-    glClear(GL_COLOR_BUFFER_BIT); 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 }
 
 void Display::refresh() {

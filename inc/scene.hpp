@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <math.h>
+#include <GL/glew.h>
 #include "display.hpp"
 #include "object.hpp"
 #include "light.hpp"
@@ -25,7 +26,7 @@ class Scene {
 public:
     typedef enum Display_Texture {
         DT_NONE, DT_DEPTH, DT_TEST, DT_CASCADED1, DT_CASCADED2, DT_CASCADED3, DT_CASCADED4, 
-        DT_CASCADED5, DT_CASCADED6, DT_CASCADED7, DT_CASCADED8, DT_NORMAL
+        DT_CASCADED5, DT_CASCADED6, DT_CASCADED7, DT_CASCADED8, DT_NORMAL, DT_COLOR, DT_TEXCOORD
     } Display_Texture;
 
     Scene(Display *disp);
@@ -67,7 +68,11 @@ private:
     Object* fullscreen_quad;
     Display_Texture displayed_texture;
 
-    Texture *testtex;
+    Texture *null_colortex;
+    Texture *deferred_normalmap;
+    Texture *deferred_colormap;
+    Texture *deferred_texcoordmap;
+    Texture *deferred_depthmap;
 
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;
