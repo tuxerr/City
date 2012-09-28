@@ -1,41 +1,33 @@
 #include "timer.hpp"
 
-Timer::Timer(int fps) : fps(fps) , act_fps(fps) {
-}
-
-void Timer::init() {
-    // inits SDL timer system
-    SDL_InitSubSystem(SDL_INIT_TIMER);
-    reset();
+Timer::Timer(int fps) : clock(), fps(fps) , act_fps(fps) {
+    needed_time=1000/fps;
 }
 
 void Timer::reset() {
-    last_time=SDL_GetTicks();
+    clock.restart();
 }
 
 void Timer::wait() {
     // slows the program to avoid using too much CPU
-    int act_time=SDL_GetTicks();
-    int needed_time=1000/fps;
-
-    if(act_time-last_time<needed_time) {
+    int elapsed_time = clock.getElapsedTime().asMilliseconds();
+    
+    if(elapsed_time<needed_time) {
         // if the new image is too quick
-        SDL_Delay(needed_time-act_time+last_time);
+        sf::sleep(sf::milliseconds(needed_time-elapsed_time));
     } else {
         Logger::log(LOG_WARNING)
             <<"Performance issues : program cannot keep up to "<<fps
-            <<" fps (act "<<act_time-last_time<<" ms or "<<1000/(act_time-last_time)
+            <<" fps (act "<<elapsed_time<<" ms or "<<1000/(elapsed_time)
             <<" fps)"<<endl;
     } 
 
-    act_time=SDL_GetTicks();
+    reset();
 
     // calculates real FPS
-    if(act_time!=last_time)
-        act_fps=1000/(act_time-last_time);
+    if(elapsed_time!=0)
+        act_fps=1000/(elapsed_time);
 
-    last_time=act_time;
-    
 }
 
 int Timer::get_act_fps() {

@@ -26,6 +26,7 @@ int main(int argc,char *argv[]) {
 
     PerlinNoise noise(0.5,2,2,8,42424237);
     Display disp(1680,1050,false,true);     disp.init();     
+    Controls c(disp.getWindow());
 
     Scene sce(&disp);
     
@@ -39,7 +40,7 @@ int main(int argc,char *argv[]) {
 
     terrain.scale(60,60,60);
     
-    Controls c;
+
 
     ObjFile spaceship("data/spaceship.obj");
 
@@ -125,7 +126,7 @@ int main(int argc,char *argv[]) {
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
     
     int i=0;
-    timer.init();
+
     Vec3<float> position(0,0,1),up_vector(0,0,1);
     Vec3<float> target(100,0,1);
     bool stop=false;
@@ -135,6 +136,7 @@ int main(int argc,char *argv[]) {
     float view_distance=1500;
     
     sce.display_texture(Scene::DT_NONE);
+    timer.reset();
 
     while(!c.quit) {
         i++;

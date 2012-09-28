@@ -2,11 +2,11 @@
 #define DEF_CONTROLS
 
 #include <iostream>
-#include <SDL/SDL.h>
+#include <SFML/Window.hpp>
 
 class Controls {
 public:
-    Controls();
+    Controls(sf::Window *app);
     void refresh();
     bool quit;
     bool up;
@@ -19,6 +19,7 @@ public:
     bool e;
     
 private:
+    sf::Window *app;
 };
 
 #endif

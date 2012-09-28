@@ -20,41 +20,23 @@ Display::~Display() {
         delete (*itub);
     }
 
-    SDL_GL_DeleteContext(glcontext);
-    SDL_DestroyWindow(screen);
-    SDL_Quit();
+    delete window; // removes the SFML rendering context
 }
 
 void Display::init() {
 
-    if(SDL_Init(SDL_INIT_VIDEO)<0) {
-        std::cout<<"Error during SDL init : "<<SDL_GetError()<<std::endl;
-        exit(1);
-    }
+    sf::ContextSettings winsettings;
+    winsettings.depthBits         = 24; // Request a 24 bits depth buffer
+    winsettings.antialiasingLevel = 2;  // Request 2 levels of antialiasing
+    winsettings.majorVersion = 4;
+    winsettings.minorVersion = 0;
     
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-    if(antialiasing) {
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-    }
 
     if(fullscreen) {
-        screen=SDL_CreateWindow(TITLE,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
-                                width,height,SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | 
-                                SDL_WINDOW_FULLSCREEN);
+        window = new sf::Window(sf::VideoMode(width,height,32),TITLE,sf::Style::Fullscreen,winsettings);
     } else {
-        screen=SDL_CreateWindow(TITLE,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
-                                width,height,SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+        window = new sf::Window(sf::VideoMode(width,height,32),TITLE,sf::Style::Close,winsettings);
     }
-
-    glcontext = SDL_GL_CreateContext(screen);
-
-//    SDL_GL_SetSwapInterval(1);
 
     glewInit();
     
@@ -63,6 +45,10 @@ void Display::init() {
     glEnable(GL_TEXTURE_2D_ARRAY);
 
     glPatchParameteri(GL_PATCH_VERTICES,4); // patches are made up from 4 vertices
+}
+
+sf::Window* Display::getWindow() {
+    return window;
 }
 
 int Display::get_width() {
@@ -158,5 +144,5 @@ void Display::new_draw() {
 }
 
 void Display::refresh() {
-    SDL_GL_SwapWindow(screen);
+    window->display();
 }

@@ -1,4 +1,3 @@
-
 #ifndef DEF_DISPLAY
 #define DEF_DISPLAY
 
@@ -6,7 +5,7 @@
 #include <string>
 #include <map>
 #include <set>
-#include <SDL/SDL.h>
+#include <SFML/Window.hpp>
 #include <GL/glew.h>
 #include "shader_program.hpp"
 #include "uniform.hpp"
@@ -20,6 +19,7 @@ public:
     Display(int width=800,int height=600,bool fullscreen=false,bool aa=true);
     ~Display();
     void init();
+    sf::Window* getWindow();
     void viewport(int new_width = -1, int new_height = -1);
     int get_width();
     int get_height();
@@ -35,8 +35,8 @@ public:
     void refresh();
 
 private:
-    SDL_WindowID screen;
-    SDL_GLContext glcontext;
+    sf::Window *window;
+    
     int width;
     int height;
     bool fullscreen;
