@@ -1,7 +1,6 @@
 #version 330
 
 smooth in vec3 texcoord;
-in vec3 color;
 
 out vec4 pixel_color;
 

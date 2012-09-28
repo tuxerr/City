@@ -65,6 +65,11 @@ private:
     Uniform *uniform_displaytex_arraytex;
     Uniform *uniform_displaytex_choice;
 
+    Uniform *uniform_phong_normalmap;
+    Uniform *uniform_phong_depthmap;
+    Uniform *uniform_phong_colormap;
+    Uniform *uniform_phong_texcoordmap;
+
     Object* fullscreen_quad;
     Display_Texture displayed_texture;
 
@@ -73,6 +78,7 @@ private:
     Texture *deferred_colormap;
     Texture *deferred_texcoordmap;
     Texture *deferred_depthmap;
+    Texture *deferred_result;
 
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;

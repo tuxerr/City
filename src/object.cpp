@@ -341,14 +341,16 @@ void Object::update_matrices(Matrix4 *perspective,Matrix4 *camera) {
     if(camera!=NULL) {
         total_modelview = (*camera)*obj_modelview;
 
-        normal_mat = obj_modelview; 
-        normal_mat.invert();
-        normal_mat.transpose();
+        if(modelview_changed) {
+            normal_mat = obj_modelview; 
+            normal_mat.invert();
+            normal_mat.transpose();
+        }
 
         if(perspective!=NULL) {
             projection_modelview = (*perspective)*total_modelview;
         }
-        
+
     }
     modelview_changed=false;
 }

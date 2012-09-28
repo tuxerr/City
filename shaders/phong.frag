@@ -4,10 +4,7 @@
 
 out vec4 pixel_color;
 
-in vec3 color;
-smooth in vec4 vert_pos;
-smooth in vec4 vert_normal;
-smooth in vec2 texcoord;
+smooth in vec2 deferred_texcoord;
 
 uniform Light_ {
     int light_type;
@@ -35,6 +32,7 @@ uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
+    mat4 screen_to_world; //inverse(perspective*camera)
     float near;
     vec3 camera_pos;
     vec3 eye_vector;
@@ -45,8 +43,17 @@ uniform int lightnumber;
 
 uniform sampler2DArrayShadow shadowmap[8];
 uniform samplerCubeShadow shadowcubemap[8];
+uniform sampler2D normalmap;
+uniform sampler2D depthmap;
+uniform sampler2D colormap;
+uniform sampler2D texcoordmap;
 
 uniform float cascaded_shading_zdelta;
+
+vec3 color;
+vec4 vert_pos;
+vec4 vert_normal;
+vec3 texcoord;
 
 vec4 spotlight(int lightID) {
     vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
@@ -235,6 +242,20 @@ vec4 apply_fog(vec4 color,float distance) {
 }
 
 void main(void) {
+    // getting information from deferred textures
+    color = texture(colormap,deferred_texcoord).rgb;
+    
+    float depth=texture(depthmap,deferred_texcoord).r;
+    vec2 screen_texcoord=deferred_texcoord.xy*2-1;
+    vec4 screen_coordinates = vec4(screen_texcoord,(depth-0.5)*2,1.);
+    vert_pos = GlobalValues.screen_to_world*screen_coordinates;
+    vert_pos.xyz=vert_pos.xyz/vert_pos.w;
+    vert_pos.w=1;
+
+    vert_normal = texture(normalmap,deferred_texcoord);
+    
+    texcoord = texture(texcoordmap,deferred_texcoord).xyz;
+
     vec4 res = vec4(0,0,0,0);
     for(int i=0;i<lightnumber;i++) {
 
@@ -256,6 +277,7 @@ void main(void) {
         }
     }
 
-//    pixel_color=res;
-    pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
+    pixel_color=res;
+//    pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
+
 }       

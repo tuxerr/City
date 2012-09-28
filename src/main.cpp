@@ -134,7 +134,7 @@ int main(int argc,char *argv[]) {
     
     float view_distance=1500;
     
-    sce.display_texture(Scene::DT_NORMAL);
+    sce.display_texture(Scene::DT_NONE);
 
     while(!c.quit) {
         i++;

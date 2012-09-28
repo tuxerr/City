@@ -8,7 +8,7 @@ Scene::Scene(Display *disp) :
 {
     // program initialisation
     disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL);
-    disp->new_program("shaders/phong.vert","shaders/phong.frag",NULL,NULL,"phong");
+    disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,"phong");
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,"depth_creation");
     disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,"display_texture");
 //    disp->new_program("shaders/phong.vert","shaders/phong.frag","shaders/terrain_tc.tess","terrain_te.tess","phong");
@@ -32,6 +32,20 @@ Scene::Scene(Display *disp) :
 
         uniform_cascaded_shading_zdelta=disp->new_uniform("cascaded_shading_zdelta",UNIFORM_FLOAT);
         disp->link_program_to_uniform("phong",uniform_cascaded_shading_zdelta);
+
+        uniform_phong_normalmap=disp->new_uniform("normalmap",UNIFORM_SAMPLER);
+        disp->link_program_to_uniform("phong",uniform_phong_normalmap);
+
+        uniform_phong_depthmap=disp->new_uniform("depthmap",UNIFORM_SAMPLER);
+        disp->link_program_to_uniform("phong",uniform_phong_depthmap);
+
+        uniform_phong_colormap=disp->new_uniform("colormap",UNIFORM_SAMPLER);
+        disp->link_program_to_uniform("phong",uniform_phong_colormap);
+
+        uniform_phong_texcoordmap=disp->new_uniform("texcoordmap",UNIFORM_SAMPLER);
+        disp->link_program_to_uniform("phong",uniform_phong_texcoordmap);
+
+
 
         for(int i=0;i<MAX_LIGHTS;i++) {
             std::stringstream uniform_name;
@@ -92,8 +106,15 @@ Scene::Scene(Display *disp) :
     deferred_colormap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
     deferred_texcoordmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
     deferred_depthmap=new Texture(screen_width,screen_height,TEXTURE_DEPTH);
+    deferred_result=new Texture(screen_width,screen_height,TEXTURE_RGBA);
 
-    uniform_displaytex_tex->set_value(deferred_normalmap);
+    // uniform setting
+    uniform_phong_normalmap->set_value(deferred_normalmap);
+    uniform_phong_colormap->set_value(deferred_colormap);
+    uniform_phong_texcoordmap->set_value(deferred_texcoordmap);
+    uniform_phong_depthmap->set_value(deferred_depthmap);
+
+    uniform_displaytex_tex->set_value(deferred_result);
     uniform_displaytex_choice->set_value(-1);
 }
 
@@ -229,8 +250,8 @@ void Scene::delete_light(Light* l) {
 }
 
 void Scene::render() {
-    
-    FBO fbo_shadows,fbo_deferred;
+
+    FBO fbo_shadows,fbo_deferred,fbo_deferred_phong;
     fbo_shadows.attach_texture(null_colortex,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be complete
 
     for(int i=0;i<MAX_LIGHTS;i++) {
@@ -281,14 +302,36 @@ void Scene::render() {
         glDrawBuffers(3,&(bufs[0]));
         draw_scene("deferred");
         fbo_deferred.unbind();
+
     } else {
         Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO"<<std::endl;
     }
 
+    // phong shading on full-screen quad
+    glDrawBuffers(1,&(bufs[0]));
+    fbo_deferred_phong.attach_texture(deferred_result,FBO_COLOR0);
+    if(fbo_deferred_phong.iscomplete()) {
+        fbo_deferred_phong.bind();
+        
+        disp->new_draw();
+        fullscreen_quad->set_program("phong");
+
+        Matrix4 screen_to_world;
+        screen_to_world = perspective*camera;
+        screen_to_world.invert();
+        globalvalues->set_value(screen_to_world,"screen_to_world");
+
+        draw_object(fullscreen_quad,true); 
+        
+        fbo_deferred_phong.unbind();        
+    } else {
+        Logger::log(LOG_ERROR)<<"Couldn't bing the deferred rendering FBO for the phong pass"<<std::endl;
+    } 
+
+    // draw result of final pass (using fullscreen quad)
     disp->new_draw();
-    if(displayed_texture!=DT_NONE) {
-        draw_object(fullscreen_quad,true);
-    }
+    fullscreen_quad->set_program("display_texture");
+    draw_object(fullscreen_quad,true);
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
@@ -572,7 +615,10 @@ void Scene::draw_object(Object *o,bool use_shaders) {
 
 void Scene::display_texture(Display_Texture tex) {
     displayed_texture=tex;
-    if(tex==DT_CASCADED1) {
+    if(tex==DT_NONE) {
+        uniform_displaytex_tex->set_value(deferred_result);
+        uniform_displaytex_choice->set_value(-1);
+    } else if(tex==DT_CASCADED1) {
         uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
         uniform_displaytex_choice->set_value(0);
     } else if(tex==DT_CASCADED2) {
