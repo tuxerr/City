@@ -3,7 +3,10 @@
 layout(quads, equal_spacing, sw) in;
 
 in vec3 tcPosition[];
-out vec3 tePosition;
+
+out vec3 color;
+smooth out vec4 vert_normal;
+smooth out vec3 texcoord;
 
 uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
@@ -23,5 +26,6 @@ void main()
     vec3 a = mix(tcPosition[0], tcPosition[3], u);
     vec3 b = mix(tcPosition[12], tcPosition[15], u);
     tePosition = mix(a, b, v);
+    // tePosition = texture(heightmap,mix(a,b,v));
     gl_Position = Projection * Modelview * vec4(tePosition, 1);
 }

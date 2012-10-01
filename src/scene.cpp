@@ -11,7 +11,7 @@ Scene::Scene(Display *disp) :
     disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,"phong");
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,"depth_creation");
     disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,"display_texture");
-//    disp->new_program("shaders/phong.vert","shaders/phong.frag","shaders/terrain_tc.tess","terrain_te.tess","phong");
+//    disp->new_program("shaders/deferred_tess.vert","shaders/terrain_tc.tess","shaders/terrain_te.tess","shaders/deferred_tess.frag","deferred_tess");
     disp->new_program("shaders/deferred.vert","shaders/deferred.frag",NULL,NULL,"deferred");
 
     int screen_width=disp->get_width();
@@ -44,7 +44,6 @@ Scene::Scene(Display *disp) :
 
         uniform_phong_texcoordmap=disp->new_uniform("texcoordmap",UNIFORM_SAMPLER);
         disp->link_program_to_uniform("phong",uniform_phong_texcoordmap);
-
 
 
         for(int i=0;i<MAX_LIGHTS;i++) {
