@@ -75,3 +75,22 @@ void Texture::unbind() {
 GLenum Texture::get_gl_texture_type() {
     return gl_texture_type;
 }
+
+void Texture::set_data(void *data,int xoffset,int yoffset,int data_width,int data_height) {
+    if(data_width==-1) {
+        data_width=width;
+    }
+    if(data_height==-1) {
+        data_height=height;
+    }
+
+    switch(texture_type) {
+    case TEXTURE_RGBA:
+        glTexSubImage2D(GL_TEXTURE_2D,0,xoffset,yoffset,data_width,data_height,GL_RGBA,GL_FLOAT,data);
+        break;
+        
+    default:
+        Logger::log(LOG_ERROR)<<"Can't set data in a depth texture"<<std::endl;
+        break;
+    }
+}

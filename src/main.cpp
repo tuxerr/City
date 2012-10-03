@@ -35,7 +35,7 @@ int main(int argc,char *argv[]) {
 
     Timer timer;
 
-    Terrain terrain(0.4,&noise);
+    Terrain terrain(&noise);
 
     terrain.scale(60,60,60);
     
