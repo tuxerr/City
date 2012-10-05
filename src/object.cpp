@@ -287,6 +287,11 @@ void Object::draw(float distance_from_camera) {
             parts[i][lod].ibo_quads.bind();
             glDrawElements(GL_QUADS,parts[i][lod].ibo_quads.size()/parts[i][lod].ibo_quads.element_size(),parts[i][lod].ibo_quads.element_type(),0);
 
+        } else if(obj_draw_mode==OBJECT_DRAW_PATCHES && parts[i][lod].ibo_quads.size()>0) {
+            // patches and quads share the same VBOs, since GL_PATCH_VERTICES is 4 (patches are just special quads)
+            parts[i][lod].ibo_quads.bind();
+            glDrawElements(GL_PATCHES,parts[i][lod].ibo_quads.size()/parts[i][lod].ibo_quads.element_size(),parts[i][lod].ibo_quads.element_type(),0);
+
         } else if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && parts[i][lod].ibo_triangles.size()>0) {
             parts[i][lod].ibo_triangles.bind();
             glDrawElements(GL_TRIANGLES,parts[i][lod].ibo_triangles.size()/parts[i][lod].ibo_triangles.element_size(),parts[i][lod].ibo_triangles.element_type(),0);

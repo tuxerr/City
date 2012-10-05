@@ -49,6 +49,8 @@ int main(int argc,char *argv[]) {
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->rotate(180,0,0,1);
     o->translate(0,0,5);
+
+    spaceship.close();
     
     Spaceship ship(o);
     float vert[] = {-1, -1, 0,
@@ -105,18 +107,7 @@ int main(int argc,char *argv[]) {
     t->set_enable_draw(false);
     t2->set_enable_draw(false);
 
-    float terrain_detail=40;
-    for(int i=0;i<200;i+=terrain_detail) {
-        for(int j=0;j<200;j+=terrain_detail) {
-            Object *t=sce.new_object();
-            terrain.generate_terrain(Vec2<float>(i,j),terrain_detail,terrain_detail,t,true);
-            t->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-            t->set_program("phong");
-            t->translate(i+terrain_detail/2,j+terrain_detail/2,0);
-        }
-    } 
-
-    spaceship.close();
+    Terrain_Data tdata = terrain.generate_terrain(Vec2<float>(i,j),500);
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);

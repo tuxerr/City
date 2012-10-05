@@ -26,7 +26,8 @@ typedef struct Terrain_Data {
 class Terrain {
 public:
     Terrain(float precision,PerlinNoise *noise);
-    Terrain_Data generate_terrain(Vec2<float> coord,float xlength,float ylength);
+    Terrain_Data generate_terrain(Vec2<float> coord,float length);
+    void generate_patches(float length, Object *o);
     void scale(float x,float y,float z);
     float height(float x,float y);
 

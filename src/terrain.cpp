@@ -32,26 +32,28 @@ Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
             Vec3<float> n2(0,EPS,height(cx+coord.x,cy+coord.y+EPS)-cz);
             n1=n1*10;
             n2=n2*10;
-            Vec3<float> res = n1.cross(n2);
-            if(res.z<0) {
-                res=res*-1;
+            Vec3<float> normal = n1.cross(n2);
+            if(normal.z<0) {
+                normal=normal*-1;
             }
 
-            res.normalize();
+            normal.normalize();
 
-            float pente = res.scalar(Vec3<float>(0,0,1));
+            float pente = normal.scalar(Vec3<float>(0,0,1));
                 
-            color_matrix.push_back(mixvec(Vec3<float>(0.35,0.23,0.06),
+            Vec3<float> color = mixvec(Vec3<float>(0.35,0.23,0.06),
                                           mixvec(Vec3<float>(0,1,0),Vec3<float>(1,1,1),cz/2),
-                                          pente));
-/*                if(pente<0.65) {
-                  color_matrix.push_back(Vec3<float>(0.35,0.23,0.06));
-                  } else if(cz>0.7) {
-                  color_matrix.push_back(Vec3<float>(1,1,1));
-                  }*/
+                                       pente);
 
-            normal_matrix.push_back(res);
-            geodata[i
+            geodata[i*TERRAIN_TEX_RESOLUTION+j]=normal.x;
+            geodata[i*TERRAIN_TEX_RESOLUTION+j+1]=normal.y;
+            geodata[i*TERRAIN_TEX_RESOLUTION+j+2]=normal.z;
+            geodata[i*TERRAIN_TEX_RESOLUTION+j+3]=cz;
+
+            colordata[i*TERRAIN_TEX_RESOLUTION+j]=color.x;
+            colordata[i*TERRAIN_TEX_RESOLUTION+j+1]=color.y;
+            colordata[i*TERRAIN_TEX_RESOLUTION+j+2]=color.z;
+            colordata[i*TERRAIN_TEX_RESOLUTION+j+3]=cz;
 
         }
     }
@@ -59,8 +61,19 @@ Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
     Texture *geotex = new Texture(TERRAIN_TEX_RESOLUTION,TERRAIN_TEX_RESOLUTION,TEXTURE_RGBA);
     Texture *colortex = new Texture(TERRAIN_TEX_RESOLUTION,TERRAIN_TEX_RESOLUTION,TEXTURE_RGBA);
     
+    geotex->set_data(geodata);
+    colortex->set_data(colordata);
+
+    return_data.geometry_tex=geotex;
+    return_data.color_tex=colortex;
+    return_data.init_coord=coord;
+    return_data.length=length;
     
     return return_data;
+}
+
+void Terrain::generate_patches(float length, Object *o) {
+    
 }
 
 
