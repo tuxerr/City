@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include "SOIL.h"
 #include "constants.hpp"
+#include "logger.hpp"
 
 typedef enum Texture_Types {
     TEXTURE_DEPTH, TEXTURE_RGBA, TEXTURE_DEPTH_LAYERED
@@ -22,6 +23,7 @@ public:
     GLuint id();
     void bind(int texture_index = -1);
     void unbind();
+    void set_data(void *data,int xoffset=0,int yoffset=0,int data_width=-1,int data_height=-1);
 
 private:
     GLuint texture_id;

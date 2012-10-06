@@ -10,19 +10,28 @@
 #include "object.hpp"
 #include "perlin.hpp"
 
+#define TERRAIN_TEX_RESOLUTION 1024
+
 typedef enum Fill_Modes {
     SIDE_UP_FILL, SIDE_RIGHT_FILL, EDGE_FILL
 } Fill_Modes;
 
+typedef struct Terrain_Data {
+    Texture *geometry_tex;
+    Texture *color_tex;
+    Vec2<float> init_coord;
+    float length;
+} Terrain_Data;
+
 class Terrain {
 public:
     Terrain(float precision,PerlinNoise *noise);
-    void generate_terrain(Vec2<float> coord,float xlength,float ylength,Object *object,bool generate_lod);
+    Terrain_Data generate_terrain(Vec2<float> coord,float length);
+    void generate_patches(float length, Object *o);
     void scale(float x,float y,float z);
     float height(float x,float y);
 
 private:
-    float precision;
     Vec3<float> scalar;
     PerlinNoise *noise;
 };
