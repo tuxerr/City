@@ -39,7 +39,6 @@ int main(int argc,char *argv[]) {
     Terrain terrain(&noise);
 
     terrain.scale(60,60,60);
-    
 
 
     ObjFile spaceship("data/spaceship.obj");
@@ -54,61 +53,12 @@ int main(int argc,char *argv[]) {
     spaceship.close();
     
     Spaceship ship(o);
-    float vert[] = {-1, -1, 0,
-                    1, -1, 0, 
-                    1, 1, 0, 
-                    -1, 1, 0};
 
-    float norms[] = {0, 0, 1, 
-                     0, 0, 1, 
-                     0, 0, 1, 
-                     0, 0, 1};
-
-    int index[] = {0, 1, 2, 3};
-
-    float color[] = {1, 1, 1,
-                     1, 1, 1,
-                     1, 1, 1,
-                     1, 1, 1};
-
-    float vert2[] = {0,0,0,
-                     0,1,0,
-                     -0.5,1,1,
-                     -0.5,0,1};
-
-
-    float norms2[] = {-1,0,0,
-                      -1,0,0,
-                      -1,0,0,
-                      -1,0,0};
-
-    float color2[] = {1, 0, 0,
-                      1, 0, 0,
-                      1, 0, 0,
-                      1, 0, 0};
-
-    Object *t = sce.new_object();
-    t->set_draw_mode(OBJECT_DRAW_QUADS);
-    t->set_program("phong");
-    t->update_vertices_buffer(&vert[0],sizeof(vert));
-    t->update_normals_buffer(&norms[0],sizeof(norms));
-    t->update_quads_index_buffer(&index[0],sizeof(index));
-    t->update_color_buffer(&color[0],sizeof(color));
-    t->scale(100,100,100);
-
-    Object *t2 = sce.new_object();
-    t2->set_draw_mode(OBJECT_DRAW_QUADS);
-    t2->set_program("phong");
-    t2->update_vertices_buffer(&vert2[0],sizeof(vert2));
-    t2->update_normals_buffer(&norms2[0],sizeof(norms2));
-    t2->update_quads_index_buffer(&index[0],sizeof(index));
-    t2->update_color_buffer(&color2[0],sizeof(color2));
-    t2->scale(10,10,10);
-
-    t->set_enable_draw(false);
-    t2->set_enable_draw(false);
-
-    Terrain_Data tdata = terrain.generate_terrain(Vec2<float>(i,j),500);
+    #define TERRAIN_LENGTH 200
+    Terrain_Data tdata = terrain.generate_terrain(Vec2<float>(0,0),TERRAIN_LENGTH);
+    Object *terrain_patches = sce.new_object();
+    terrain.generate_patches(TERRAIN_LENGTH,terrain_patches);
+    terrain_patches->set_draw_mode(OBJECT_DRAW_PATCHES);
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);

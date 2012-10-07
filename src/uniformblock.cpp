@@ -47,7 +47,7 @@ void UniformBlock::bind_to_attach_point(GLuint program_id) {
         size=ubo_size;
         create();
     } else if(size!=ubo_size) {
-        Logger::log()<<"Size mismatch for UBO "<<get_ubo()<<" : UBO size is "<<size
+        Logger::log(LOG_ERROR)<<"Size mismatch for UBO "<<get_ubo()<<" : UBO size is "<<size
                  <<" and needed size is "<<ubo_size<<std::endl;
     }
     glBindBuffer(GL_UNIFORM_BUFFER,ubo);

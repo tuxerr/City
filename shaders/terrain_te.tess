@@ -1,12 +1,19 @@
 #version 410
 
-layout(quads, equal_spacing, sw) in;
+layout(quads, equal_spacing, cw) in;
 
 in vec3 tcPosition[];
 
 out vec3 color;
 smooth out vec4 vert_normal;
 smooth out vec3 texcoord;
+
+uniform sampler2D terrain_geo;
+uniform sampler2D terrain_color;
+uniform float terrain_height;
+uniform float terrain_length;
+uniform float lod_factor;
+uniform vec2 screen_size;
 
 uniform GlobalValues_ {
     mat4 modelview; // camera*modelview
@@ -20,12 +27,19 @@ uniform GlobalValues_ {
 } GlobalValues;
  
 void main()
-
 {
     float u = gl_TessCoord.x, v = gl_TessCoord.y;
+
     vec3 a = mix(tcPosition[0], tcPosition[3], u);
-    vec3 b = mix(tcPosition[12], tcPosition[15], u);
-    tePosition = mix(a, b, v);
-    // tePosition = texture(heightmap,mix(a,b,v));
-    gl_Position = Projection * Modelview * vec4(tePosition, 1);
+    vec3 b = mix(tcPosition[12], tcPosition[15], v);
+
+    vec3 tePosition = mix(a, b, v);
+    vec2 tex_coord = tePosition.xy/terrain_length;
+
+    float height = texture(terrain_geo,tex_coord).a*terrain_height;
+    color = texture(terrain_color,tex_coord).rgb;
+    vert_normal = vec4(texture(terrain_geo,tex_coord).xyz,1.0);
+    texcoord = vec3(0,0,0);
+     
+    gl_Position = GlobalValues.projection_modelview*vec4(tePosition.xy,height, 1);
 }

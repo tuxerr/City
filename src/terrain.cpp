@@ -16,6 +16,7 @@ float Terrain::height(float x,float y) {
 
 Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
     Terrain_Data return_data;
+    Logger::log()<<"Generating a "<<TERRAIN_TEX_RESOLUTION<<" * "<<TERRAIN_TEX_RESOLUTION<<" terrain of length "<<length<<std::endl;
 
     float geodata[TERRAIN_TEX_RESOLUTION*TERRAIN_TEX_RESOLUTION*4]; // careful, high RAM usage
     float colordata[TERRAIN_TEX_RESOLUTION*TERRAIN_TEX_RESOLUTION*4]; // careful, high RAM usage
@@ -73,7 +74,30 @@ Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
 }
 
 void Terrain::generate_patches(float length, Object *o) {
+    int patch_number = TERRAIN_TEX_RESOLUTION/64;
+    float patch_length = length/patch_number;
+    Logger::log()<<"Generating "<<patch_number<<" quad patches of individual length "<<patch_length<<std::endl;
+
+    std::vector<Vec3<float>> vertices;
+    std::vector<int> quad_index;
+    vertices.reserve(patch_number*patch_number);
+    quad_index.reserve(patch_number*patch_number*4);
     
+
+    for(int i=0;i<=patch_number;i++) {
+        for(int j=0;j<=patch_number;j++) {
+            vertices.push_back(Vec3<float>(i*patch_length,j*patch_length,0));
+        }   
+    }
+
+    for(int i=0;i<patch_number;i++) {
+        for(int j=0;j<patch_number;j++) {
+            quad_index.push_back(i*patch_number+j);
+            quad_index.push_back((i+1)*patch_number+j);
+            quad_index.push_back((i+1)*patch_number+j+1);
+            quad_index.push_back(i*patch_number+j+1);
+        }
+    }
 }
 
 

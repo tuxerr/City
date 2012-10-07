@@ -68,7 +68,7 @@ void Program::load_shaders(const char *vertex_shader_path,const char *fragment_s
 
 GLuint Program::compile_shader(const char *path,GLenum shader_type) {
     GLuint shader=0;
-    if(shader_type==GL_FRAGMENT_SHADER || shader_type==GL_VERTEX_SHADER) {
+    if(shader_type==GL_FRAGMENT_SHADER || shader_type==GL_VERTEX_SHADER || shader_type==GL_TESS_EVALUATION_SHADER || shader_type==GL_TESS_CONTROL_SHADER ) {
         shader = glCreateShader(shader_type);
     } else {
         std::cout<<"Wrong shader type"<<std::endl;
