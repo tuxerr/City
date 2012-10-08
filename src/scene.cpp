@@ -463,7 +463,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
             frustum.orthogonal_frustum(cam_pos,ldir_norm,lsp_y,optimal_radius,1,camera_height*2);
 
-            draw_scene("depth_creation");
+            draw_scene("");
             
             fbo.unbind();
         }  else {

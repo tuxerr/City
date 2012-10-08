@@ -44,7 +44,6 @@ int main(int argc,char *argv[]) {
     ObjFile spaceship("data/spaceship.obj");
 
     Object *o=sce.new_object();
-    o->set_program("phong");
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
     o->rotate(180,0,0,1);
@@ -54,11 +53,10 @@ int main(int argc,char *argv[]) {
     
     Spaceship ship(o);
 
-    #define TERRAIN_LENGTH 200
-    Terrain_Data tdata = terrain.generate_terrain(Vec2<float>(0,0),TERRAIN_LENGTH);
+//    Terrain_Data tdata = terrain.generate_terrain();
+
     Object *terrain_patches = sce.new_object();
-    terrain.generate_patches(TERRAIN_LENGTH,terrain_patches);
-    terrain_patches->set_draw_mode(OBJECT_DRAW_PATCHES);
+    terrain.generate_patches(400,terrain_patches);
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(true);

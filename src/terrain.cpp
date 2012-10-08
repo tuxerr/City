@@ -1,7 +1,7 @@
 #include "terrain.hpp"
 
 Terrain::Terrain(PerlinNoise *noise) : scalar(Vec3<float>(1,1,1)), noise(noise) {
-    
+    Logger::log()<<"Instanciated terrain : "<<(void*)this<<std::endl;
 }
 
 void Terrain::scale(float x,float y,float z) {
@@ -14,9 +14,15 @@ float Terrain::height(float x,float y) {
     return scalar.z*noise->GetHeight(x/scalar.x,y/scalar.y);
 }
 
-Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
-    Terrain_Data return_data;
+//Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
+void Terrain::generate_terrain() {
+    float length=400;
+    Vec2<float> coord(0,0);
+
+    std::cout<<"lol2"<<std::endl;
     Logger::log()<<"Generating a "<<TERRAIN_TEX_RESOLUTION<<" * "<<TERRAIN_TEX_RESOLUTION<<" terrain of length "<<length<<std::endl;
+
+    Terrain_Data return_data;
 
     float geodata[TERRAIN_TEX_RESOLUTION*TERRAIN_TEX_RESOLUTION*4]; // careful, high RAM usage
     float colordata[TERRAIN_TEX_RESOLUTION*TERRAIN_TEX_RESOLUTION*4]; // careful, high RAM usage
@@ -70,13 +76,13 @@ Terrain_Data Terrain::generate_terrain(Vec2<float> coord,float length) {
     return_data.init_coord=coord;
     return_data.length=length;
     
-    return return_data;
+//    return return_data;
 }
 
 void Terrain::generate_patches(float length, Object *o) {
-    int patch_number = TERRAIN_TEX_RESOLUTION/64;
+    int patch_number = TERRAIN_TEX_RESOLUTION/8; // a patch can be divided up to 64 times, so 8*8 times
     float patch_length = length/patch_number;
-    Logger::log()<<"Generating "<<patch_number<<" quad patches of individual length "<<patch_length<<std::endl;
+    Logger::log()<<"Generating "<<patch_number<<" * "<<patch_number<<" quad patches of individual length "<<patch_length<<std::endl;
 
     std::vector<Vec3<float>> vertices;
     std::vector<int> quad_index;
@@ -98,6 +104,8 @@ void Terrain::generate_patches(float length, Object *o) {
             quad_index.push_back(i*patch_number+j+1);
         }
     }
+
+    o->set_draw_mode(OBJECT_DRAW_PATCHES);
 }
 
 

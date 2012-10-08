@@ -13,10 +13,6 @@
 
 #define TERRAIN_TEX_RESOLUTION 1024
 
-typedef enum Fill_Modes {
-    SIDE_UP_FILL, SIDE_RIGHT_FILL, EDGE_FILL
-} Fill_Modes;
-
 typedef struct Terrain_Data {
     Texture *geometry_tex;
     Texture *color_tex;
@@ -27,7 +23,7 @@ typedef struct Terrain_Data {
 class Terrain {
 public:
     Terrain(PerlinNoise *noise);
-    Terrain_Data generate_terrain(Vec2<float> coord,float length);
+    void generate_terrain();
     void generate_patches(float length, Object *o);
     void scale(float x,float y,float z);
     float height(float x,float y);
@@ -37,7 +33,5 @@ private:
     PerlinNoise *noise;
 };
 
-void fill_line_buffer(std::vector<int> &line_buffer,int i,int imax,int j,int jmax,Fill_Modes mode);
-void fill_triangle_buffer(std::vector<int> &tri_buffer,int i,int imax,int j,int jmax,Fill_Modes mode);
 
 #endif
