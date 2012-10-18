@@ -1,7 +1,7 @@
 #include "display.hpp"
 
 Display::Display(int width,int height,bool fullscreen,bool aa) : 
-    width(width), height(height), fullscreen(fullscreen), antialiasing(aa)
+    current_program(NULL), width(width), height(height), fullscreen(fullscreen), antialiasing(aa)
 {
 }
 
@@ -105,7 +105,9 @@ Program *Display::get_program(std::string name) {
 void Display::use_program(std::string name) {
     Program *p = get_program(name);
     if(current_program!=p) {
-        current_program->unuse();
+        if(current_program!=NULL) {
+            current_program->unuse();
+        }
         p->use();
         current_program=p;
     }
