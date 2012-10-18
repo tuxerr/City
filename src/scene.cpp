@@ -7,12 +7,12 @@ Scene::Scene(Display *disp) :
     octree(Vec3<float>(0,0,0),Vec3<float>(4096,4096,4096))
 {
     // program initialisation
-    disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL);
-    disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,"phong");
-    disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,"depth_creation");
-    disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,"display_texture");
-    disp->new_program("shaders/deferred_tess.vert","shaders/deferred_tess.frag","shaders/terrain_tc.tess","shaders/terrain_te.tess","deferred_tess");
-    disp->new_program("shaders/deferred.vert","shaders/deferred.frag",NULL,NULL,"deferred");
+    disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL,NULL);
+    disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,NULL,"phong");
+    disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"depth_creation");
+    disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,NULL,"display_texture");
+    disp->new_program("shaders/deferred_tess.vert","shaders/deferred_tess.frag","shaders/terrain_tc.tess","shaders/terrain_te.tess",NULL,"deferred_tess");
+    disp->new_program("shaders/deferred.vert","shaders/deferred.frag",NULL,NULL,NULL,"deferred");
 
     int screen_width=disp->get_width();
     int screen_height=disp->get_height();

@@ -7,7 +7,7 @@ Program::~Program() {
     glDeleteProgram(program_id);
 }
 
-void Program::load_shaders(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path) {
+void Program::load_shaders(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path,const char *geometry_shader_path) {
     program_id=glCreateProgram();
 
     if(vertex_shader_path!=NULL) {
@@ -41,6 +41,14 @@ void Program::load_shaders(const char *vertex_shader_path,const char *fragment_s
         }
         glDeleteShader(tesseval_shader);
     }
+
+    if(geometry_shader_path!=NULL) {
+        GLuint geometry_shader=compile_shader(geometry_shader_path,GL_GEOMETRY_SHADER);
+        if(geometry_shader!=0) {
+            glAttachShader(program_id,geometry_shader);
+        }
+        glDeleteShader(geometry_shader);
+    }
     
     // linking attributes
     glBindAttribLocation(program_id,SHADER_VERTEX_ATTRIB,"in_Vertex");
@@ -68,7 +76,7 @@ void Program::load_shaders(const char *vertex_shader_path,const char *fragment_s
 
 GLuint Program::compile_shader(const char *path,GLenum shader_type) {
     GLuint shader=0;
-    if(shader_type==GL_FRAGMENT_SHADER || shader_type==GL_VERTEX_SHADER || shader_type==GL_TESS_EVALUATION_SHADER || shader_type==GL_TESS_CONTROL_SHADER ) {
+    if(shader_type==GL_FRAGMENT_SHADER || shader_type==GL_VERTEX_SHADER || shader_type==GL_TESS_EVALUATION_SHADER || shader_type==GL_TESS_CONTROL_SHADER || shader_type==GL_GEOMETRY_SHADER) {
         shader = glCreateShader(shader_type);
     } else {
         std::cout<<"Wrong shader type"<<std::endl;

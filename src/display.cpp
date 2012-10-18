@@ -75,14 +75,14 @@ void Display::viewport(int new_width,int new_height) {
     glViewport(0,0,new_width,new_height);
 }
 
-void Display::new_program(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path,std::string name) {
+void Display::new_program(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path,const char *geometry_shader_path,std::string name) {
     // if a program with this name already exists, rewrite it.
     if(programs.find(name)!=programs.end()) {
         programs.erase(programs.find(name));
     }
     
     // creates the new program with both vertex and fragment shaders.
-    programs[name].load_shaders(vertex_shader_path,fragment_shader_path,tessellation_control_shader_path,tessellation_evaluator_shader_path);
+    programs[name].load_shaders(vertex_shader_path,fragment_shader_path,tessellation_control_shader_path,tessellation_evaluator_shader_path,geometry_shader_path);
     Logger::log()<<"Program "<<name<<" was created"<<std::endl;
 }
 
