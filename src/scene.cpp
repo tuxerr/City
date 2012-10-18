@@ -299,7 +299,7 @@ void Scene::render() {
     if(fbo_deferred.iscomplete()) {
         fbo_deferred.bind();
         glDrawBuffers(3,&(bufs[0]));
-        draw_scene("deferred");
+        draw_scene();
         fbo_deferred.unbind();
 
     } else {
@@ -320,7 +320,7 @@ void Scene::render() {
         screen_to_world.invert();
         globalvalues->set_value(screen_to_world,"screen_to_world");
 
-        draw_object(fullscreen_quad,true); 
+        draw_object(fullscreen_quad); 
         
         fbo_deferred_phong.unbind();        
     } else {
@@ -330,7 +330,7 @@ void Scene::render() {
     // draw result of final pass (using fullscreen quad)
     disp->new_draw();
     fullscreen_quad->set_program("display_texture");
-    draw_object(fullscreen_quad,true);
+    draw_object(fullscreen_quad);
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
@@ -463,7 +463,7 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
 
             frustum.orthogonal_frustum(cam_pos,ldir_norm,lsp_y,optimal_radius,1,camera_height*2);
 
-            draw_scene("");
+            draw_scene();
             
             fbo.unbind();
         }  else {
@@ -502,22 +502,15 @@ Vec3<float> Scene::calculate_shadowing_optimal_point(Vec3<float> near_values[4],
     return Vec3<float>((max_right+max_left)/2,(max_top+max_bot)/2,depth/8);
 }
 
-void Scene::draw_scene(std::string program_name) {
+void Scene::draw_scene() {
     disp->new_draw();
-
-    Program *program=NULL;
 
     if(camera_changed) {
         globalvalues->set_value(camera_pos,"camera_pos");
     }
 
-    if(program_name!="") {
-        program=disp->get_program(program_name);
-        program->use();
-    }
-
     std::list<Object*> drawn;
-    draw_octree(octree,true,drawn,program_name);
+    draw_octree(octree,true,drawn);
  
     int i=0;
     std::list<Object*>::iterator it;
@@ -527,17 +520,13 @@ void Scene::draw_scene(std::string program_name) {
         i++;
     }
 
-    if(program_name!="") {
-        program->unuse();
-    }
-
     if(camera_changed) {
         camera_changed=false;
     }
 
 }
 
-void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn,std::string program_name) {
+void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn) {
     if(oct.objects.size()!=0) {
 
         std::list<Object*>::iterator it;
@@ -547,11 +536,8 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
 
                 o->update_matrices(&perspective,&camera);
 
-                if(program_name!="") {
-                    draw_object(o,false);
-                } else {
-                    draw_object(o,true);
-                }
+                draw_object(o);
+
                 drawn.push_back(o);
                 o->has_been_drawn=true;
 
@@ -565,20 +551,20 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
             if(col==FULL_IN) {
                 for(int i=0;i<8;i++) {
                     if(oct.nodes[i]!=NULL) {
-                        draw_octree(*oct.nodes[i],false,drawn,program_name);
+                        draw_octree(*oct.nodes[i],false,drawn);
                     }
                 }
             } else if(col==IN) {
                 for(int i=0;i<8;i++) {
                     if(oct.nodes[i]!=NULL) {
-                        draw_octree(*oct.nodes[i],true,drawn,program_name);
+                        draw_octree(*oct.nodes[i],true,drawn);
                     }
                 }
             } 
         } else {
             for(int i=0;i<8;i++) {
                 if(oct.nodes[i]!=NULL) {
-                    draw_octree(*oct.nodes[i],false,drawn,program_name);
+                    draw_octree(*oct.nodes[i],false,drawn);
                 }
             }
         }
@@ -586,10 +572,7 @@ void Scene::draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn
     }
 }
 
-void Scene::draw_object(Object *o,bool use_shaders) {
-    std::string program_name=o->get_program();
-    // if the object's shader doesn't exist, use default one.
-    Program *program=disp->get_program(program_name);
+void Scene::draw_object(Object *o) {
     Vec3<float> object_position((o->modelview_matrix()).val[3],
                                 (o->modelview_matrix()).val[7],
                                 (o->modelview_matrix()).val[11]);
@@ -601,15 +584,9 @@ void Scene::draw_object(Object *o,bool use_shaders) {
 
     globalvalues->set_value(o->normal_matrix(),"normal_matrix");
 
-    if(use_shaders) {
-        program->use();
-    }
+    disp->use_program(o->get_program());
 
     o->draw(objminuscam.norm());
-
-    if(use_shaders) {
-        program->unuse();
-    }
 }
 
 void Scene::display_texture(Display_Texture tex) {

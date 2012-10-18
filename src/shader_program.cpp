@@ -199,15 +199,6 @@ void Program::bind_texture(Texture* tex) {
 
 void Program::unuse() {
     if(binded) {
-        std::list<Texture*>::iterator it = textures.begin();
-        for(;it!=textures.end();it++) {
-            if( (*it) != NULL) {
-                (*it)->unbind();
-            }
-        }
-
-        glUseProgram(0);
-
         binded=false;
     }
 }

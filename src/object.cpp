@@ -7,7 +7,7 @@ Object::Object(Octree *tree) :
     ena_textures(true),
     ena_draw(true),
     obj_draw_mode(OBJECT_DRAW_LINES),
-    program_name("default"),
+    program_name("deferred"),
     modelview_changed(true),
     tree(tree),
     bounding_sphere_size(0),

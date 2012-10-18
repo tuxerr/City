@@ -27,6 +27,7 @@ public:
     void new_program(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path,std::string name="default");
     bool has_program(std::string name);
     Program *get_program(std::string name);
+    void use_program(std::string name);
     Uniform* new_uniform(std::string uniform_name,Uniform_Type type);
     UniformBlock* new_uniformblock(std::string uniform_name);
     void link_program_to_uniform(std::string program_name,Uniform *uni);
@@ -36,6 +37,7 @@ public:
 
 private:
     sf::Window *window;
+    Program *current_program;
     
     int width;
     int height;

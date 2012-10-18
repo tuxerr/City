@@ -38,9 +38,9 @@ public:
     void delete_object(Object *o);
     void render();
     void render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni);
-    void draw_scene(std::string program_name = "");
-    void draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn,std::string program_name);
-    void draw_object(Object *o,bool use_shaders);
+    void draw_scene();
+    void draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn);
+    void draw_object(Object *o);
     PointLight* new_pointlight(Vec3<float> pos,Vec3<float> color=Vec3<float>(1,1,1),float intensity=1);
     SpotLight* new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity=1);
     DirectionalLight* new_directionallight(Vec3<float> direction,Vec3<float> color=Vec3<float>(1,1,1),float intensity=1);

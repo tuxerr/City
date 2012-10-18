@@ -102,6 +102,15 @@ Program *Display::get_program(std::string name) {
     }
 }
 
+void Display::use_program(std::string name) {
+    Program *p = get_program(name);
+    if(current_program!=p) {
+        current_program->unuse();
+        p->use();
+        current_program=p;
+    }
+}
+
 Uniform* Display::new_uniform(std::string uniform_name,Uniform_Type type) {
     Uniform *uni=new Uniform(uniform_name,type);
     uniforms.insert(uni);
