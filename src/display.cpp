@@ -20,34 +20,65 @@ Display::~Display() {
         delete (*itub);
     }
 
-    delete window; // removes the SFML rendering context
+    glfwTerminate();
+}
+
+void error_callback(int error, const char* description)
+{
+    Logger::log(LOG_ERROR)<<description<<std::endl;
 }
 
 void Display::init() {
-
-    sf::ContextSettings winsettings;
-    winsettings.depthBits         = 24; // Request a 24 bits depth buffer
-    winsettings.antialiasingLevel = 2;  // Request 2 levels of antialiasing
-    winsettings.majorVersion = 4;
-    winsettings.minorVersion = 0;
     
-
+    glfwInit();
+    Logger::log(LOG_INFO)<<"GLFW Version : "<<glfwGetVersionString()<<std::endl;
+    glfwSetErrorCallback(error_callback);
+    
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    
     if(fullscreen) {
-        window = new sf::Window(sf::VideoMode(width,height,32),TITLE,sf::Style::Fullscreen,winsettings);
+        window = glfwCreateWindow(width, height, TITLE , NULL, NULL);
     } else {
-        window = new sf::Window(sf::VideoMode(width,height,32),TITLE,sf::Style::Close,winsettings);
+        window = glfwCreateWindow(width, height, TITLE , NULL, NULL);
+    }
+    
+    if(!window) {
+        glfwTerminate();
+        Logger::log(LOG_ERROR)<<"GLFW Terminating"<<std::endl;
+    }
+    
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit () != GLEW_NO_ERROR)
+    {
+        Logger::log(LOG_ERROR) << "Failed to initialize GLEW... " << std::endl;
+        return ;
     }
 
-    glewInit();
+    GLint major,minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION,&minor);
+                
+    Logger::log(LOG_INFO)<<"OpenGL Context Version : "<<major<<"."<<minor<<" on GPU : "<<glGetString(GL_RENDERER)<<" by "<<glGetString(GL_VENDOR)<<std::endl;
+
     
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_2D_ARRAY);
 
     glPatchParameteri(GL_PATCH_VERTICES,4); // patches are made up from 4 vertices
+
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+    Logger::log(LOG_INFO)<<"Framebuffer is "<<width<<"x"<<height<<std::endl;
+
 }
 
-sf::Window* Display::getWindow() {
+GLFWwindow* Display::getWindow() {
     return window;
 }
 
@@ -119,14 +150,19 @@ Uniform* Display::new_uniform(std::string uniform_name,Uniform_Type type) {
     return uni;
 }
 
-UniformBlock* Display::new_uniformblock(std::string uniformblock_name) {
+UniformBlock* Display::new_uniformblock(std::string uniformblock_name,std::string uniformblock_name_attachpoint) {
     int max_uniforms;
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS,&max_uniforms);
     if(uniformblocks.size()==(unsigned int)max_uniforms) {
         Logger::log()<<"MAX_UNIFORM_BLOCKS is "<<max_uniforms<<" : you can't create anymore UniformBlocks"<<std::endl;
         return NULL;
     } else {
-        UniformBlock *uni=new UniformBlock(uniformblock_name,uniformblocks.size()+1);
+        UniformBlock *uni = NULL;
+        if(uniformblock_name_attachpoint=="") {
+            uni =new UniformBlock(uniformblock_name,uniformblocks.size()+1);
+        } else {
+            uni =new UniformBlock(uniformblock_name,uniformblock_name_attachpoint,uniformblocks.size()+1);
+        }
         uniformblocks.insert(uni);
         return uni;
     }
@@ -146,7 +182,7 @@ void Display::link_program_to_uniformblock(std::string program_name,UniformBlock
       // subscribe the program to the uniform
         programs[program_name].subscribe_to_uniformblock(uni);
     } else {
-	Logger::log()<<"Program "<<program_name<<" does not exist"<<std::endl;
+        Logger::log()<<"Program "<<program_name<<" does not exist"<<std::endl;
     }
 }
 
@@ -155,5 +191,6 @@ void Display::new_draw() {
 }
 
 void Display::refresh() {
-    window->display();
+    std::cout<<"swapping"<<std::endl;
+    glfwSwapBuffers(window);
 }

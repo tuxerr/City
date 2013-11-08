@@ -11,7 +11,7 @@ Scene::Scene(Display *disp) :
     disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,NULL,"phong");
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"depth_creation");
     disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,NULL,"display_texture");
-    disp->new_program("shaders/deferred_tess.vert","shaders/deferred_tess.frag","shaders/terrain_tc.tess","shaders/terrain_te.tess",NULL,"deferred_tess");
+    //disp->new_program("shaders/deferred_tess.vert","shaders/deferred_tess.frag","shaders/terrain_tc.tess","shaders/terrain_te.tess",NULL,"deferred_tess");
     disp->new_program("shaders/deferred.vert","shaders/deferred.frag",NULL,NULL,NULL,"deferred");
 
     int screen_width=disp->get_width();
@@ -49,7 +49,7 @@ Scene::Scene(Display *disp) :
         for(int i=0;i<MAX_LIGHTS;i++) {
             std::stringstream uniform_name;
             uniform_name<<"Light["<<i<<"]";
-            uniform_lights[i]=disp->new_uniformblock(uniform_name.str());
+            uniform_lights[i]=disp->new_uniformblock("Light",uniform_name.str());
             disp->link_program_to_uniformblock("phong",uniform_lights[i]);
             
             uniform_name.str("");
@@ -57,10 +57,10 @@ Scene::Scene(Display *disp) :
             uniform_light_sampler[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
             disp->link_program_to_uniform("phong",uniform_light_sampler[i]);
 
-            uniform_name.str("");
-            uniform_name<<"shadowcubemap["<<i<<"]";
-            uniform_light_samplercube[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
-            disp->link_program_to_uniform("phong",uniform_light_samplercube[i]);
+            //uniform_name.str("");
+            //uniform_name<<"shadowcubemap["<<i<<"]";
+            //uniform_light_samplercube[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
+            //disp->link_program_to_uniform("phong",uniform_light_samplercube[i]);
         }
 
         uniform_light_number->set_value(light_number);
@@ -82,7 +82,7 @@ Scene::Scene(Display *disp) :
     fullscreen_quad = new_object();
     fullscreen_quad->set_draw_mode(OBJECT_DRAW_QUADS);
     fullscreen_quad->set_program("display_texture");
-    fullscreen_quad->set_enable_draw(false);
+    fullscreen_quad->set_enable_draw(true);
     float vert[] = {-1, -1, 0,
                     1, -1, 0, 
                     1, 1, 0, 
@@ -324,13 +324,14 @@ void Scene::render() {
         
         fbo_deferred_phong.unbind();        
     } else {
-        Logger::log(LOG_ERROR)<<"Couldn't bing the deferred rendering FBO for the phong pass"<<std::endl;
+        Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO for the phong pass"<<std::endl;
     } 
 
     // draw result of final pass (using fullscreen quad)
     disp->new_draw();
     fullscreen_quad->set_program("display_texture");
     draw_object(fullscreen_quad);
+    std::cout<<"drawing final tex"<<std::endl;
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {

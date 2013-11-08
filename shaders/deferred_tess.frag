@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 #define FOG_DENSITY 0.001
 

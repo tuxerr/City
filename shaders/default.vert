@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 in vec3 in_Vertex;
 in vec3 in_Color;
@@ -7,7 +7,7 @@ in vec3 in_TexCoord;
 
 out vec3 color;
 
-uniform GlobalValues_ {
+uniform GlobalValues {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))

@@ -3,7 +3,10 @@
 
 #include <iostream>
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 #include "texture.hpp"
+#include <OpenGL/gl3.h>
 
 typedef enum FBO_Type {
     FBO_DRAW, FBO_READ, FBO_BOTH

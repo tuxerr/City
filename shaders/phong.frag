@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 #define FOG_DENSITY 0.001
 
@@ -6,7 +6,7 @@ out vec4 pixel_color;
 
 smooth in vec2 deferred_texcoord;
 
-uniform Light_ {
+uniform Light {
     int light_type;
     float intensity; 
     vec3 spot_values; //linear_dissipation,illu_angle,max_illu_angle
@@ -22,13 +22,15 @@ uniform Light_ {
     mat4 matrix7;
     mat4 matrix8;
     bool render_shadows;
-    vec4 offset2;
     float shadow_min_range;
-    vec4 offset;
     float shadow_max_range;
 } Light[8];
 
-uniform GlobalValues_ {
+//uniform Lights {
+//    LightInformation Light[8];
+//};
+
+uniform GlobalValues {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
@@ -42,7 +44,7 @@ uniform GlobalValues_ {
 uniform int lightnumber;
 
 uniform sampler2DArrayShadow shadowmap[8];
-uniform samplerCubeShadow shadowcubemap[8];
+//uniform samplerCubeShadow shadowcubemap[8];
 uniform sampler2D normalmap;
 uniform sampler2D depthmap;
 uniform sampler2D colormap;
@@ -56,7 +58,7 @@ vec4 vert_normal;
 vec3 texcoord;
 
 vec4 spotlight(int lightID) {
-    vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
+    vec4 globalcolor = (vec4(color,1.0)*vec4(Light[int(lightID)].color,1.0));
 
     vec3 light_ray = vert_pos.xyz-Light[lightID].origin;
     vec3 norm_normal = normalize(vert_normal.xyz);
@@ -148,7 +150,7 @@ float directional_shadowing(int lightID) {
     } else if(cascaded_layer==3) {
         light_point = Light[lightID].matrix4*vert_pos;    
     } else if(cascaded_layer==4) {
-        light_point = Light[lightID].matrix5*vert_pos;    
+        light_point = Light[lightID].matrix5*vert_pos;
     } else if(cascaded_layer==5) {
         light_point = Light[lightID].matrix6*vert_pos;    
     } else if(cascaded_layer==6) {
@@ -262,10 +264,10 @@ void main(void) {
         if(Light[i].light_type==1) {
             if(Light[i].render_shadows) {
                 vec3 light_ray = vert_pos.xyz-Light[i].origin;
-                float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
-                if(abs(light_ray.z) <= lightval) {
-                    res+=pointlight(i);
-                }   
+                //float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
+                //if(abs(light_ray.z) <= lightval) {
+                //    res+=pointlight(i);
+                //}
             } else {
                 res+=pointlight(i);
             }

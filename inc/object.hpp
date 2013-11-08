@@ -6,6 +6,8 @@
 #include <string>
 #include <list>
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 #include "vbo.hpp"
 #include "matrix4.hpp"
 #include "shader_program.hpp"

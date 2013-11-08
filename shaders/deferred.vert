@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 in vec3 in_Vertex;
 in vec3 in_Color;
@@ -9,7 +9,7 @@ out vec3 color;
 smooth out vec4 vert_normal;
 smooth out vec3 texcoord;
 
-uniform GlobalValues_ {
+uniform GlobalValues {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))

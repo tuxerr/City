@@ -258,6 +258,8 @@ void Object::draw(float distance_from_camera) {
 
     for(unsigned int i=0;i<parts.size();i++) {
         parts[i][lod].vbo.bind();
+        parts[i][lod].vbo.print_contents();
+
         glEnableVertexAttribArray(SHADER_VERTEX_ATTRIB);
         glVertexAttribPointer(SHADER_VERTEX_ATTRIB,3,parts[i][lod].vbo.element_type(),GL_FALSE,0,0);
 

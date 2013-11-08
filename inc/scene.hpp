@@ -7,6 +7,8 @@
 #include <sstream>
 #include <math.h>
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 #include "display.hpp"
 #include "object.hpp"
 #include "light.hpp"
@@ -46,6 +48,8 @@ public:
     DirectionalLight* new_directionallight(Vec3<float> direction,Vec3<float> color=Vec3<float>(1,1,1),float intensity=1);
     void delete_light(Light* l);
     void display_texture(Display_Texture tex);
+    Object* fullscreen_quad;
+
 
 private:
     Vec3<float> calculate_shadowing_optimal_point(Vec3<float> near_values[4],Vec3<float> far_values[4],float &radius);
@@ -70,7 +74,6 @@ private:
     Uniform *uniform_phong_colormap;
     Uniform *uniform_phong_texcoordmap;
 
-    Object* fullscreen_quad;
     Display_Texture displayed_texture;
 
     Texture *null_colortex;

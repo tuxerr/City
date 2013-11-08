@@ -5,6 +5,8 @@
 #include <string>
 #include <map>
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 #include "matrix4.hpp"
 #include "vec3.hpp"
 #include "vec2.hpp"
@@ -13,11 +15,13 @@
 class UniformBlock {
 public:
     UniformBlock(std::string name,int attachpoint);
+    UniformBlock(std::string name,std::string attach_name, int attachpoint);
     void create();
     void destroy();
     int get_attach_point();
     void bind_to_attach_point(GLuint program_id);
     std::string get_name();
+    std::string get_attach_name();
     void set_value(bool val,std::string sub_name);
     void set_value(int val,std::string sub_name);
     void set_value(float val,std::string sub_name);
@@ -34,7 +38,7 @@ private:
     GLint get_offset(std::string sub_name);
 
     std::string complete_name;
-    std::string subuniform_name; /* name without the _ to query subuniforms */
+    std::string attach_name; /* name to attach to the shader */
     int size;
     bool iscreated;
     int attachpoint;

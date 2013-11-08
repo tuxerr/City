@@ -1,8 +1,8 @@
-#version 330
+#version 410
 
 in vec3 in_Vertex;
 
-uniform GlobalValues_ {
+uniform GlobalValues {
     mat4 modelview; // camera*modelview
     mat4 projection_modelview; //perspective*camera*modelview
     mat4 normal_matrix; // transpose(inverse(modelview))
@@ -13,7 +13,7 @@ uniform GlobalValues_ {
     float far;
 } GlobalValues;
 
-uniform Light_properties_ {
+uniform Light_properties {
     mat4 matrix;
 } Light_properties;
 

@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 #include "texture.hpp"
 #include "matrix4.hpp"
 #include "vec3.hpp"

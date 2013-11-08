@@ -8,6 +8,7 @@ Program::~Program() {
 }
 
 void Program::load_shaders(const char *vertex_shader_path,const char *fragment_shader_path,const char *tessellation_control_shader_path,const char *tessellation_evaluator_shader_path,const char *geometry_shader_path) {
+
     program_id=glCreateProgram();
 
     if(vertex_shader_path!=NULL) {
@@ -138,7 +139,7 @@ void Program::subscribe_to_uniform(Uniform *uni) {
             std::cout<<max_size<<" Textures are already binded to program "<<id()<<std::endl;
         } else {
             textures.push_back(NULL);
-            uni->add_texture(&textures.back(),this,textures.size()-1);
+            uni->add_texture(&textures.back(),this,int(textures.size())-1);
         }
     } else {
         uniforms[uni]=false;
@@ -147,9 +148,9 @@ void Program::subscribe_to_uniform(Uniform *uni) {
 }
 
 void Program::subscribe_to_uniformblock(UniformBlock *uni) {
-    GLuint loc = glGetUniformBlockIndex(id(),uni->get_name().c_str());
+    GLuint loc = glGetUniformBlockIndex(id(),uni->get_attach_name().c_str());
     if(loc==GL_INVALID_INDEX) {
-        std::cout<<"Uniform "<<uni->get_name()<<" does not exist in program "<<id()<<std::endl;
+        std::cout<<"Uniform "<<uni->get_attach_name()<<" does not exist in program "<<id()<<std::endl;
     } else {
         uni->bind_to_attach_point(id());      
         glUniformBlockBinding(id(), loc, uni->get_attach_point());

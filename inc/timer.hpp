@@ -2,7 +2,10 @@
 #define DEF_TIMER
 
 #include <iostream>
-#include <SFML/System.hpp>
+#include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
+#include <unistd.h>
 #include "logger.hpp"
 
 using namespace std;
@@ -12,16 +15,14 @@ using namespace std;
 class Timer {
 public:
     Timer(int fps=DEFAULT_TIMER_FPS);
-    void reset();
     void wait();
     int get_act_fps();
 
 private:
-    sf::Clock clock;
     int fps;
     int act_fps;
-    int needed_time;
-    
+    double old_time;
+    double needed_time;
 };
 
 #endif

@@ -5,8 +5,9 @@
 #include <string>
 #include <map>
 #include <set>
-#include <SFML/Window.hpp>
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 #include "shader_program.hpp"
 #include "uniform.hpp"
 #include "uniformblock.hpp"
@@ -19,7 +20,7 @@ public:
     Display(int width=800,int height=600,bool fullscreen=false,bool aa=true);
     ~Display();
     void init();
-    sf::Window* getWindow();
+    GLFWwindow* getWindow();
     void viewport(int new_width = -1, int new_height = -1);
     int get_width();
     int get_height();
@@ -29,14 +30,14 @@ public:
     Program *get_program(std::string name);
     void use_program(std::string name);
     Uniform* new_uniform(std::string uniform_name,Uniform_Type type);
-    UniformBlock* new_uniformblock(std::string uniform_name);
+    UniformBlock* new_uniformblock(std::string uniform_name,std::string uniform_name_attachpoint="");
     void link_program_to_uniform(std::string program_name,Uniform *uni);
     void link_program_to_uniformblock(std::string program_name,UniformBlock *uni);
     void new_draw();
     void refresh();
 
 private:
-    sf::Window *window;
+    GLFWwindow *window;
     Program *current_program;
     
     int width;

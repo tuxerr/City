@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 out vec4 outcol;
 
