@@ -1,9 +1,21 @@
 #include "vbo.hpp"
 
-VBO::VBO(GLenum target,GLenum mode,GLenum element_type)  : 
-    vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0),
-    vbo_element_type(element_type), created(false)
+VBO::VBO(GLenum target,GLenum mode,GLenum element_type,GLuint vao)  :
+    vao(vao), vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0),
+    vbo_element_type(element_type), created(false), attrib(SHADER_NONE)
 {
+    if(target==GL_ARRAY_BUFFER) {
+        Logger::log(LOG_ERROR)<<"You must specify a shader attribute for VAO linking when setting up a VBO"<<std::endl;
+    }
+}
+
+VBO::VBO(GLenum target,GLenum mode,GLenum element_type,GLuint vao,Shader_Attribs attrib)  :
+vao(vao), vbo_type(target), access_mode(mode), vbo_size(0), vbo_capacity(0),
+vbo_element_type(element_type), created(false), attrib(attrib)
+{
+    if(target==GL_ELEMENT_ARRAY_BUFFER) {
+        Logger::log(LOG_ERROR)<<"You can't specify a shader attribute for VAO linking when setting up a IBO"<<std::endl;
+    }
 }
 
 VBO::~VBO() {
@@ -16,6 +28,18 @@ bool VBO::iscreated() {
 void VBO::create() {
     glGenBuffers(1,&vbo);
     created=true;
+    
+    if(vbo_type==GL_ARRAY_BUFFER) { //if we're using a VBO, link it to the object subpart VAO.
+        glBindVertexArray(vao);
+        bind();
+        
+        glEnableVertexAttribArray(attrib);
+        glVertexAttribPointer(attrib,3,element_type(),GL_FALSE,0,0);
+        
+        unbind();
+        glBindVertexArray(0);
+    }
+    
 }
 
 void VBO::destroy() {
@@ -93,7 +117,6 @@ void VBO::update(void *data,int size) {
 
 void VBO::print_contents() {
     bind();
-    std::cout<<"Printing VBO contents"<<std::endl;
     if(!created) {
         std::cout<<"VBO isn't allocated"<<std::endl;
         return;

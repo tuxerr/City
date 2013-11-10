@@ -18,16 +18,18 @@ class Octree;
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
+typedef enum Object_Draw_Modes {
+    OBJECT_DRAW_TRIANGLES = GL_TRIANGLES, OBJECT_DRAW_LINES = GL_LINES, OBJECT_DRAW_QUADS = GL_QUADS, OBJECT_DRAW_PATCHES = GL_PATCHES, OBJECT_DRAW_NONE = GL_NONE
+} Object_Draw_Modes;
+
 typedef struct ObjectPart {
     VBO vbo,ibo_lines,ibo_triangles,ibo_quads,cbo,tbo,nbo;
+    GLuint vao;
+    Object_Draw_Modes current_draw_mode;
     float lodmindist; /* for LOD purposes, minimum display distance */
     float bounding_sphere_size;
     int bounding_sphere_weight;
 } ObjectPart;
-
-typedef enum Object_Draw_Modes {
-    OBJECT_DRAW_TRIANGLES = GL_TRIANGLES, OBJECT_DRAW_LINES = GL_LINES, OBJECT_DRAW_QUADS = GL_QUADS, OBJECT_DRAW_PATCHES = GL_PATCHES
-} Object_Draw_Modes;
 
 class Object {
 public:

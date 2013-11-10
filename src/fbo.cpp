@@ -62,15 +62,15 @@ bool FBO::iscomplete() {
 void FBO::bind(FBO_Type type) {
     switch(type) {
     case FBO_DRAW:
-        //glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbo_id);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fbo_id);
         break;
 
     case FBO_READ:
-        //glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo_id);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER,fbo_id);
         break;
 
     case FBO_BOTH:
-        //glBindFramebuffer(GL_FRAMEBUFFER,fbo_id);
+        glBindFramebuffer(GL_FRAMEBUFFER,fbo_id);
         break;
     }
 

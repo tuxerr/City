@@ -80,15 +80,14 @@ Scene::Scene(Display *disp) :
 
     //generate the fullscreen quad object
     fullscreen_quad = new_object();
-    fullscreen_quad->set_draw_mode(OBJECT_DRAW_QUADS);
     fullscreen_quad->set_program("display_texture");
     fullscreen_quad->set_enable_draw(true);
     float vert[] = {-1, -1, 0,
-                    1, -1, 0, 
-                    1, 1, 0, 
+                    1, -1, 0,
+                    1, 1, 0,
                     -1, 1, 0};
 
-    int index[] = {0, 1, 2, 3};
+    unsigned int index[] = {0, 1, 2, 2, 3, 0};
 
     float color[] = {1, 1, 1,
                      1, 1, 1,
@@ -96,9 +95,10 @@ Scene::Scene(Display *disp) :
                      1, 1, 1};
 
     fullscreen_quad->update_vertices_buffer(&vert[0],sizeof(vert));
-    fullscreen_quad->update_quads_index_buffer(&index[0],sizeof(index));
+    fullscreen_quad->update_triangles_index_buffer(&index[0],sizeof(index));
     fullscreen_quad->update_color_buffer(&color[0],sizeof(color));
-
+    fullscreen_quad->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    
     // textures initialization
     null_colortex=new Texture(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
     deferred_normalmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
@@ -329,6 +329,8 @@ void Scene::render() {
 
     // draw result of final pass (using fullscreen quad)
     disp->new_draw();
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    
     fullscreen_quad->set_program("display_texture");
     draw_object(fullscreen_quad);
     std::cout<<"drawing final tex"<<std::endl;

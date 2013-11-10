@@ -34,16 +34,21 @@ void Object::destroy() {
 
 int Object::new_part() {
     std::vector<ObjectPart> v;
+    
     if(parts.size()==0) {
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
         ObjectPart part = 
         {
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // vbo
-            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo lines
-            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo triangles
-            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo quads
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // cbo
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // tbo
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // nbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_VERTEX_ATTRIB), // vbo
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo lines
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo triangles
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo quads
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_COLOR_ATTRIB), // cbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_TEXTURE_ATTRIB), // tbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_NORMAL_ATTRIB), // nbo
+            vao,
+            OBJECT_DRAW_NONE,
             -1,                          // minimum viewing distance for the LOD
             0,
             0
@@ -51,16 +56,20 @@ int Object::new_part() {
         v.push_back(part);
 
     } else {
-        for(unsigned int i=0;i<parts[0].size();i++) {
+        for(unsigned int i=0;i<parts[0].size();i++) { //creating N parts if we currently have N LODs for part 0
+            GLuint vao;
+            glGenVertexArrays(1, &vao);
             ObjectPart part = 
             {
-                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // vbo
-                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo lines
-                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo triangles
-                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo quads
-                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // cbo
-                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // tbo
-                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // nbo
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_VERTEX_ATTRIB), // vbo
+                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo lines
+                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo triangles
+                VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo quads
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_COLOR_ATTRIB), // cbo
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_TEXTURE_ATTRIB), // tbo
+                VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_NORMAL_ATTRIB), // nbo
+                vao,
+                OBJECT_DRAW_NONE,
                 parts[0][i].lodmindist,                          // minimum viewing distance for the LOD
                 0,
                 0
@@ -86,15 +95,19 @@ int Object::new_lod(float lodmindist) {
 
     // for each new lod, we have to create n parts, n being the number of parts in the first LOD
     for(unsigned int i=0;i<parts.size();i++) {
-        ObjectPart part = 
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        ObjectPart part =
         {
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // vbo
-            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo lines
-            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo triangles
-            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT), // ibo quads
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // cbo
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // tbo
-            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT), // nbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_VERTEX_ATTRIB), // vbo
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo lines
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo triangles
+            VBO(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,GL_UNSIGNED_INT,vao), // ibo quads
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_COLOR_ATTRIB), // cbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_TEXTURE_ATTRIB), // tbo
+            VBO(GL_ARRAY_BUFFER,GL_STATIC_DRAW,GL_FLOAT,vao,SHADER_NORMAL_ATTRIB), // nbo
+            vao,
+            OBJECT_DRAW_NONE,
             lodmindist,                                      // minimum viewing distance for the LOD
             0,
             0
@@ -107,6 +120,8 @@ int Object::new_lod(float lodmindist) {
 void Object::update_vertices_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
     
     if(part_number<parts.size() && lod_number<parts[0].size()) {
+
+
         if(!parts[part_number][lod_number].vbo.iscreated())
             parts[part_number][lod_number].vbo.create();
         parts[part_number][lod_number].vbo.update(data,size);
@@ -218,6 +233,30 @@ bool Object::enable_draw() {
 
 void Object::set_draw_mode(Object_Draw_Modes draw_mode) {
     obj_draw_mode=draw_mode;
+    for(unsigned int i=0;i<parts.size();i++) {
+        for(unsigned int j=0;j<parts[i].size();j++) {
+            switch(draw_mode) {
+                case OBJECT_DRAW_LINES:
+                    glBindVertexArray(parts[i][j].vao);
+                    parts[i][j].ibo_lines.bind();
+                    glBindVertexArray(0);
+                    break;
+                    
+                case OBJECT_DRAW_TRIANGLES:
+                    glBindVertexArray(parts[i][j].vao);
+                    parts[i][j].ibo_triangles.bind();
+                    std::cout<<"binding triangles to vao "<<parts[i][j].vao<<std::endl;
+                    glBindVertexArray(0);
+                    break;
+                    
+                case OBJECT_DRAW_PATCHES:
+                    glBindVertexArray(parts[i][j].vao);
+                    parts[i][j].ibo_quads.bind();
+                    glBindVertexArray(0);
+                    break;
+            }
+        }
+    }
 }
 
 Matrix4 &Object::modelview_matrix() {
@@ -255,69 +294,23 @@ void Object::draw(float distance_from_camera) {
         }
     }         
     int lod=lod_to_draw;
-
+    
     for(unsigned int i=0;i<parts.size();i++) {
-        parts[i][lod].vbo.bind();
-        parts[i][lod].vbo.print_contents();
-
-        glEnableVertexAttribArray(SHADER_VERTEX_ATTRIB);
-        glVertexAttribPointer(SHADER_VERTEX_ATTRIB,3,parts[i][lod].vbo.element_type(),GL_FALSE,0,0);
-
-        if(ena_colors && parts[i][lod].cbo.size()>0) {
-            parts[i][lod].cbo.bind();
-            glEnableVertexAttribArray(SHADER_COLOR_ATTRIB);
-            glVertexAttribPointer(SHADER_COLOR_ATTRIB,3,parts[i][lod].cbo.element_type(),GL_FALSE,0,0);
-        }
-
-        if(parts[i][lod].nbo.size()>0) {
-            parts[i][lod].nbo.bind();
-            glEnableVertexAttribArray(SHADER_NORMAL_ATTRIB);
-            glVertexAttribPointer(SHADER_NORMAL_ATTRIB,3,parts[i][lod].nbo.element_type(),GL_FALSE,0,0);
-        }
-
-        if(ena_textures && parts[i][lod].tbo.size()>0) {
-            parts[i][lod].tbo.bind();
-            glEnableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
-            glVertexAttribPointer(SHADER_TEXTURE_ATTRIB,4,parts[i][lod].tbo.element_type(),GL_FALSE,0,0);
-        }
+        glBindVertexArray(parts[i][lod].vao);
 
         if(obj_draw_mode==OBJECT_DRAW_LINES && parts[i][lod].ibo_lines.size()>0) {
-            parts[i][lod].ibo_lines.bind();
             glDrawElements(GL_LINES,parts[i][lod].ibo_lines.size()/parts[i][lod].ibo_lines.element_size(),parts[i][lod].ibo_lines.element_type(),0);
-
-        } else if(obj_draw_mode==OBJECT_DRAW_QUADS && parts[i][lod].ibo_quads.size()>0) {
-            parts[i][lod].ibo_quads.bind();
-            glDrawElements(GL_QUADS,parts[i][lod].ibo_quads.size()/parts[i][lod].ibo_quads.element_size(),parts[i][lod].ibo_quads.element_type(),0);
-
         } else if(obj_draw_mode==OBJECT_DRAW_PATCHES && parts[i][lod].ibo_quads.size()>0) {
             // patches and quads share the same VBOs, since GL_PATCH_VERTICES is 4 (patches are just special quads)
-            parts[i][lod].ibo_quads.bind();
             glDrawElements(GL_PATCHES,parts[i][lod].ibo_quads.size()/parts[i][lod].ibo_quads.element_size(),parts[i][lod].ibo_quads.element_type(),0);
-
         } else if(obj_draw_mode==OBJECT_DRAW_TRIANGLES && parts[i][lod].ibo_triangles.size()>0) {
             parts[i][lod].ibo_triangles.bind();
             glDrawElements(GL_TRIANGLES,parts[i][lod].ibo_triangles.size()/parts[i][lod].ibo_triangles.element_size(),parts[i][lod].ibo_triangles.element_type(),0);
-
-        } else {
-            // draw using standard index if nothing else has been found
-            if(parts[i][lod].vbo.element_type()==GL_FLOAT) {
-                glDrawArrays(obj_draw_mode,0,parts[i][lod].vbo.size()/(parts[i][lod].vbo.element_size()*sizeof(float)));
-            } else if(parts[i][lod].vbo.element_type()==GL_DOUBLE) {
-                glDrawArrays(obj_draw_mode,0,parts[i][lod].vbo.size()/(parts[i][lod].vbo.element_size()*sizeof(double)));
-            }
         }
-    
-        if(ena_colors && parts[i][lod].cbo.size()>0) {
-            glDisableVertexAttribArray(SHADER_COLOR_ATTRIB);
-        }
-        if(parts[i][lod].nbo.size()>0) {
-            glDisableVertexAttribArray(SHADER_NORMAL_ATTRIB);
-        }
-        if(ena_textures && parts[i][lod].tbo.size()>0) {
-            glDisableVertexAttribArray(SHADER_TEXTURE_ATTRIB);
-        }
-        glDisableVertexAttribArray(SHADER_VERTEX_ATTRIB);
+        
+        glBindVertexArray(0);
     }
+
 }
 
 void Object::translate(float x, float y, float z) {

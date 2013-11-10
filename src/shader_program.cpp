@@ -154,10 +154,10 @@ void Program::subscribe_to_uniformblock(UniformBlock *uni) {
     } else {
         uni->bind_to_attach_point(id());      
         glUniformBlockBinding(id(), loc, uni->get_attach_point());
-        if(glGetError()==GL_INVALID_VALUE) {
+        /*if(glGetError()==GL_INVALID_VALUE) {
             std::cout<<"Error while binding block uniform "<<uni->get_name()<<"(program "<<id()
                      <<") to attach point "<<uni->get_attach_point()<<" with location "<<loc<<std::endl;
-        } 
+        } */
     }
 }
 

@@ -49,25 +49,26 @@ void Display::init() {
         glfwTerminate();
         Logger::log(LOG_ERROR)<<"GLFW Terminating"<<std::endl;
     }
-    
+
     glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE;
+
     if (glewInit () != GLEW_NO_ERROR)
     {
         Logger::log(LOG_ERROR) << "Failed to initialize GLEW... " << std::endl;
         return ;
     }
+    glGetError(); //remove the glewInit 1280 error
 
     GLint major,minor;
+
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION,&minor);
-                
-    Logger::log(LOG_INFO)<<"OpenGL Context Version : "<<major<<"."<<minor<<" on GPU : "<<glGetString(GL_RENDERER)<<" by "<<glGetString(GL_VENDOR)<<std::endl;
 
     
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_2D_ARRAY);
+    Logger::log(LOG_INFO)<<"OpenGL Context Version : "<<major<<"."<<minor<<" on GPU : "<<glGetString(GL_RENDERER)<<" by "<<glGetString(GL_VENDOR)<<std::endl;
+
+    //glClearColor(1, 1, 0, 1);
 
     glPatchParameteri(GL_PATCH_VERTICES,4); // patches are made up from 4 vertices
 

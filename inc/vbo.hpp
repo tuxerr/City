@@ -6,10 +6,13 @@
 #define GLFW_INCLUDE_GLCOREARB
 #include <GLFW/glfw3.h>
 #include <string.h>
+#include "shader_program.hpp"
+#include "logger.hpp"
 
 class VBO {
 public:
-    VBO(GLenum target,GLenum mode,GLenum element_type);
+    VBO(GLenum target,GLenum mode,GLenum element_type,GLuint vao);
+    VBO(GLenum target,GLenum mode,GLenum element_type,GLuint vao,Shader_Attribs attrib);
     ~VBO();
     void create();
     bool iscreated();
@@ -24,6 +27,8 @@ public:
     void print_contents();
 
 private:
+    Shader_Attribs attrib;
+    GLuint vao;
     GLuint vbo;
     GLenum vbo_type;
     GLenum access_mode;

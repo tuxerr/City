@@ -15,5 +15,5 @@ void main() {
     } else {
         pixel_color=texture(arraytex,vec3(texcoord.xy,choice));
     }
-    pixel_color = vec4(1,1,0,1);
+    pixel_color = vec4(1,0,0,1);
 }

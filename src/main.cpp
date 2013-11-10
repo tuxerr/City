@@ -27,6 +27,7 @@ int main(int argc,char *argv[]) {
     Logger::init("city.log");
 
     PerlinNoise noise(0.5,2,2,8,42424237);
+
     Display disp(800,600,false,true);     disp.init();
     Controls c(disp.getWindow());
 
@@ -110,10 +111,13 @@ int main(int argc,char *argv[]) {
         //sce.set_camera(position,target,up_vector);
         //sce.render();
 
+        std::cout<<"Error : "<<glGetError()<<std::endl;
+        disp.new_draw();
         c.refresh();
         sce.draw_object(sce.fullscreen_quad);
         disp.refresh();
-        disp.new_draw();
+
+
 
         timer.wait();
     }
