@@ -191,17 +191,19 @@ void UniformBlock::set_value(Vec2<int> &i2 ,std::string sub_name) {
 
 void UniformBlock::set_value(Matrix4 &mat,std::string sub_name) {
     Matrix4 m = mat;
-    m.transpose();
+     m.transpose();
 
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        GLint mat_stride;
-        if(matrix_strides.find(sub_name)==matrix_strides.end()) {
-            mat_stride = get_value_from_pname(sub_name,GL_UNIFORM_MATRIX_STRIDE);
-            matrix_strides[sub_name] = mat_stride;
-        } else {
-            mat_stride = matrix_strides[sub_name];
-        }
+        //GLint mat_stride;
+        //if(matrix_strides.find(sub_name)==matrix_strides.end()) {
+        //    mat_stride = get_value_from_pname(sub_name,GL_UNIFORM_MATRIX_STRIDE);
+        //    matrix_strides[sub_name] = mat_stride;
+        //} else {
+        //    mat_stride = matrix_strides[sub_name];
+       //}
+        
+        int mat_stride=0;
 
         glBindBuffer(GL_UNIFORM_BUFFER,ubo);
         for(int i=0;i<4;i++) {

@@ -81,7 +81,7 @@ Scene::Scene(Display *disp) :
     //generate the fullscreen quad object
     fullscreen_quad = new_object();
     fullscreen_quad->set_program("display_texture");
-    fullscreen_quad->set_enable_draw(true);
+    fullscreen_quad->set_enable_draw(false);
     float vert[] = {-1, -1, 0,
                     1, -1, 0,
                     1, 1, 0,
@@ -119,9 +119,9 @@ Scene::Scene(Display *disp) :
 
 Scene::~Scene() {
     std::set<Object*>::iterator it;
-    for(it=objects.begin();it!=objects.end();it++) {
-        delete_object(*it);
-    }
+    //for(it=objects.begin();it!=objects.end();it++) {
+    //    delete_object(*it);
+    //}
     objects.clear();
 
     for(int i=0;i<MAX_LIGHTS;i++) {
@@ -249,6 +249,7 @@ void Scene::delete_light(Light* l) {
 }
 
 void Scene::render() {
+    disp->new_draw();
 
     FBO fbo_shadows,fbo_deferred,fbo_deferred_phong;
     fbo_shadows.attach_texture(null_colortex,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be complete
@@ -284,7 +285,6 @@ void Scene::render() {
     fbo_shadows.unbind();
     
     frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far,scene_fov_rad);
-
     
     // reset all saved lods to unset for the new global render
     for(Object* o : objects) {
@@ -298,7 +298,9 @@ void Scene::render() {
     fbo_deferred.attach_texture(deferred_depthmap,FBO_DEPTH);
     if(fbo_deferred.iscomplete()) {
         fbo_deferred.bind();
+        disp->new_draw();
         glDrawBuffers(3,&(bufs[0]));
+
         draw_scene();
         fbo_deferred.unbind();
 
@@ -322,18 +324,17 @@ void Scene::render() {
 
         draw_object(fullscreen_quad); 
         
-        fbo_deferred_phong.unbind();        
+        fbo_deferred_phong.unbind();
     } else {
         Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO for the phong pass"<<std::endl;
     } 
 
     // draw result of final pass (using fullscreen quad)
-    disp->new_draw();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
-    
+    disp->new_draw();
     fullscreen_quad->set_program("display_texture");
     draw_object(fullscreen_quad);
-    std::cout<<"drawing final tex"<<std::endl;
+    
 }
 
 void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
@@ -472,7 +473,6 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         }  else {
             Logger::log()<<"FBO incomplete for the render of directional light "<<std::endl;
         }  
-//        draw_scene("depth_creation");
         
     }
 
@@ -522,6 +522,7 @@ void Scene::draw_scene() {
         o->has_been_drawn=false;
         i++;
     }
+
 
     if(camera_changed) {
         camera_changed=false;
@@ -582,7 +583,7 @@ void Scene::draw_object(Object *o) {
     Vec3<float> objminuscam = object_position - camera_pos;
 
     globalvalues->set_value(o->modelview_matrix(),"modelview");
-
+    
     globalvalues->set_value(o->projection_modelview_matrix(),"projection_modelview");
 
     globalvalues->set_value(o->normal_matrix(),"normal_matrix");
@@ -623,7 +624,7 @@ void Scene::display_texture(Display_Texture tex) {
         uniform_displaytex_choice->set_value(7);
     } else if(tex==DT_DEPTH) {
         uniform_displaytex_tex->set_value(deferred_depthmap);
-        uniform_displaytex_choice->set_value(-1);
+        uniform_displaytex_choice->set_value(-2);
     } else if(tex==DT_NORMAL) {
         uniform_displaytex_tex->set_value(deferred_normalmap);
         uniform_displaytex_choice->set_value(-1);

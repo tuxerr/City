@@ -9,7 +9,6 @@ void Timer::wait() {
     // slows the program to avoid using too much CPU
     double time = glfwGetTime();
     double elapsed = time-old_time;
-    Logger::log()<<"w8"<<std::endl;
     if(elapsed<needed_time) {
         // if the new image is too quick
         usleep(int((needed_time-elapsed)*1000000));

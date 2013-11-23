@@ -60,12 +60,14 @@ void Display::init() {
     }
     glGetError(); //remove the glewInit 1280 error
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    
     GLint major,minor;
 
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION,&minor);
 
-    
     Logger::log(LOG_INFO)<<"OpenGL Context Version : "<<major<<"."<<minor<<" on GPU : "<<glGetString(GL_RENDERER)<<" by "<<glGetString(GL_VENDOR)<<std::endl;
 
     //glClearColor(1, 1, 0, 1);
@@ -192,6 +194,5 @@ void Display::new_draw() {
 }
 
 void Display::refresh() {
-    std::cout<<"swapping"<<std::endl;
     glfwSwapBuffers(window);
 }

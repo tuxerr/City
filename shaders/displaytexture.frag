@@ -6,14 +6,15 @@ out vec4 pixel_color;
 
 uniform sampler2D tex;
 uniform sampler2DArray arraytex;
-uniform int choice; //choice == -1 : use tex as texture. else use choice as arraytex layer.
+uniform int choice; //choice == -1 : use tex as texture. else use choice as arraytex layer. -2 : depth texture (replicate)
 
 void main() {
-    pixel_color = vec4(1,1,0,1);
     if(choice==-1) {
         pixel_color=texture(tex,texcoord.xy);
-    } else {
+    } else if(choice==-2) {
+        vec4 depth_val=texture(tex,texcoord.xy);
+        pixel_color=vec4(depth_val.x,depth_val.x,depth_val.x,0.5);
+    }else {
         pixel_color=texture(arraytex,vec3(texcoord.xy,choice));
     }
-    pixel_color = vec4(1,0,0,1);
 }

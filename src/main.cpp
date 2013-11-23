@@ -33,11 +33,11 @@ int main(int argc,char *argv[]) {
 
     Scene sce(&disp);
     
-    Vec3<float> camerapos(0,0,4);
-    sce.set_camera(camerapos,Vec3<float>(300,300,1),Vec3<float>(0,0,1));
-    sce.set_perspective(90,1,1500);
+    Vec3<float> camerapos(5,0,0);
+    sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
+    sce.set_perspective(100,0.1,1000);
 
-    Timer timer(20);
+    Timer timer(40);
 
     Terrain terrain(&noise);
 
@@ -48,76 +48,72 @@ int main(int argc,char *argv[]) {
     Object *o=sce.new_object();
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->rotate(180,0,0,1);
-    o->translate(0,0,0);
+    o->set_enable_draw(true);
 
     spaceship.close();
     
-    //Spaceship ship(o);
+    Spaceship ship(o);
 
-//    Terrain_Data tdata = terrain.generate_terrain();
+    //Terrain_Data tdata = terrain.generate_terrain();
 
     //Object *terrain_patches = sce.new_object();
     //terrain.generate_patches(400,terrain_patches);
+    //terrain_patches->set_enable_draw(false);
+    //terrain_patches->set_draw_mode(OBJECT_DRAW_TRIANGLES);
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(false);
-    //l1->set_shadow_range(-1,314);
+    l1->set_shadow_range(-1,314);
 
 //    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
-    
-    int i=0;
 
     Vec3<float> position(5,0,0),up_vector(0,0,1);
     Vec3<float> target(0,0,0);
-    bool stop=false;
     
     //o->translate(20,0,1);
     
     float view_distance=1500;
     
     sce.display_texture(Scene::DT_NONE);
-    //while(!c.quit) {
     while (!c.quit_program()) {
-        
-        //if(!stop) {
-       //     ship.move(c.up,c.down,c.right,c.left);
-        //}
+        disp.new_draw();
 
-/*        if(c.down) {
-            l1->enable_shadows(false);
-        } else if(c.up) {
-            l1->enable_shadows(true);
+//        ship.camera_config(position,target,up_vector);
+
+//        ship.move(c.is_pressed(CT_UP),c.is_pressed(CT_DOWN), c.is_pressed(CT_RIGHT), c.is_pressed(CT_LEFT));
+        if(c.is_pressed(CT_DOWN)) {
+     //       l1->enable_shadows(false);
+        } else if(c.is_pressed(CT_UP)) {
+     //       l1->enable_shadows(true);
         }
 
-        if(c.right) {
+        if(c.is_pressed(CT_LEFT)) {
             o->rotate(-2,0,0,1);
         } 
-        if(c.left) {
+        if(c.is_pressed(CT_RIGHT)) {
             o->rotate(2,0,0,1);
-            } */
+        }
+        if(c.is_pressed(CT_UP)) {
+            o->rotate(-2,0,1,0);
+        }
 
-        //if(c.d) {
-        //    view_distance-=100;
-        //    sce.set_perspective(90,1,view_distance);
-        //}
+        if(c.is_pressed('d')) {
+            view_distance-=100;
+            sce.set_perspective(90,1,view_distance);
+        }
 
         //if(c.e) {
         //    view_distance+=100;
         //    sce.set_perspective(90,1,view_distance);
         //}
 
-        //ship.camera_config(position,target,up_vector);
-        //sce.set_camera(position,target,up_vector);
-        //sce.render();
-
-        std::cout<<"Error : "<<glGetError()<<std::endl;
-        disp.new_draw();
-        c.refresh();
-        sce.draw_object(sce.fullscreen_quad);
+        sce.set_camera(position,target,up_vector);
+        sce.render();
+        //disp.new_draw();
+        //sce.draw_object(o);
+       
         disp.refresh();
-
-
+        c.refresh();
 
         timer.wait();
     }

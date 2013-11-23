@@ -245,7 +245,6 @@ void Object::set_draw_mode(Object_Draw_Modes draw_mode) {
                 case OBJECT_DRAW_TRIANGLES:
                     glBindVertexArray(parts[i][j].vao);
                     parts[i][j].ibo_triangles.bind();
-                    std::cout<<"binding triangles to vao "<<parts[i][j].vao<<std::endl;
                     glBindVertexArray(0);
                     break;
                     

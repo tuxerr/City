@@ -20,5 +20,7 @@ uniform GlobalValues {
 
 void main() {
     gl_Position = GlobalValues.projection_modelview*vec4(in_Vertex,1.0);
+    //gl_Position = vec4(in_Vertex,1.0);
+
     color=in_Color;
 }

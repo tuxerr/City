@@ -49,6 +49,8 @@ public:
     void delete_light(Light* l);
     void display_texture(Display_Texture tex);
     Object* fullscreen_quad;
+    Matrix4 camera;
+    Matrix4 perspective;
 
 
 private:
@@ -87,8 +89,7 @@ private:
     Vec3<float> camera_pos;
     Vec3<float> eye_vector;
     Vec3<float> up_vector;
-    Matrix4 camera;
-    Matrix4 perspective;
+    
     bool camera_changed;
 
     float scene_near;
