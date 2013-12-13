@@ -30,6 +30,8 @@ public:
     void set_value(Vec2<float> &val,std::string sub_name);
     void set_value(Vec2<int> &val,std::string sub_name);
     void set_value(Matrix4 &val,std::string sub_name);
+    void bind();
+    void unbind();
     GLuint get_ubo();
     void print_contents();
 
@@ -41,6 +43,7 @@ private:
     std::string attach_name; /* name to attach to the shader */
     int size;
     bool iscreated;
+    bool isbinded;
     int attachpoint;
     GLuint ubo;
     GLuint program_id;

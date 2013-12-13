@@ -26,10 +26,8 @@ Scene::Scene(Display *disp) :
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
     }
+    
     if(disp->has_program("phong")) {
-        uniform_light_number=disp->new_uniform("lightnumber",UNIFORM_INT);
-        disp->link_program_to_uniform("phong",uniform_light_number);
-
         uniform_cascaded_shading_zdelta=disp->new_uniform("cascaded_shading_zdelta",UNIFORM_FLOAT);
         disp->link_program_to_uniform("phong",uniform_cascaded_shading_zdelta);
 
@@ -45,25 +43,18 @@ Scene::Scene(Display *disp) :
         uniform_phong_texcoordmap=disp->new_uniform("texcoordmap",UNIFORM_SAMPLER);
         disp->link_program_to_uniform("phong",uniform_phong_texcoordmap);
 
-
-        for(int i=0;i<MAX_LIGHTS;i++) {
-            std::stringstream uniform_name;
-            uniform_name<<"Light["<<i<<"]";
-            uniform_lights[i]=disp->new_uniformblock("Light",uniform_name.str());
-            disp->link_program_to_uniformblock("phong",uniform_lights[i]);
-            
-            uniform_name.str("");
-            uniform_name<<"shadowmap["<<i<<"]";
-            uniform_light_sampler[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
-            disp->link_program_to_uniform("phong",uniform_light_sampler[i]);
+        uniform_light=disp->new_uniformblock("Light");
+        disp->link_program_to_uniformblock("phong",uniform_light);
+        
+        uniform_light_sampler=disp->new_uniform("shadowmap",UNIFORM_SAMPLER);
+        disp->link_program_to_uniform("phong",uniform_light_sampler);
 
             //uniform_name.str("");
             //uniform_name<<"shadowcubemap["<<i<<"]";
             //uniform_light_samplercube[i]=disp->new_uniform(uniform_name.str(),UNIFORM_SAMPLER);
             //disp->link_program_to_uniform("phong",uniform_light_samplercube[i]);
-        }
+        
 
-        uniform_light_number->set_value(light_number);
     }
     if(disp->has_program("depth_creation")) {
         uniform_light_projection=disp->new_uniformblock("Light_properties");
@@ -115,6 +106,17 @@ Scene::Scene(Display *disp) :
 
     uniform_displaytex_tex->set_value(deferred_result);
     uniform_displaytex_choice->set_value(-1);
+    
+    //rendering FBOs initialization
+    fbo_shadows.attach_texture(null_colortex,FBO_COLOR0);
+    
+    fbo_deferred_phong.attach_texture(deferred_result,FBO_COLOR0);
+    
+    fbo_deferred.attach_texture(deferred_normalmap,FBO_COLOR0);
+    fbo_deferred.attach_texture(deferred_colormap,FBO_COLOR1);
+    fbo_deferred.attach_texture(deferred_texcoordmap,FBO_COLOR2);
+    fbo_deferred.attach_texture(deferred_depthmap,FBO_DEPTH);
+
 }
 
 Scene::~Scene() {
@@ -187,11 +189,10 @@ void Scene::delete_object(Object *o) {
 PointLight* Scene::new_pointlight(Vec3<float> pos,Vec3<float> color,float intensity) {
     for(int i=0;i<MAX_LIGHTS;i++) {
         if(lights[i]==NULL) {
-            PointLight *l=new PointLight(uniform_lights[i],pos,intensity,color);
+            PointLight *l=new PointLight(pos,intensity,color);
             lights[i]=(Light*)l;
             light_number++;
-            uniform_light_number->set_value(light_number);
-            return l;            
+            return l;
         }
     }
     
@@ -202,11 +203,10 @@ PointLight* Scene::new_pointlight(Vec3<float> pos,Vec3<float> color,float intens
 SpotLight* Scene::new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> direction,float illu_angle,float max_illu_angle,float intensity) {
     for(int i=0;i<MAX_LIGHTS;i++) {
         if(lights[i]==NULL) {
-            SpotLight *l=new SpotLight(uniform_lights[i],pos,direction,intensity,color,illu_angle,max_illu_angle);
+            SpotLight *l=new SpotLight(pos,direction,intensity,color,illu_angle,max_illu_angle);
             lights[i]=(Light*)l;
             light_number++;
-            uniform_light_number->set_value(light_number);
-            return l;            
+            return l;
         }
     }
     
@@ -217,11 +217,10 @@ SpotLight* Scene::new_spotlight(Vec3<float> pos,Vec3<float> color,Vec3<float> di
 DirectionalLight* Scene::new_directionallight(Vec3<float> direction,Vec3<float> color,float intensity) {
     for(int i=0;i<MAX_LIGHTS;i++) {
         if(lights[i]==NULL) {
-            DirectionalLight *l=new DirectionalLight(uniform_lights[i],direction,intensity,color);
+            DirectionalLight *l=new DirectionalLight(direction,intensity,color);
             lights[i]=(Light*)l;
             light_number++;
-            uniform_light_number->set_value(light_number);
-            return l;            
+            return l;
         }
     }
     
@@ -235,67 +234,26 @@ void Scene::delete_light(Light* l) {
             if(lights[i]==l) {
                 for(int j=i;j<MAX_LIGHTS-1;j++) {
                     lights[j]=lights[j+1];
-                    if(lights[j]!=NULL) {
-                        lights[j]->set_uniform(uniform_lights[j]);
-                    }
                 }
                 lights[MAX_LIGHTS-1]=NULL;
             }
         }
         delete l;
         light_number--;
-        uniform_light_number->set_value(light_number);
     }
 }
 
 void Scene::render() {
+     // useless in this case but necessary tex for the fbo to be complete
     disp->new_draw();
-
-    FBO fbo_shadows,fbo_deferred,fbo_deferred_phong;
-    fbo_shadows.attach_texture(null_colortex,FBO_COLOR0); // useless in this case but necessary tex for the fbo to be complete
-
-    for(int i=0;i<MAX_LIGHTS;i++) {
-
-        if(lights[i]!=NULL) {
-            if(lights[i]->enable_shadows()) {
-                disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
-            
-                switch(lights[i]->get_type()) {
-                case POINT_LIGHT:
-                    break;
-
-                case SPOT_LIGHT:
-                    break;
-
-                case DIRECTION_LIGHT:
-                    render_directional_shadowmap((DirectionalLight*) lights[i],fbo_shadows,uniform_light_sampler[i]);
-                    break;
-
-                case OFF:
-                    break;
-
-                default:
-                    break;
-                }
-
-                disp->viewport();
-            }
-        }
-    }
-    fbo_shadows.unbind();
     
     frustum.perspective_frustum(camera_pos,eye_vector.normalize(),up_vector,disp->get_ratio(),scene_far,scene_fov_rad);
     
-    // reset all saved lods to unset for the new global render
-    for(Object* o : objects) {
-        o->reset_lod_to_draw();
-    }
+    fbo_deferred_phong.bind();
+    disp->new_draw();
+    fbo_deferred_phong.unbind();
 
-    // deferred rendering : first pass
-    fbo_deferred.attach_texture(deferred_normalmap,FBO_COLOR0);
-    fbo_deferred.attach_texture(deferred_colormap,FBO_COLOR1);
-    fbo_deferred.attach_texture(deferred_texcoordmap,FBO_COLOR2);
-    fbo_deferred.attach_texture(deferred_depthmap,FBO_DEPTH);
+    // deferred rendering : first pass (Gbuffer construction)
     if(fbo_deferred.iscomplete()) {
         fbo_deferred.bind();
         disp->new_draw();
@@ -307,27 +265,64 @@ void Scene::render() {
     } else {
         Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO"<<std::endl;
     }
-
-    // phong shading on full-screen quad
+    
     glDrawBuffers(1,&(bufs[0]));
-    fbo_deferred_phong.attach_texture(deferred_result,FBO_COLOR0);
-    if(fbo_deferred_phong.iscomplete()) {
-        fbo_deferred_phong.bind();
+    for(int i=0;i<MAX_LIGHTS;i++) {
         
-        disp->new_draw();
-        fullscreen_quad->set_program("phong");
+        if(lights[i]!=NULL && lights[i]->is_activated()) {
+            //shadowing pass
+            if(lights[i]->enable_shadows()) {
+                disp->viewport(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE);
+                
+                switch(lights[i]->get_type()) {
+                    case POINT_LIGHT:
+                        break;
+                        
+                    case SPOT_LIGHT:
+                        break;
+                        
+                    case DIRECTION_LIGHT:
+                        render_directional_shadowmap((DirectionalLight*) lights[i]);
+                        break;
+                        
+                    case OFF:
+                        break;
+                        
+                    default:
+                        break;
+                }
+                
+                disp->viewport();
+                for(Object* o : objects) {
+                    o->reset_lod_to_draw();
+                }
+                
+            }
+            //lighting pass with phong shader
+            if(fbo_deferred_phong.iscomplete()) {
+                fbo_deferred_phong.bind();
+                
+                glBlendFunc(GL_ONE,GL_ONE);
+                fullscreen_quad->set_program("phong");
+                
+                Matrix4 screen_to_world;
+                screen_to_world = perspective*camera;
+                screen_to_world.invert();
+                globalvalues->set_value(screen_to_world,"screen_to_world");
+                
+                lights[i]->set_uniform(uniform_light);
+                uniform_light_sampler->set_value(lights[i]->get_depth_texture());
+                
+                draw_object(fullscreen_quad);
 
-        Matrix4 screen_to_world;
-        screen_to_world = perspective*camera;
-        screen_to_world.invert();
-        globalvalues->set_value(screen_to_world,"screen_to_world");
+                glBlendFunc(GL_ONE,GL_ZERO);
 
-        draw_object(fullscreen_quad); 
-        
-        fbo_deferred_phong.unbind();
-    } else {
-        Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO for the phong pass"<<std::endl;
-    } 
+                fbo_deferred_phong.unbind();
+            } else {
+                Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO for the phong pass"<<std::endl;
+            }
+        }
+    }
 
     // draw result of final pass (using fullscreen quad)
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -337,8 +332,7 @@ void Scene::render() {
     
 }
 
-void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni) {
-    UniformBlock *uni = dirlight->get_uniformblock();
+void Scene::render_directional_shadowmap(DirectionalLight* dirlight) {
     Matrix4 light_mat,camera_mat;
 
     Vec3<float> ldir_norm = dirlight->get_direction(); 
@@ -457,26 +451,26 @@ void Scene::render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uni
         // matrix send to pixel shader (phong)
         std::stringstream uniform_name;
         uniform_name<<"matrix"<<(cascaded_layer+1);
-        uni->set_value(light_mat,uniform_name.str());
+        uniform_light->set_value(light_mat,uniform_name.str());
 
-        fbo.attach_texture(dirlight->get_depth_texture(),FBO_DEPTH,cascaded_layer);
+        fbo_shadows.attach_texture(dirlight->get_depth_texture(),FBO_DEPTH,cascaded_layer);
 
-        if(fbo.iscomplete()) {
-            fbo.bind();
+        if(fbo_shadows.iscomplete()) {
+            fbo_shadows.bind();
             uniform_light_projection->set_value(light_mat,"matrix");
 
             frustum.orthogonal_frustum(cam_pos,ldir_norm,lsp_y,optimal_radius,1,camera_height*2);
 
             draw_scene();
             
-            fbo.unbind();
+            fbo_shadows.unbind();
         }  else {
             Logger::log()<<"FBO incomplete for the render of directional light "<<std::endl;
         }  
         
     }
 
-    shadowmap_uni->set_value(dirlight->get_depth_texture());
+    uniform_light_sampler->set_value(dirlight->get_depth_texture());
 }
 
 Vec3<float> Scene::calculate_shadowing_optimal_point(Vec3<float> near_values[4],Vec3<float> far_values[4], float &radius) {

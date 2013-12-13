@@ -63,6 +63,8 @@ void Display::init() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     
+    glEnable(GL_BLEND);
+    
     GLint major,minor;
 
     glGetIntegerv(GL_MAJOR_VERSION, &major);

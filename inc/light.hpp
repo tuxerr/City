@@ -18,11 +18,11 @@ typedef enum Light_Types {
 
 class Light {
 public:
-    Light(UniformBlock *uniform,float intensity,Vec3<float> color);
+    Light(float intensity,Vec3<float> color);
     void set_color(Vec3<float> color);
     void set_intensity(float intensity);
     void set_linear_dissipation(float linear_dissipation);
-    void set_uniform(UniformBlock *uniform);
+    virtual void set_uniform(UniformBlock *uniform);
     void enable_shadows(bool shadow);
     bool enable_shadows();
     void set_shadow_range(float min,float max=-1);
@@ -30,12 +30,12 @@ public:
     float get_shadow_max_range();
     void activate();
     void desactivate();
+    void toggle();
+    bool is_activated();
     Texture* get_depth_texture();
-    UniformBlock* get_uniformblock();
     Light_Types get_type();
 
 protected:
-    UniformBlock *uniform;
     Light_Types type;
     Vec3<float> color;
     float intensity;
@@ -44,12 +44,12 @@ protected:
     bool render_shadows;
     float shadow_min_range;
     float shadow_max_range;
-
+    bool activated;
 };
 
 class PointLight : public Light {
 public:
-    PointLight(UniformBlock *uniform,Vec3<float> pos,float intensity,Vec3<float> color);
+    PointLight(Vec3<float> pos,float intensity,Vec3<float> color);
     void set_pos(Vec3<float> pos);
     void set_uniform(UniformBlock *uniform);
 
@@ -61,7 +61,7 @@ private:
 
 class DirectionalLight : public Light{
 public:
-    DirectionalLight(UniformBlock *uniform,Vec3<float> direction,float intensity,Vec3<float> color);
+    DirectionalLight(Vec3<float> direction,float intensity,Vec3<float> color);
     void set_direction(Vec3<float> direction);   
     Vec3<float> get_direction();
     void set_uniform(UniformBlock *uniform);
@@ -74,7 +74,7 @@ private:
 
 class SpotLight : public PointLight {
 public:
-    SpotLight(UniformBlock *uniform,Vec3<float> pos,Vec3<float> direction,float intensity,Vec3<float> color,float illu_angle,float max_illu_angle);
+    SpotLight(Vec3<float> pos,Vec3<float> direction,float intensity,Vec3<float> color,float illu_angle,float max_illu_angle);
     void set_spot(float illu_angle,float max_illu_angle);
     void set_direction(Vec3<float> direction);
     void set_uniform(UniformBlock *uniform);

@@ -34,7 +34,7 @@ int main(int argc,char *argv[]) {
     Scene sce(&disp);
     
     Vec3<float> camerapos(5,0,0);
-    sce.set_camera(camerapos,Vec3<float>(0,0,0),Vec3<float>(0,0,1));
+    sce.set_camera(camerapos,Vec3<float>(0,0,2),Vec3<float>(0,0,1));
     sce.set_perspective(100,0.1,1000);
 
     Timer timer(40);
@@ -45,6 +45,7 @@ int main(int argc,char *argv[]) {
 
     ObjFile spaceship("data/spaceship.obj");
 
+    
     Object *o=sce.new_object();
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
@@ -56,18 +57,22 @@ int main(int argc,char *argv[]) {
 
     //Terrain_Data tdata = terrain.generate_terrain();
 
-    //Object *terrain_patches = sce.new_object();
-    //terrain.generate_patches(400,terrain_patches);
-    //terrain_patches->set_enable_draw(false);
-    //terrain_patches->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    Object *terrain_patches = sce.new_object();
+    terrain.generate_patches(400,terrain_patches);
+    terrain_patches->set_enable_draw(true);
+    terrain_patches->set_draw_mode(OBJECT_DRAW_TRIANGLES);
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(false);
     l1->set_shadow_range(-1,314);
+    l1->set_color(Vec3<float>(1,0,0));
+    //l1->desactivate();
+    
 
-//    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,60),Vec3<float>(1,1,1),1);
+    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,4),Vec3<float>(0,1,0),1.0);
+    //l2->desactivate();
 
-    Vec3<float> position(5,0,0),up_vector(0,0,1);
+    Vec3<float> position(5,0,2),up_vector(0,0,1);
     Vec3<float> target(0,0,0);
     
     //o->translate(20,0,1);
@@ -75,6 +80,8 @@ int main(int argc,char *argv[]) {
     float view_distance=1500;
     
     sce.display_texture(Scene::DT_NONE);
+    float pos=0;
+    
     while (!c.quit_program()) {
         disp.new_draw();
 
@@ -94,7 +101,17 @@ int main(int argc,char *argv[]) {
             o->rotate(2,0,0,1);
         }
         if(c.is_pressed(CT_UP)) {
-            o->rotate(-2,0,1,0);
+            pos-=0.05;
+        } else if(c.is_pressed(CT_DOWN)) {
+            pos+=0.05;
+        }
+        l2->set_pos(Vec3<float>(0,pos,4));
+        
+        if(c.is_pressed(CT_UP)) {
+            //l2->toggle();
+        }
+        if(c.is_pressed(CT_DOWN)) {
+           // l1->toggle();
         }
 
         if(c.is_pressed('d')) {

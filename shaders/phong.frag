@@ -24,11 +24,7 @@ uniform Light {
     bool render_shadows;
     float shadow_min_range;
     float shadow_max_range;
-} Light[8];
-
-//uniform Lights {
-//    LightInformation Light[8];
-//};
+} Light;
 
 uniform GlobalValues {
     mat4 modelview; // camera*modelview
@@ -41,9 +37,7 @@ uniform GlobalValues {
     float far;
 } GlobalValues;
 
-uniform int lightnumber;
-
-uniform sampler2DArrayShadow shadowmap[8];
+uniform sampler2DArrayShadow shadowmap;
 //uniform samplerCubeShadow shadowcubemap[8];
 uniform sampler2D normalmap;
 uniform sampler2D depthmap;
@@ -57,22 +51,22 @@ vec4 vert_pos;
 vec4 vert_normal;
 vec3 texcoord;
 
-vec4 spotlight(int lightID) {
-    vec4 globalcolor = (vec4(color,1.0)*vec4(Light[int(lightID)].color,1.0));
+vec4 spotlight() {
+    vec4 globalcolor = (vec4(color,1.0)*vec4(Light.color,1.0));
 
-    vec3 light_ray = vert_pos.xyz-Light[lightID].origin;
+    vec3 light_ray = vert_pos.xyz-Light.origin;
     vec3 norm_normal = normalize(vert_normal.xyz);
     vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
     vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
-    float distance = abs(length(Light[lightID].origin-GlobalValues.camera_pos));
+    float distance = abs(length(Light.origin-GlobalValues.camera_pos));
 
     vec4 ambiant = globalcolor*0.1;
     vec4 diffuse = vec4(0,0,0,0);
     vec4 specular = vec4(0,0,0,0);
 
-    float illu_angle = Light[lightID].spot_values.y;
-    float max_illu_angle = Light[lightID].spot_values.z;
-    vec3 direction = Light[lightID].direction;
+    float illu_angle = Light.spot_values.y;
+    float max_illu_angle = Light.spot_values.z;
+    vec3 direction = Light.direction;
      
     float spot_angle = dot(normalize(light_ray),normalize(direction));
     if(spot_angle>illu_angle) {
@@ -80,7 +74,7 @@ vec4 spotlight(int lightID) {
         float specular_mult_factor = max(dot(normalize(eye_ray),reflected_ray),0.0);
         diffuse = diffuse_mult_factor*globalcolor*0.4;
         specular = pow(specular_mult_factor,500.0)*1*globalcolor;
-        specular = specular/(distance*Light[lightID].spot_values.x);
+        specular = specular/(distance*Light.spot_values.x);
          
         if(spot_angle<max_illu_angle) {
             float attenuation = (1-(spot_angle-max_illu_angle)/(illu_angle-max_illu_angle));
@@ -89,18 +83,18 @@ vec4 spotlight(int lightID) {
         }
     } 
      
-//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
+//    return ambiant+(diffuse+specular)*Light.intensity;
     return ambiant+diffuse+specular;
 }
 
-vec4 pointlight(int lightID) {
-    vec4 globalcolor = (vec4(color,1.0)+vec4(Light[lightID].color,1.0))*0.5;
+vec4 pointlight() {
+    vec4 globalcolor = (vec4(color,1.0)+vec4(Light.color,1.0))*0.5;
     
-    vec3 light_ray = vert_pos.xyz-Light[lightID].origin;
+    vec3 light_ray = vert_pos.xyz-Light.origin;
     vec3 norm_normal = normalize(vert_normal.xyz);
     vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
     vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
-    float distance = abs(length(Light[lightID].origin-GlobalValues.camera_pos));
+    float distance = abs(length(Light.origin-GlobalValues.camera_pos));
 
     float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
     float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
@@ -108,16 +102,16 @@ vec4 pointlight(int lightID) {
     vec4 ambiant = globalcolor*0.1;
     vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
     vec4 specular = pow(specular_mult_factor,500)*globalcolor;
-    specular = specular/(distance/3*Light[lightID].spot_values.x);
+    specular = specular/(distance/3*Light.spot_values.x);
         
-//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
+//    return ambiant+(diffuse+specular)*Light.intensity;
     return ambiant+diffuse+specular;
 }
 
 
 
-float directional_shadowing(int lightID) {
-    float shadow_min_range = Light[lightID].shadow_min_range;
+float directional_shadowing() {
+    float shadow_min_range = Light.shadow_min_range;
     if(shadow_min_range==-1) {
         shadow_min_range=GlobalValues.near;
     }
@@ -125,10 +119,10 @@ float directional_shadowing(int lightID) {
     float distance_from_cam = length(vert_pos.xyz-GlobalValues.camera_pos);
     float zdelta = dot(vert_pos.xyz-GlobalValues.camera_pos,normalize(GlobalValues.eye_vector))-shadow_min_range;
 
-    if(Light[lightID].shadow_max_range != -1 && zdelta>=Light[lightID].shadow_max_range) {
+    if(Light.shadow_max_range != -1 && zdelta>=Light.shadow_max_range) {
         return 1.0;
     }
-    if(zdelta<=Light[lightID].shadow_min_range) {
+    if(zdelta<=Light.shadow_min_range) {
         return 1.0;
     }
 
@@ -142,21 +136,21 @@ float directional_shadowing(int lightID) {
 
     vec4 light_point;
     if(cascaded_layer==0) {
-        light_point = Light[lightID].matrix1*vert_pos;    
+        light_point = Light.matrix1*vert_pos;    
     } else if(cascaded_layer==1) {
-        light_point = Light[lightID].matrix2*vert_pos;    
+        light_point = Light.matrix2*vert_pos;    
     } else if(cascaded_layer==2) {
-        light_point = Light[lightID].matrix3*vert_pos;    
+        light_point = Light.matrix3*vert_pos;    
     } else if(cascaded_layer==3) {
-        light_point = Light[lightID].matrix4*vert_pos;    
+        light_point = Light.matrix4*vert_pos;    
     } else if(cascaded_layer==4) {
-        light_point = Light[lightID].matrix5*vert_pos;
+        light_point = Light.matrix5*vert_pos;
     } else if(cascaded_layer==5) {
-        light_point = Light[lightID].matrix6*vert_pos;    
+        light_point = Light.matrix6*vert_pos;    
     } else if(cascaded_layer==6) {
-        light_point = Light[lightID].matrix7*vert_pos;    
+        light_point = Light.matrix7*vert_pos;    
     } else if(cascaded_layer==7) {
-        light_point = Light[lightID].matrix8*vert_pos;    
+        light_point = Light.matrix8*vert_pos;    
     }
     
     // clamping from [1,-1] to [1,0]
@@ -167,7 +161,7 @@ float directional_shadowing(int lightID) {
     float depth_offset_u20=0.0003;
     float depth_offset_o20=0.001;
     float depth_offset_final = (distance_from_cam<10? depth_offset_u20 : depth_offset_o20);
-    lightval = texture(shadowmap[lightID],vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_final;
+    lightval = texture(shadowmap,vec4(light_point.xy,cascaded_layer,cascaded_layer))+depth_offset_final;
 
     float soft_offset = 0.0009765625;
     vec4 v4off1 = vec4(light_point.xy+vec2(soft_offset,0),cascaded_layer,cascaded_layer);
@@ -176,10 +170,10 @@ float directional_shadowing(int lightID) {
     vec4 v4off4 = vec4(light_point.xy+vec2(0,-soft_offset),cascaded_layer,cascaded_layer);
     float lightval1,lightval2,lightval3,lightval4;
 
-    lightval1 = texture(shadowmap[lightID],v4off1)+depth_offset_final;
-    lightval2 = texture(shadowmap[lightID],v4off2)+depth_offset_final;
-    lightval3 = texture(shadowmap[lightID],v4off3)+depth_offset_final;
-    lightval4 = texture(shadowmap[lightID],v4off4)+depth_offset_final;
+    lightval1 = texture(shadowmap,v4off1)+depth_offset_final;
+    lightval2 = texture(shadowmap,v4off2)+depth_offset_final;
+    lightval3 = texture(shadowmap,v4off3)+depth_offset_final;
+    lightval4 = texture(shadowmap,v4off4)+depth_offset_final;
     if(light_point.z <= lightval) {
         return 1.0;
     } else {
@@ -202,10 +196,10 @@ float directional_shadowing(int lightID) {
     return 0.0;
 }
 
-vec4 directionallight(int lightID) {
-    vec4 globalcolor = (vec4(color,1.0)*vec4(Light[lightID].color,1.0));
+vec4 directionallight() {
+    vec4 globalcolor = (vec4(color,1.0)*vec4(Light.color,1.0));
     
-    vec3 light_ray = Light[lightID].direction;
+    vec3 light_ray = Light.direction;
     vec3 norm_normal = normalize(vert_normal.xyz);
     vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
     vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
@@ -215,12 +209,12 @@ vec4 directionallight(int lightID) {
 
     vec4 ambiant = globalcolor*0.3;
     vec4 diffuse = diffuse_mult_factor*globalcolor*0.7;
-    vec4 specular = pow(specular_mult_factor,500)*vec4(Light[lightID].color,1.0);
-    specular = specular/3*Light[lightID].spot_values.x;
+    vec4 specular = pow(specular_mult_factor,500)*vec4(Light.color,1.0);
+    specular = specular/3*Light.spot_values.x;
     
-//    return ambiant+(diffuse+specular)*Light[lightID].intensity;
-    if(Light[lightID].render_shadows) {
-        float res = directional_shadowing(lightID);
+//    return ambiant+(diffuse+specular)*Light.intensity;
+    if(Light.render_shadows) {
+        float res = directional_shadowing();
         vec4 fullillu = ambiant+diffuse+specular;
         vec4 shadowed = ambiant;
         return mix(shadowed,fullillu,res);
@@ -259,24 +253,22 @@ void main(void) {
     texcoord = texture(texcoordmap,deferred_texcoord).xyz;
 
     vec4 res = vec4(0,0,0,0);
-    for(int i=0;i<lightnumber;i++) {
 
-        if(Light[i].light_type==1) {
-            if(Light[i].render_shadows) {
-                vec3 light_ray = vert_pos.xyz-Light[i].origin;
+    if(Light.light_type==1) {
+            if(Light.render_shadows) {
+                vec3 light_ray = vert_pos.xyz-Light.origin;
                 //float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
                 //if(abs(light_ray.z) <= lightval) {
-                //    res+=pointlight(i);
+                //    res+=pointlight();
                 //}
             } else {
-                res+=pointlight(i);
+                res=pointlight();
             }
 
-        } else if(Light[i].light_type==2) {
-            res+=spotlight(i);
-        } else if(Light[i].light_type==3) {
-            res += directionallight(i);
-        }
+    } else if(Light.light_type==2) {
+            res =spotlight();
+    } else if(Light.light_type==3) {
+            res = directionallight();
     }
 
     pixel_color=res;

@@ -119,73 +119,116 @@ GLint UniformBlock::get_offset(std::string sub_name) {
     }
 }
 
+void UniformBlock::bind() {
+    if(!isbinded) {
+        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+        isbinded=true;
+    }
+}
+
+void UniformBlock::unbind() {
+    if(isbinded) {
+        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        isbinded=false;
+    }
+}
+
 void UniformBlock::set_value(bool val,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
         int realval;
         if(val) {
             realval=1;
         } else {
             realval=0;
         }
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(realval),&realval);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(realval),&realval);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(realval),&realval);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
+        
     }
 }
 
 void UniformBlock::set_value(int val,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
     }
 }
 
 void UniformBlock::set_value(float val,std::string sub_name) {
     int offset = get_offset(sub_name);
-
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(val),&val);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
     }
 }
 
 void UniformBlock::set_value(Vec3<float> &v3 ,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v3),&v3);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v3),&v3);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v3),&v3);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
+        
     }
 }
 
 void UniformBlock::set_value(Vec3<int> &i3 ,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i3),&i3);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i3),&i3);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i3),&i3);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
     }
 }
 
 void UniformBlock::set_value(Vec2<float> &v2 ,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v2),&v2);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v2),&v2);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(v2),&v2);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
     }
 }
 
 void UniformBlock::set_value(Vec2<int> &i2 ,std::string sub_name) {
     int offset = get_offset(sub_name);
     if(offset!=-1) {
-        glBindBuffer(GL_UNIFORM_BUFFER,ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i2),&i2);
-        glBindBuffer(GL_UNIFORM_BUFFER,0);
+        if(isbinded) {
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i2),&i2);
+        } else {
+            glBindBuffer(GL_UNIFORM_BUFFER,ubo);
+            glBufferSubData(GL_UNIFORM_BUFFER,offset,sizeof(i2),&i2);
+            glBindBuffer(GL_UNIFORM_BUFFER,0);
+        }
     }
 }
 

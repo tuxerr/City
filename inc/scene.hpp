@@ -39,7 +39,7 @@ public:
     Object* new_object();
     void delete_object(Object *o);
     void render();
-    void render_directional_shadowmap(DirectionalLight* dirlight,FBO &fbo,Uniform *shadowmap_uni);
+    void render_directional_shadowmap(DirectionalLight* dirlight);
     void draw_scene();
     void draw_octree(Octree &oct,bool testcollision,std::list<Object*> &drawn);
     void draw_object(Object *o);
@@ -61,10 +61,9 @@ private:
     int light_number;
     Display *disp;
     UniformBlock *globalvalues;
-    UniformBlock *uniform_lights[MAX_LIGHTS];
-    Uniform *uniform_light_sampler[MAX_LIGHTS];
-    Uniform *uniform_light_samplercube[MAX_LIGHTS];
-    Uniform *uniform_light_number;
+    UniformBlock *uniform_light;
+    Uniform *uniform_light_sampler;
+    Uniform *uniform_light_samplercube;
     Uniform *uniform_cascaded_shading_zdelta;
 
     Uniform *uniform_displaytex_tex;
@@ -84,6 +83,8 @@ private:
     Texture *deferred_texcoordmap;
     Texture *deferred_depthmap;
     Texture *deferred_result;
+    
+    FBO fbo_shadows,fbo_deferred,fbo_deferred_phong;
 
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;
