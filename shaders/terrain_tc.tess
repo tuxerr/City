@@ -21,6 +21,7 @@ uniform GlobalValues {
     vec3 camera_pos;
     vec3 eye_vector;
     float far;
+    ivec2 screen_size;
 } GlobalValues;
 
 #define ID gl_InvocationID

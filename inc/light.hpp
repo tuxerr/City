@@ -25,6 +25,7 @@ public:
     virtual void set_uniform(UniformBlock *uniform);
     void enable_shadows(bool shadow);
     bool enable_shadows();
+    float get_intensity();
     void set_shadow_range(float min,float max=-1);
     float get_shadow_min_range();
     float get_shadow_max_range();
@@ -52,6 +53,7 @@ public:
     PointLight(Vec3<float> pos,float intensity,Vec3<float> color);
     void set_pos(Vec3<float> pos);
     void set_uniform(UniformBlock *uniform);
+    Vec3<float> get_pos();
 
 private:
     Vec3<float> pos;

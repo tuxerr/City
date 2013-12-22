@@ -11,6 +11,7 @@ uniform GlobalValues {
     vec3 camera_pos;
     vec3 eye_vector;
     float far;
+    vec2 screen_size;
 } GlobalValues;
 
 uniform Light_properties {

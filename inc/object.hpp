@@ -62,6 +62,9 @@ public:
     void translate(float x, float y, float z);
     void scale(float x, float y, float z);
     void rotate(float angle,float x, float y, float z);
+    void reset_modelview();
+    void set_pos(float x, float y, float z);
+    void set_pos(Vec3<float> pos);
     Vec3<float> position();
 
     bool has_been_drawn;
@@ -71,6 +74,7 @@ private:
     bool ena_colors;
     bool ena_textures;
     bool ena_draw;
+    bool has_normals;
     Object_Draw_Modes obj_draw_mode;
     std::string program_name;
     Matrix4 obj_modelview;

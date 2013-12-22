@@ -3,7 +3,7 @@
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 UniformBlock::UniformBlock(std::string name,int attachpoint) : 
-    complete_name(name), attach_name(name), size(-1), iscreated(false), attachpoint(attachpoint)
+    complete_name(name), attach_name(name), size(-1), iscreated(false), attachpoint(attachpoint), isbinded(false)
 {
    /* if(complete_name.find('[')==std::string::npos) {
         complete_name+="_";
@@ -13,7 +13,7 @@ UniformBlock::UniformBlock(std::string name,int attachpoint) :
 }
 
 UniformBlock::UniformBlock(std::string name,std::string attach_name, int attachpoint) :
-complete_name(name), attach_name(attach_name), size(-1), iscreated(false), attachpoint(attachpoint)
+complete_name(name), attach_name(attach_name), size(-1), iscreated(false), attachpoint(attachpoint), isbinded(false)
 {
     /* if(complete_name.find('[')==std::string::npos) {
      complete_name+="_";

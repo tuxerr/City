@@ -63,7 +63,11 @@ void Display::init() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     
+    glEnable(GL_CULL_FACE);
+    
     glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE,GL_ONE);
+    glDisable(GL_BLEND);
     
     GLint major,minor;
 
@@ -75,8 +79,6 @@ void Display::init() {
     //glClearColor(1, 1, 0, 1);
 
     glPatchParameteri(GL_PATCH_VERTICES,4); // patches are made up from 4 vertices
-
-    int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
     Logger::log(LOG_INFO)<<"Framebuffer is "<<width<<"x"<<height<<std::endl;
@@ -119,7 +121,7 @@ void Display::new_program(const char *vertex_shader_path,const char *fragment_sh
     
     // creates the new program with both vertex and fragment shaders.
     programs[name].load_shaders(vertex_shader_path,fragment_shader_path,tessellation_control_shader_path,tessellation_evaluator_shader_path,geometry_shader_path);
-    Logger::log()<<"Program "<<name<<" was created"<<std::endl;
+    Logger::log()<<"Program "<<name<<" was created with ID "<<programs[name].id()<<std::endl;
 }
 
 bool Display::has_program(std::string name) {
@@ -178,7 +180,7 @@ void Display::link_program_to_uniform(std::string program_name,Uniform *uni) {
       // subscribe the program to the uniform
         programs[program_name].subscribe_to_uniform(uni);
     } else {
-	Logger::log()<<"Program "<<program_name<<" does not exist"<<std::endl;
+        Logger::log()<<"Program "<<program_name<<" does not exist"<<std::endl;
     }
 }
 

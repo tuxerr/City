@@ -37,6 +37,7 @@ public:
     void set_perspective_ortho(float width,float near,float far);
     void set_camera(Vec3<float> pos,Vec3<float>direction,Vec3<float>up_vector);
     Object* new_object();
+    Object* new_object_outside_octree();
     void delete_object(Object *o);
     void render();
     void render_directional_shadowmap(DirectionalLight* dirlight);
@@ -48,7 +49,6 @@ public:
     DirectionalLight* new_directionallight(Vec3<float> direction,Vec3<float> color=Vec3<float>(1,1,1),float intensity=1);
     void delete_light(Light* l);
     void display_texture(Display_Texture tex);
-    Object* fullscreen_quad;
     Matrix4 camera;
     Matrix4 perspective;
 
@@ -74,7 +74,7 @@ private:
     Uniform *uniform_phong_depthmap;
     Uniform *uniform_phong_colormap;
     Uniform *uniform_phong_texcoordmap;
-
+    
     Display_Texture displayed_texture;
 
     Texture *null_colortex;
@@ -91,6 +91,12 @@ private:
     Vec3<float> eye_vector;
     Vec3<float> up_vector;
     
+    Object* cube;
+    void generate_cube();
+    Object* fullscreen_quad;
+    void generate_fullscreen_quad();
+    void set_deferred_cube_position(PointLight *l);
+
     bool camera_changed;
 
     float scene_near;

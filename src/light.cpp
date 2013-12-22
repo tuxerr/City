@@ -7,6 +7,10 @@ Light::Light(float intensity,Vec3<float> color) :
 {
 }
 
+float Light::get_intensity() {
+    return intensity;
+}
+
 void Light::set_color(Vec3<float> color) {
     this->color=color;
 }
@@ -81,7 +85,6 @@ Light_Types Light::get_type() {
 }
 
 /*** PointLight Class ***/
-
 PointLight::PointLight(Vec3<float> pos,float intensity,Vec3<float> color) :
     Light(intensity,color)
 {
@@ -99,10 +102,12 @@ void PointLight::set_uniform(UniformBlock *uniform) {
     Light::set_uniform(uniform);
 }
 
+Vec3<float> PointLight::get_pos() {
+    return pos;
+}
 
 
 /*** DirectionalLight ***/
-
 DirectionalLight::DirectionalLight(Vec3<float> direction,float intensity,Vec3<float> color) :
     Light(intensity,color)
 {
@@ -126,7 +131,6 @@ void DirectionalLight::set_uniform(UniformBlock *uniform) {
 }
 
 /*** SpotLight ***/
-
 SpotLight::SpotLight(Vec3<float> pos,Vec3<float> direction,float intensity,Vec3<float> color,float illu_angle,float max_illu_angle) :
     PointLight(pos,intensity,color)
 {

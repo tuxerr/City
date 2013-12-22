@@ -6,6 +6,7 @@ Object::Object(Octree *tree) :
     ena_colors(true),
     ena_textures(true),
     ena_draw(true),
+    has_normals(false),
     obj_draw_mode(OBJECT_DRAW_LINES),
     program_name("deferred"),
     modelview_changed(true),
@@ -146,7 +147,7 @@ void Object::update_vertices_buffer(void *data,int size,unsigned int part_number
     }
     calculate_bounding_sphere();
 
-    if(lod_number==0) {
+    if(lod_number==0 && tree!=NULL) {
         tree->delete_object(this);
         tree->add_object(this);
     }
@@ -172,6 +173,7 @@ void Object::update_normals_buffer(void *data,int size,unsigned int part_number,
             parts[part_number][lod_number].nbo.create();
         parts[part_number][lod_number].nbo.update(data,size);
     }
+    has_normals=true;
 }
 
 void Object::update_lines_index_buffer(void *data,int size,unsigned int part_number,unsigned int lod_number) {
@@ -315,16 +317,35 @@ void Object::draw(float distance_from_camera) {
 void Object::translate(float x, float y, float z) {
     obj_modelview.translate(x,y,z);
     modelview_changed=true;
-    tree->delete_object(this);
-    tree->add_object(this);
+    if(tree!=NULL) {
+        tree->delete_object(this);
+        tree->add_object(this);
+    }
+}
+
+void Object::set_pos(Vec3<float> pos) {
+    set_pos(pos.x,pos.y,pos.z);
+}
+
+void Object::set_pos(float x, float y, float z) {
+    Vec3<float> pos = position();
+    Vec3<float> destination = Vec3<float>(x,y,z);
+    Vec3<float> translation = destination-pos;
+    translate(translation.x,translation.y,translation.z);
 }
 
 void Object::scale(float x, float y, float z) {
     obj_modelview.scale(x,y,z);
     modelview_changed=true;
     bounding_scale_factor*=maxf(maxf(x,y),z);
-    tree->delete_object(this);
-    tree->add_object(this);
+    if(tree!=NULL) {
+        tree->delete_object(this);
+        tree->add_object(this);
+    }
+}
+
+void Object::reset_modelview() {
+    obj_modelview.identity();
 }
 
 void Object::rotate(float angle,float x, float y, float z) {
@@ -340,11 +361,11 @@ void Object::update_matrices(Matrix4 *perspective,Matrix4 *camera) {
     if(camera!=NULL) {
         total_modelview = (*camera)*obj_modelview;
 
-        if(modelview_changed) {
+        if(modelview_changed && has_normals) {
             normal_mat = obj_modelview; 
             normal_mat.invert();
             normal_mat.transpose();
-        }
+        } 
 
         if(perspective!=NULL) {
             projection_modelview = (*perspective)*total_modelview;

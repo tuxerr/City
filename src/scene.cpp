@@ -9,6 +9,8 @@ Scene::Scene(Display *disp) :
     // program initialisation
     disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL,NULL);
     disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,NULL,"phong");
+    disp->new_program("shaders/pointlight_draw.vert","shaders/phong_pointlight.frag",NULL,NULL,NULL,"phong_pointlight");
+    disp->new_program("shaders/pointlight_draw.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"phong_pointlight_stencil");
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"depth_creation");
     disp->new_program("shaders/displaytexture.vert","shaders/displaytexture.frag",NULL,NULL,NULL,"display_texture");
     //disp->new_program("shaders/deferred_tess.vert","shaders/deferred_tess.frag","shaders/terrain_tc.tess","shaders/terrain_te.tess",NULL,"deferred_tess");
@@ -20,8 +22,14 @@ Scene::Scene(Display *disp) :
     globalvalues=disp->new_uniformblock("GlobalValues");
     disp->link_program_to_uniformblock("default",globalvalues);
     disp->link_program_to_uniformblock("phong",globalvalues);
+    disp->link_program_to_uniformblock("phong_pointlight",globalvalues);
+    disp->link_program_to_uniformblock("phong_pointlight_stencil",globalvalues);
     disp->link_program_to_uniformblock("depth_creation",globalvalues);
     disp->link_program_to_uniformblock("deferred",globalvalues);
+    disp->link_program_to_uniformblock("display_texture",globalvalues);
+    
+    Vec2<float> screen_size(screen_width,screen_height);
+    globalvalues->set_value(screen_size, "screen_size");
 
     for(int i=0;i<MAX_LIGHTS;i++) {
         lights[i]=NULL;
@@ -56,6 +64,12 @@ Scene::Scene(Display *disp) :
         
 
     }
+    if(disp->has_program("phong_pointlight")) {
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_normalmap);
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_depthmap);
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
+        disp->link_program_to_uniformblock("phong_pointlight",uniform_light);
+    }
     if(disp->has_program("depth_creation")) {
         uniform_light_projection=disp->new_uniformblock("Light_properties");
         disp->link_program_to_uniformblock("depth_creation",uniform_light_projection);
@@ -69,31 +83,13 @@ Scene::Scene(Display *disp) :
         disp->link_program_to_uniform("display_texture",uniform_displaytex_choice);
     }
 
-    //generate the fullscreen quad object
-    fullscreen_quad = new_object();
-    fullscreen_quad->set_program("display_texture");
-    fullscreen_quad->set_enable_draw(false);
-    float vert[] = {-1, -1, 0,
-                    1, -1, 0,
-                    1, 1, 0,
-                    -1, 1, 0};
-
-    unsigned int index[] = {0, 1, 2, 2, 3, 0};
-
-    float color[] = {1, 1, 1,
-                     1, 1, 1,
-                     1, 1, 1,
-                     1, 1, 1};
-
-    fullscreen_quad->update_vertices_buffer(&vert[0],sizeof(vert));
-    fullscreen_quad->update_triangles_index_buffer(&index[0],sizeof(index));
-    fullscreen_quad->update_color_buffer(&color[0],sizeof(color));
-    fullscreen_quad->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    generate_fullscreen_quad();
+    generate_cube(); //cube centered at 0,0,0 and of size 2 (-1 to 1)
     
     // textures initialization
     null_colortex=new Texture(DEPTH_TEXTURE_SIZE,DEPTH_TEXTURE_SIZE,TEXTURE_RGBA);
-    deferred_normalmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
     deferred_colormap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
+    deferred_normalmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
     deferred_texcoordmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
     deferred_depthmap=new Texture(screen_width,screen_height,TEXTURE_DEPTH);
     deferred_result=new Texture(screen_width,screen_height,TEXTURE_RGBA);
@@ -111,12 +107,90 @@ Scene::Scene(Display *disp) :
     fbo_shadows.attach_texture(null_colortex,FBO_COLOR0);
     
     fbo_deferred_phong.attach_texture(deferred_result,FBO_COLOR0);
+    fbo_deferred_phong.attach_texture(deferred_depthmap,FBO_DEPTH);
     
     fbo_deferred.attach_texture(deferred_normalmap,FBO_COLOR0);
     fbo_deferred.attach_texture(deferred_colormap,FBO_COLOR1);
     fbo_deferred.attach_texture(deferred_texcoordmap,FBO_COLOR2);
     fbo_deferred.attach_texture(deferred_depthmap,FBO_DEPTH);
+}
 
+void Scene::generate_cube() {
+    //generate the fullscreen cube object
+    cube = new_object_outside_octree();
+    cube->set_program("phong_pointlight");
+    cube->set_enable_draw(false);
+    
+    float vert[] = {
+        // front
+        -1.0, -1.0,  1.0,
+        1.0, -1.0,  1.0,
+        1.0,  1.0,  1.0,
+        -1.0,  1.0,  1.0,
+        // back
+        -1.0, -1.0, -1.0,
+        1.0, -1.0, -1.0,
+        1.0,  1.0, -1.0,
+        -1.0,  1.0, -1.0,
+    }; //
+    
+    unsigned int index[] = {
+        0, 1, 2,
+        2, 3, 0,
+        // top
+        3, 2, 6,
+        6, 7, 3,
+        // back
+        7, 6, 5,
+        5, 4, 7,
+        // bottom
+        4, 5, 1,
+        1, 0, 4,
+        // left
+        4, 0, 3,
+        3, 7, 4,
+        // right
+        1, 5, 6,
+        6, 2, 1,
+        };
+    
+    float color[] = {1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1};
+    
+    cube->update_vertices_buffer(&vert[0],sizeof(vert));
+    cube->update_triangles_index_buffer(&index[0],sizeof(index));
+    cube->update_color_buffer(&color[0],sizeof(color));
+    cube->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+}
+
+void Scene::generate_fullscreen_quad() {
+    //generate the fullscreen quad object
+    fullscreen_quad = new_object_outside_octree();
+    fullscreen_quad->set_program("display_texture");
+    fullscreen_quad->set_enable_draw(false);
+    
+    float vert[] = {-1, -1, 0,
+        1, -1, 0,
+        1, 1, 0,
+        -1, 1, 0};
+    
+    unsigned int index[] = {0, 1, 2, 2, 3, 0};
+    
+    float color[] = {1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1};
+    
+    fullscreen_quad->update_vertices_buffer(&vert[0],sizeof(vert));
+    fullscreen_quad->update_triangles_index_buffer(&index[0],sizeof(index));
+    fullscreen_quad->update_color_buffer(&color[0],sizeof(color));
+    fullscreen_quad->set_draw_mode(OBJECT_DRAW_TRIANGLES);
 }
 
 Scene::~Scene() {
@@ -172,6 +246,12 @@ void Scene::set_camera(Vec3<float> pos,Vec3<float> direction,Vec3<float> up_vect
 
 Object* Scene::new_object() {
     Object *o=new Object(&octree);
+    objects.insert(o);
+    return o;
+}
+
+Object* Scene::new_object_outside_octree() {
+    Object *o=new Object(NULL);
     objects.insert(o);
     return o;
 }
@@ -243,6 +323,14 @@ void Scene::delete_light(Light* l) {
     }
 }
 
+void Scene::set_deferred_cube_position(PointLight *l) {
+    float cube_size = l->get_intensity()*LINEAR_LIGHT_ATTENUATION*DEFERRED_CUBE_SIZE;
+    cube->reset_modelview();
+    cube->set_pos(l->get_pos());
+    cube->scale(cube_size,cube_size,cube_size);
+    cube->update_matrices(&perspective,&camera);
+}
+
 void Scene::render() {
      // useless in this case but necessary tex for the fbo to be complete
     disp->new_draw();
@@ -265,6 +353,11 @@ void Scene::render() {
     } else {
         Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO"<<std::endl;
     }
+    
+    Matrix4 screen_to_world;
+    screen_to_world = perspective*camera;
+    screen_to_world.invert();
+    globalvalues->set_value(screen_to_world,"screen_to_world");
     
     glDrawBuffers(1,&(bufs[0]));
     for(int i=0;i<MAX_LIGHTS;i++) {
@@ -297,25 +390,61 @@ void Scene::render() {
                     o->reset_lod_to_draw();
                 }
                 
+                uniform_light_sampler->set_value(lights[i]->get_depth_texture());
             }
             //lighting pass with phong shader
             if(fbo_deferred_phong.iscomplete()) {
                 fbo_deferred_phong.bind();
                 
-                glBlendFunc(GL_ONE,GL_ONE);
-                fullscreen_quad->set_program("phong");
                 
-                Matrix4 screen_to_world;
-                screen_to_world = perspective*camera;
-                screen_to_world.invert();
-                globalvalues->set_value(screen_to_world,"screen_to_world");
-                
-                lights[i]->set_uniform(uniform_light);
-                uniform_light_sampler->set_value(lights[i]->get_depth_texture());
-                
-                draw_object(fullscreen_quad);
+                if(lights[i]->get_type()==POINT_LIGHT || lights[i]->get_type()==SPOT_LIGHT) {
+                    //std::cout<<"start: "<<glGetError()<<std::endl;
 
-                glBlendFunc(GL_ONE,GL_ZERO);
+                    glEnable(GL_STENCIL_TEST);
+                    //pretty fucking clever trick to use the stencil to limit pixels to render http://ogldev.atspace.co.uk/www/tutorial37/tutorial37.html
+                    
+                    glDepthMask(GL_FALSE);
+                    glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+                    glDisable(GL_CULL_FACE);
+                    glClear(GL_STENCIL_BUFFER_BIT);
+                    
+                    glStencilFunc(GL_ALWAYS, 0, 0);
+                    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
+                    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
+                
+                    lights[i]->set_uniform(uniform_light);
+                    set_deferred_cube_position((PointLight*)lights[i]);
+
+                    cube->set_program("phong_pointlight_stencil");
+                    draw_object(cube);
+                    
+                    glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+                    glDisable(GL_DEPTH_TEST);
+                    
+                    glEnable(GL_BLEND);
+                    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+                
+                    glEnable(GL_CULL_FACE);
+                    glCullFace(GL_FRONT);
+                    
+                    cube->set_program("phong_pointlight");
+                    draw_object(cube);
+                    
+                    glDisable(GL_BLEND);
+                    glDepthMask(GL_TRUE);
+                    
+                    glDisable(GL_STENCIL_TEST);
+                    glCullFace(GL_BACK);
+                    glEnable(GL_DEPTH_TEST);
+                    //std::cout<<glGetError()<<std::endl;
+                } else {
+                    fullscreen_quad->set_program("phong");
+                    lights[i]->set_uniform(uniform_light);
+                    
+                    draw_object(fullscreen_quad);
+                }
+                
+                glDisable(GL_BLEND);
 
                 fbo_deferred_phong.unbind();
             } else {

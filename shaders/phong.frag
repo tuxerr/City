@@ -1,10 +1,8 @@
 #version 410
 
-#define FOG_DENSITY 0.001
+#define LINEAR_LIGHT_ATTENUATION 1
 
 out vec4 pixel_color;
-
-smooth in vec2 deferred_texcoord;
 
 uniform Light {
     int light_type;
@@ -35,6 +33,7 @@ uniform GlobalValues {
     vec3 camera_pos;
     vec3 eye_vector;
     float far;
+    vec2 screen_size;
 } GlobalValues;
 
 uniform sampler2DArrayShadow shadowmap;
@@ -50,6 +49,7 @@ vec3 color;
 vec4 vert_pos;
 vec4 vert_normal;
 vec3 texcoord;
+vec2 deferred_texcoord;
 
 vec4 spotlight() {
     vec4 globalcolor = (vec4(color,1.0)*vec4(Light.color,1.0));
@@ -83,8 +83,8 @@ vec4 spotlight() {
         }
     } 
      
-//    return ambiant+(diffuse+specular)*Light.intensity;
-    return ambiant+diffuse+specular;
+    return ambiant+(diffuse+specular)*Light.intensity;
+//    return ambiant+diffuse+specular;
 }
 
 vec4 pointlight() {
@@ -94,7 +94,8 @@ vec4 pointlight() {
     vec3 norm_normal = normalize(vert_normal.xyz);
     vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
     vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
-    float distance = abs(length(Light.origin-GlobalValues.camera_pos));
+    float eye_distance = distance(Light.origin,GlobalValues.camera_pos);
+    float light_distance = abs(length(light_ray));
 
     float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
     float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
@@ -102,10 +103,9 @@ vec4 pointlight() {
     vec4 ambiant = globalcolor*0.1;
     vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
     vec4 specular = pow(specular_mult_factor,500)*globalcolor;
-    specular = specular/(distance/3*Light.spot_values.x);
+    specular = specular/(eye_distance/3*Light.spot_values.x);
         
-//    return ambiant+(diffuse+specular)*Light.intensity;
-    return ambiant+diffuse+specular;
+    return (ambiant+diffuse+specular)*Light.intensity*(1/(light_distance*light_distance))*LINEAR_LIGHT_ATTENUATION;
 }
 
 
@@ -212,7 +212,6 @@ vec4 directionallight() {
     vec4 specular = pow(specular_mult_factor,500)*vec4(Light.color,1.0);
     specular = specular/3*Light.spot_values.x;
     
-//    return ambiant+(diffuse+specular)*Light.intensity;
     if(Light.render_shadows) {
         float res = directional_shadowing();
         vec4 fullillu = ambiant+diffuse+specular;
@@ -224,7 +223,7 @@ vec4 directionallight() {
 
 }
 
-vec4 apply_fog(vec4 color,float distance) {
+/*vec4 apply_fog(vec4 color,float distance) {
 
     const float LOG2 = 1.442695;
     float fogFactor = exp2( -FOG_DENSITY * 
@@ -235,15 +234,15 @@ vec4 apply_fog(vec4 color,float distance) {
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
     return mix(vec4(1,0.9,0.7,1), color, fogFactor);
-}
+}*/
 
 void main(void) {
     // getting information from deferred textures
     color = texture(colormap,deferred_texcoord).rgb;
+    deferred_texcoord = gl_FragCoord.xy/GlobalValues.screen_size;
     
     float depth=texture(depthmap,deferred_texcoord).r;
-    vec2 screen_texcoord=deferred_texcoord.xy*2-1;
-    vec4 screen_coordinates = vec4(screen_texcoord,(depth-0.5)*2,1.);
+    vec4 screen_coordinates = vec4(deferred_texcoord.xy*2-1,(depth-0.5)*2,1.);
     vert_pos = GlobalValues.screen_to_world*screen_coordinates;
     vert_pos.xyz=vert_pos.xyz/vert_pos.w;
     vert_pos.w=1;
@@ -252,26 +251,23 @@ void main(void) {
     
     texcoord = texture(texcoordmap,deferred_texcoord).xyz;
 
-    vec4 res = vec4(0,0,0,0);
-
     if(Light.light_type==1) {
-            if(Light.render_shadows) {
+     //       if(Light.render_shadows) {
                 vec3 light_ray = vert_pos.xyz-Light.origin;
                 //float lightval = texture(shadowcubemap[i],vec4(light_ray,1.0))+0.0025;
                 //if(abs(light_ray.z) <= lightval) {
                 //    res+=pointlight();
                 //}
-            } else {
-                res=pointlight();
-            }
+     //       } else {
+                pixel_color=pointlight();
+     //       }
 
     } else if(Light.light_type==2) {
-            res =spotlight();
+            pixel_color =spotlight();
     } else if(Light.light_type==3) {
-            res = directionallight();
+            pixel_color = directionallight();
     }
 
-    pixel_color=res;
 //    pixel_color = apply_fog(res,distance(GlobalValues.camera_pos,vert_pos.xyz));
 
 }       

@@ -7,7 +7,7 @@ Texture::Texture(int width,int height,Texture_Types type) : width(width), height
     case TEXTURE_DEPTH:
         gl_texture_type=GL_TEXTURE_2D;
         glBindTexture(gl_texture_type,texture_id);
-        glTexImage2D(gl_texture_type,0,GL_DEPTH_COMPONENT24,width,height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+        glTexImage2D(gl_texture_type,0,GL_DEPTH32F_STENCIL8,width,height,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
         break;
         
     case TEXTURE_RGBA:
@@ -19,7 +19,7 @@ Texture::Texture(int width,int height,Texture_Types type) : width(width), height
     case TEXTURE_DEPTH_LAYERED:
         gl_texture_type=GL_TEXTURE_2D_ARRAY;
         glBindTexture(gl_texture_type,texture_id);
-        glTexImage3D(gl_texture_type,0,GL_DEPTH_COMPONENT24,width,height,SHADOWING_MAX_LAYERS,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+        glTexImage3D(gl_texture_type,0,GL_DEPTH32F_STENCIL8,width,height,SHADOWING_MAX_LAYERS,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
         break;
 
     default:
@@ -27,8 +27,8 @@ Texture::Texture(int width,int height,Texture_Types type) : width(width), height
         break;
     }
     glTexParameterf(gl_texture_type, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-    glTexParameterf(gl_texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(gl_texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(gl_texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(gl_texture_type, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(gl_texture_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
     unbind();

@@ -1,11 +1,6 @@
 #version 410
 
 in vec3 in_Vertex;
-in vec3 in_Color;
-in vec3 in_Normal;
-in vec3 in_TexCoord;
-
-out vec3 color;
 
 uniform GlobalValues {
     mat4 modelview; // camera*modelview
@@ -20,8 +15,6 @@ uniform GlobalValues {
 } GlobalValues;
 
 void main() {
-    gl_Position = GlobalValues.projection_modelview*vec4(in_Vertex,1.0);
-    //gl_Position = vec4(in_Vertex,1.0);
-
-    color=in_Color;
+    vec4 point = GlobalValues.projection_modelview*vec4(in_Vertex,1.0);
+    gl_Position = point;
 }

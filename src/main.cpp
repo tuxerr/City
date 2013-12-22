@@ -32,55 +32,78 @@ int main(int argc,char *argv[]) {
     Controls c(disp.getWindow());
 
     Scene sce(&disp);
-    
-    Vec3<float> camerapos(5,0,0);
-    sce.set_camera(camerapos,Vec3<float>(0,0,2),Vec3<float>(0,0,1));
     sce.set_perspective(100,0.1,1000);
+    
+    Vec3<float> position(0,0,1.5),up_vector(1,0,0);
+    Vec3<float> target(0,0,0);
+    sce.set_camera(position,target,up_vector);
 
-    Timer timer(40);
-
+    Timer timer(50);
     Terrain terrain(&noise);
 
     terrain.scale(60,60,60);
 
     ObjFile spaceship("data/spaceship.obj");
-
-    
     Object *o=sce.new_object();
     spaceship.load_in_object(o);
     o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    o->set_enable_draw(true);
-
+    o->scale(0.4,0.4,0.4);
     spaceship.close();
     
     Spaceship ship(o);
 
     //Terrain_Data tdata = terrain.generate_terrain();
 
-    Object *terrain_patches = sce.new_object();
-    terrain.generate_patches(400,terrain_patches);
-    terrain_patches->set_enable_draw(true);
-    terrain_patches->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    //Object *terrain_patches = sce.new_object();
+    //terrain.generate_patches(400,terrain_patches);
+    //terrain_patches->set_enable_draw(true);
+    //terrain_patches->set_draw_mode(OBJECT_DRAW_TRIANGLES);
 
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(false);
     l1->set_shadow_range(-1,314);
     l1->set_color(Vec3<float>(1,0,0));
-    //l1->desactivate();
+    l1->desactivate();
     
+    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,1),Vec3<float>(1,1,1),1);
+    for(int i=0;i<1;i++) {
+        for(int j=0;j<1;j++) {
+            //PointLight *l3 = sce.new_pointlight(Vec3<float>(i,j,1),Vec3<float>(1,1,1),1);
+        }
+    }
 
-    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,4),Vec3<float>(0,1,0),1.0);
-    //l2->desactivate();
+    Object *ground = sce.new_object();
+    float vert[] = {-1, -1, 0,
+        1, -1, 0,
+        1, 1, 0,
+        -1, 1, 0};
+    float normals[] = {0,0,1,
+        0,0,1,
+        0,0,1,
+        0,0,1};
+    
+    unsigned int index[] = {0, 1, 2, 2, 3, 0};
+    
+    float color[] = {1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1};
+    
+    ground->update_vertices_buffer(&vert[0],sizeof(vert));
+    ground->update_triangles_index_buffer(&index[0],sizeof(index));
+    ground->update_color_buffer(&color[0],sizeof(color));
+    ground->update_normals_buffer(&normals[0],sizeof(normals));
 
-    Vec3<float> position(5,0,2),up_vector(0,0,1);
-    Vec3<float> target(0,0,0);
+    ground->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    ground->scale(10,10,10);
+    ground->set_enable_draw(false);
     
     //o->translate(20,0,1);
     
     float view_distance=1500;
     
     sce.display_texture(Scene::DT_NONE);
-    float pos=0;
+    float posx=0,posz=1;
     
     while (!c.quit_program()) {
         disp.new_draw();
@@ -95,17 +118,22 @@ int main(int argc,char *argv[]) {
         }
 
         if(c.is_pressed(CT_LEFT)) {
-            o->rotate(-2,0,0,1);
-        } 
+            //o->rotate(-2,0,0,1);
+            posx-=0.05;
+
+        }
         if(c.is_pressed(CT_RIGHT)) {
-            o->rotate(2,0,0,1);
+            //o->rotate(2,0,0,1);
+            posx+=0.05;
+
         }
         if(c.is_pressed(CT_UP)) {
-            pos-=0.05;
+            posz+=0.05;
         } else if(c.is_pressed(CT_DOWN)) {
-            pos+=0.05;
+            posz-=0.05;
         }
-        l2->set_pos(Vec3<float>(0,pos,4));
+        //l2->set_pos(Vec3<float>(posx,0,posz));
+        //o->set_pos(posx,0,posz);
         
         if(c.is_pressed(CT_UP)) {
             //l2->toggle();
@@ -124,7 +152,6 @@ int main(int argc,char *argv[]) {
         //    sce.set_perspective(90,1,view_distance);
         //}
 
-        sce.set_camera(position,target,up_vector);
         sce.render();
         //disp.new_draw();
         //sce.draw_object(o);
