@@ -9,6 +9,8 @@ Scene::Scene(Display *disp) :
     // program initialisation
     disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL,NULL);
     disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,NULL,"phong");
+    disp->new_program("shaders/fullscreen_draw.vert","shaders/blur_vertical.frag",NULL,NULL,NULL,"blur_vertical");
+    disp->new_program("shaders/fullscreen_draw.vert","shaders/blur_horizontal.frag",NULL,NULL,NULL,"blur_horizontal");
     disp->new_program("shaders/pointlight_draw.vert","shaders/phong_pointlight.frag",NULL,NULL,NULL,"phong_pointlight");
     disp->new_program("shaders/pointlight_draw.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"phong_pointlight_stencil");
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"depth_creation");
@@ -65,6 +67,18 @@ Scene::Scene(Display *disp) :
 
     }
     if(disp->has_program("phong_pointlight")) {
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_normalmap);
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_depthmap);
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
+        disp->link_program_to_uniformblock("phong_pointlight",uniform_light);
+    }
+    if(disp->has_program("blur_vertical")) {
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_normalmap);
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_depthmap);
+        disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
+        disp->link_program_to_uniformblock("phong_pointlight",uniform_light);
+    }
+    if(disp->has_program("blur_horizontal")) {
         disp->link_program_to_uniform("phong_pointlight",uniform_phong_normalmap);
         disp->link_program_to_uniform("phong_pointlight",uniform_phong_depthmap);
         disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
@@ -396,12 +410,11 @@ void Scene::render() {
             if(fbo_deferred_phong.iscomplete()) {
                 fbo_deferred_phong.bind();
                 
-                
                 if(lights[i]->get_type()==POINT_LIGHT || lights[i]->get_type()==SPOT_LIGHT) {
                     //std::cout<<"start: "<<glGetError()<<std::endl;
 
                     glEnable(GL_STENCIL_TEST);
-                    //pretty fucking clever trick to use the stencil to limit pixels to render http://ogldev.atspace.co.uk/www/tutorial37/tutorial37.html
+                    //pretty fucking clever trick that uses the stencil to limit pixels to render http://ogldev.atspace.co.uk/www/tutorial37/tutorial37.html
                     
                     glDepthMask(GL_FALSE);
                     glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
@@ -420,6 +433,7 @@ void Scene::render() {
                     
                     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
                     glDisable(GL_DEPTH_TEST);
+                    glClear(GL_COLOR_BUFFER_BIT);
                     
                     glEnable(GL_BLEND);
                     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
@@ -440,8 +454,15 @@ void Scene::render() {
                 } else {
                     fullscreen_quad->set_program("phong");
                     lights[i]->set_uniform(uniform_light);
-                    
+
+                    glEnable(GL_BLEND);
+                    glDisable(GL_DEPTH_TEST);
+                    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+
                     draw_object(fullscreen_quad);
+                    glEnable(GL_DEPTH_TEST);
+
+                    glDisable(GL_BLEND);
                 }
                 
                 glDisable(GL_BLEND);

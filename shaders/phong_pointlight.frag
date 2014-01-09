@@ -91,18 +91,23 @@ vec4 pointlight() {
     vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
     float eye_distance = distance(Light.origin,GlobalValues.camera_pos);
     float light_distance = length(light_ray);
-
-    float diffuse_mult_factor = dot(normalize(-light_ray),norm_normal);
-    float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
-
+    
+    float diffuse_mult_factor=1,specular_mult_factor=0;
+    if(length(vert_normal)!=0) { //if not in generated lines
+        diffuse_mult_factor = max(dot(normalize(-light_ray),norm_normal),0.0);
+        specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+    }
+    
     vec4 ambiant = globalcolor*0.1;
     vec4 diffuse = diffuse_mult_factor*globalcolor*0.4;
     vec4 specular = pow(specular_mult_factor,500)*globalcolor;
     specular = specular/(eye_distance/3*Light.spot_values.x);
     
+    
     float light_distance_pow2 = light_distance*light_distance;
-        
-    return (ambiant+diffuse+specular)*Light.intensity*(1/(light_distance_pow2+light_distance_pow2*light_distance/5))*LINEAR_LIGHT_ATTENUATION;
+    
+    vec4 result = (diffuse+ambiant+specular)*Light.intensity*(1/(1+light_distance+light_distance_pow2+pow(light_distance_pow2,5)/30))*LINEAR_LIGHT_ATTENUATION;
+    return result;
 }
 
 void main(void) {

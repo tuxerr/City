@@ -34,8 +34,8 @@ int main(int argc,char *argv[]) {
     Scene sce(&disp);
     sce.set_perspective(100,0.1,1000);
     
-    Vec3<float> position(0,0,1.5),up_vector(1,0,0);
-    Vec3<float> target(0,0,0);
+    Vec3<float> position(0.5,0.5,0.5),up_vector(1,0,0);
+    Vec3<float> target(5,5,1);
     sce.set_camera(position,target,up_vector);
 
     Timer timer(50);
@@ -46,9 +46,10 @@ int main(int argc,char *argv[]) {
     ObjFile spaceship("data/spaceship.obj");
     Object *o=sce.new_object();
     spaceship.load_in_object(o);
-    o->set_draw_mode(OBJECT_DRAW_TRIANGLES);
+    o->set_draw_mode(OBJECT_DRAW_LINES);
     o->scale(0.4,0.4,0.4);
     spaceship.close();
+    o->translate(0,0,0.5);
     
     Spaceship ship(o);
 
@@ -62,22 +63,23 @@ int main(int argc,char *argv[]) {
     DirectionalLight *l1=sce.new_directionallight(Vec3<float>(1,1,-1));
     l1->enable_shadows(false);
     l1->set_shadow_range(-1,314);
-    l1->set_color(Vec3<float>(1,0,0));
-    l1->desactivate();
-    
-    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,1),Vec3<float>(1,1,1),1);
-    for(int i=0;i<1;i++) {
-        for(int j=0;j<1;j++) {
-            //PointLight *l3 = sce.new_pointlight(Vec3<float>(i,j,1),Vec3<float>(1,1,1),1);
+    l1->set_color(Vec3<float>(1,1,1));
+
+    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,1),Vec3<float>(1,1,1),4);
+    //PointLight *l4=sce.new_pointlight(Vec3<float>(0,0.8,1),Vec3<float>(1,1,1),1);
+
+    for(int i=0;i<8;i++) {
+        for(int j=0;j<8;j++) {
+            //PointLight *l3 = sce.new_pointlight(Vec3<float>(i,j,0.8),Vec3<float>(1,1,1),1);
         }
     }
-
+    
     Object *ground = sce.new_object();
     float vert[] = {-1, -1, 0,
         1, -1, 0,
         1, 1, 0,
         -1, 1, 0};
-    float normals[] = {0,0,1,
+    float normal[] = {0,0,1,
         0,0,1,
         0,0,1,
         0,0,1};
@@ -85,18 +87,68 @@ int main(int argc,char *argv[]) {
     unsigned int index[] = {0, 1, 2, 2, 3, 0};
     
     float color[] = {1, 1, 1,
-        1, 1, 1,
-        1, 1, 1,
-        1, 1, 1};
+        1, 0, 1,
+        0, 1, 1,
+        1, 1, 0};
     
     ground->update_vertices_buffer(&vert[0],sizeof(vert));
     ground->update_triangles_index_buffer(&index[0],sizeof(index));
     ground->update_color_buffer(&color[0],sizeof(color));
-    ground->update_normals_buffer(&normals[0],sizeof(normals));
-
+    ground->update_normals_buffer(&normal[0],sizeof(normal));
+    
     ground->set_draw_mode(OBJECT_DRAW_TRIANGLES);
-    ground->scale(10,10,10);
-    ground->set_enable_draw(false);
+    ground->scale(2,2,2);
+    ground->set_enable_draw(true);
+    
+    Object* gridmatrix = sce.new_object();
+    float gridmatrix_vert[] = {
+        0, 0, 1,
+        3, 0, 1,
+        0, 1, 1,
+        3, 1, 1,
+        0, 2, 1,
+        3, 2, 1,
+        0, 3, 1,
+        3, 3, 1,
+    };
+    float gridmatrix_normal[] = {
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+    };
+    float gridmatrix_color[] = {
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+    };
+    unsigned int gridmatrix_index[] = {
+        0,1,
+        2,3,
+        4,5,
+        6,7,
+        0,3,
+        5,6,
+        6,2,
+    };
+    
+    gridmatrix->update_vertices_buffer(&gridmatrix_vert[0],sizeof(gridmatrix_vert));
+    gridmatrix->update_lines_index_buffer(&gridmatrix_index[0],sizeof(gridmatrix_index));
+    gridmatrix->update_color_buffer(&gridmatrix_color[0],sizeof(gridmatrix_color));
+    gridmatrix->update_normals_buffer(&gridmatrix_normal[0],sizeof(gridmatrix_normal));
+
+    gridmatrix->set_draw_mode(OBJECT_DRAW_LINES);
+    gridmatrix->scale(2,2,1);
+    gridmatrix->set_enable_draw(true);
     
     //o->translate(20,0,1);
     
@@ -108,7 +160,9 @@ int main(int argc,char *argv[]) {
     while (!c.quit_program()) {
         disp.new_draw();
 
-//        ship.camera_config(position,target,up_vector);
+        ship.camera_config(position,target,up_vector);
+       // sce.set_camera(position,target,up_vector);
+
 
 //        ship.move(c.is_pressed(CT_UP),c.is_pressed(CT_DOWN), c.is_pressed(CT_RIGHT), c.is_pressed(CT_LEFT));
         if(c.is_pressed(CT_DOWN)) {
@@ -127,19 +181,13 @@ int main(int argc,char *argv[]) {
             posx+=0.05;
 
         }
+        l2->set_pos(Vec3<float>(posx,0,1));
         if(c.is_pressed(CT_UP)) {
             posz+=0.05;
+            gridmatrix->scale(0.9,0.9,0.9);
         } else if(c.is_pressed(CT_DOWN)) {
             posz-=0.05;
-        }
-        //l2->set_pos(Vec3<float>(posx,0,posz));
-        //o->set_pos(posx,0,posz);
-        
-        if(c.is_pressed(CT_UP)) {
-            //l2->toggle();
-        }
-        if(c.is_pressed(CT_DOWN)) {
-           // l1->toggle();
+            gridmatrix->scale(1.1,1.1,1.1);
         }
 
         if(c.is_pressed('d')) {
