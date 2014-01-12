@@ -64,6 +64,7 @@ int main(int argc,char *argv[]) {
     l1->enable_shadows(false);
     l1->set_shadow_range(-1,314);
     l1->set_color(Vec3<float>(1,1,1));
+    
 
     PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,1),Vec3<float>(1,1,1),1);
     //PointLight *l4=sce.new_pointlight(Vec3<float>(0,0.8,1),Vec3<float>(1,1,1),1);

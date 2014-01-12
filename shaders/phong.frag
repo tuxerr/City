@@ -139,27 +139,35 @@ float directional_shadowing() {
 
 vec4 directionallight() {
     vec4 globalcolor = (vec4(color,1.0)*vec4(Light.color,1.0));
+    if(globalcolor.rgb!=vec3(0,0,0)) {
     
-    vec3 light_ray = Light.direction;
-    vec3 norm_normal = normalize(vert_normal.xyz);
-    vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
-    vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
+        vec3 light_ray = Light.direction;
+        vec3 norm_normal = normalize(vert_normal.xyz);
+        vec3 reflected_ray = reflect(normalize(light_ray),norm_normal);
+        vec3 eye_ray = GlobalValues.camera_pos-vert_pos.xyz;
 
-    float diffuse_mult_factor = max(dot(normalize(-light_ray),norm_normal),0.0);
-    float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+        float diffuse_mult_factor=1,specular_mult_factor=0;
+        if(length(vert_normal)!=0) { //if not in generated lines
+            float diffuse_mult_factor = max(dot(normalize(-light_ray),norm_normal),0.0);
+            float specular_mult_factor = max(dot(normalize(eye_ray),normalize(reflected_ray)),0.0);
+        }
 
-    vec4 ambiant = globalcolor*0.3;
-    vec4 diffuse = diffuse_mult_factor*globalcolor*0.7;
-    vec4 specular = pow(specular_mult_factor,500)*vec4(Light.color,1.0);
-    specular = specular/3*Light.spot_values.x;
+        vec4 ambiant = globalcolor*0.3;
+        vec4 diffuse = diffuse_mult_factor*globalcolor*0.7;
+        vec4 specular = pow(specular_mult_factor,500)*vec4(Light.color,1.0);
+        specular = specular/3*Light.spot_values.x;
     
-    if(Light.render_shadows) {
-        float res = directional_shadowing();
-        vec4 fullillu = ambiant+diffuse+specular;
-        vec4 shadowed = ambiant;
-        return mix(shadowed,fullillu,res);
+        if(Light.render_shadows) {
+            float res = directional_shadowing();
+            vec4 fullillu = ambiant+diffuse+specular;
+            vec4 shadowed = ambiant;
+            return mix(shadowed,fullillu,res);
+        } else {
+            return ambiant+diffuse+specular;
+        }
+        
     } else {
-        return ambiant+diffuse+specular;
+        return globalcolor;
     }
 
 }
