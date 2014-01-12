@@ -74,6 +74,7 @@ private:
     Uniform *uniform_phong_depthmap;
     Uniform *uniform_phong_colormap;
     Uniform *uniform_phong_texcoordmap;
+    Uniform *uniform_postprocess_colormap;
     
     Display_Texture displayed_texture;
 
@@ -83,8 +84,10 @@ private:
     Texture *deferred_texcoordmap;
     Texture *deferred_depthmap;
     Texture *deferred_result;
+    Texture *postprocess_flip1;
+    Texture *postprocess_flip2;
     
-    FBO fbo_shadows,fbo_deferred,fbo_deferred_phong;
+    FBO fbo_shadows,fbo_deferred,fbo_deferred_phong,fbo_postprocess;
 
     UniformBlock *uniform_light_projection;
     Vec3<float> camera_pos;

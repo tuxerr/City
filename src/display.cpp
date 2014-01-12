@@ -134,7 +134,8 @@ bool Display::has_program(std::string name) {
 
 Program *Display::get_program(std::string name) {
     if(programs.find(name)==programs.end()) {
-        return &programs["default"];
+        Logger::log(LOG_ERROR)<<"Program "<<name<<" not found"<<std::endl;
+        return NULL;
     } else {
         return &programs[name];
     }

@@ -34,7 +34,7 @@ int main(int argc,char *argv[]) {
     Scene sce(&disp);
     sce.set_perspective(100,0.1,1000);
     
-    Vec3<float> position(0.5,0.5,0.5),up_vector(1,0,0);
+    Vec3<float> position(0.5,0.5,0.5),up_vector(0,0,1);
     Vec3<float> target(5,5,1);
     sce.set_camera(position,target,up_vector);
 
@@ -65,7 +65,7 @@ int main(int argc,char *argv[]) {
     l1->set_shadow_range(-1,314);
     l1->set_color(Vec3<float>(1,1,1));
 
-    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,1),Vec3<float>(1,1,1),4);
+    PointLight *l2=sce.new_pointlight(Vec3<float>(0,0,1),Vec3<float>(1,1,1),1);
     //PointLight *l4=sce.new_pointlight(Vec3<float>(0,0.8,1),Vec3<float>(1,1,1),1);
 
     for(int i=0;i<8;i++) {

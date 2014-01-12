@@ -9,8 +9,8 @@ Scene::Scene(Display *disp) :
     // program initialisation
     disp->new_program("shaders/default.vert","shaders/default.frag",NULL,NULL,NULL);
     disp->new_program("shaders/fullscreen_draw.vert","shaders/phong.frag",NULL,NULL,NULL,"phong");
-    disp->new_program("shaders/fullscreen_draw.vert","shaders/blur_vertical.frag",NULL,NULL,NULL,"blur_vertical");
-    disp->new_program("shaders/fullscreen_draw.vert","shaders/blur_horizontal.frag",NULL,NULL,NULL,"blur_horizontal");
+    disp->new_program("shaders/blur_vertical.vert","shaders/blur.frag",NULL,NULL,NULL,"vertical_blur");
+    disp->new_program("shaders/blur_horizontal.vert","shaders/blur.frag",NULL,NULL,NULL,"horizontal_blur");
     disp->new_program("shaders/pointlight_draw.vert","shaders/phong_pointlight.frag",NULL,NULL,NULL,"phong_pointlight");
     disp->new_program("shaders/pointlight_draw.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"phong_pointlight_stencil");
     disp->new_program("shaders/depth_creation.vert","shaders/depth_creation.frag",NULL,NULL,NULL,"depth_creation");
@@ -29,6 +29,9 @@ Scene::Scene(Display *disp) :
     disp->link_program_to_uniformblock("depth_creation",globalvalues);
     disp->link_program_to_uniformblock("deferred",globalvalues);
     disp->link_program_to_uniformblock("display_texture",globalvalues);
+    disp->link_program_to_uniformblock("vertical_blur",globalvalues);
+    disp->link_program_to_uniformblock("horizontal_blur",globalvalues);
+
     
     Vec2<float> screen_size(screen_width,screen_height);
     globalvalues->set_value(screen_size, "screen_size");
@@ -72,17 +75,17 @@ Scene::Scene(Display *disp) :
         disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
         disp->link_program_to_uniformblock("phong_pointlight",uniform_light);
     }
-    if(disp->has_program("blur_vertical")) {
-        disp->link_program_to_uniform("phong_pointlight",uniform_phong_normalmap);
-        disp->link_program_to_uniform("phong_pointlight",uniform_phong_depthmap);
-        disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
-        disp->link_program_to_uniformblock("phong_pointlight",uniform_light);
+    if(disp->has_program("vertical_blur")) {
+        uniform_postprocess_colormap=disp->new_uniform("deferred_colormap",UNIFORM_SAMPLER);
+
+        //disp->link_program_to_uniform("blur_vertical",uniform_phong_normalmap);
+        //disp->link_program_to_uniform("blur_vertical",uniform_phong_depthmap);
+        disp->link_program_to_uniform("vertical_blur",uniform_postprocess_colormap);
     }
-    if(disp->has_program("blur_horizontal")) {
-        disp->link_program_to_uniform("phong_pointlight",uniform_phong_normalmap);
-        disp->link_program_to_uniform("phong_pointlight",uniform_phong_depthmap);
-        disp->link_program_to_uniform("phong_pointlight",uniform_phong_colormap);
-        disp->link_program_to_uniformblock("phong_pointlight",uniform_light);
+    if(disp->has_program("horizontal_blur")) {
+        //disp->link_program_to_uniform("blur_horizontal",uniform_phong_normalmap);
+        //disp->link_program_to_uniform("blur_horizontal",uniform_phong_depthmap);
+        disp->link_program_to_uniform("horizontal_blur",uniform_postprocess_colormap);
     }
     if(disp->has_program("depth_creation")) {
         uniform_light_projection=disp->new_uniformblock("Light_properties");
@@ -107,6 +110,8 @@ Scene::Scene(Display *disp) :
     deferred_texcoordmap=new Texture(screen_width,screen_height,TEXTURE_RGBA);
     deferred_depthmap=new Texture(screen_width,screen_height,TEXTURE_DEPTH);
     deferred_result=new Texture(screen_width,screen_height,TEXTURE_RGBA);
+    postprocess_flip1=new Texture(screen_width,screen_height,TEXTURE_RGBA);
+    postprocess_flip2=new Texture(screen_width,screen_height,TEXTURE_RGBA);
 
     // uniform setting
     uniform_phong_normalmap->set_value(deferred_normalmap);
@@ -114,7 +119,7 @@ Scene::Scene(Display *disp) :
     uniform_phong_texcoordmap->set_value(deferred_texcoordmap);
     uniform_phong_depthmap->set_value(deferred_depthmap);
 
-    uniform_displaytex_tex->set_value(deferred_result);
+    uniform_displaytex_tex->set_value(postprocess_flip2);
     uniform_displaytex_choice->set_value(-1);
     
     //rendering FBOs initialization
@@ -354,7 +359,8 @@ void Scene::render() {
     fbo_deferred_phong.bind();
     disp->new_draw();
     fbo_deferred_phong.unbind();
-
+    glEnable(GL_DEPTH_TEST);
+    
     // deferred rendering : first pass (Gbuffer construction)
     if(fbo_deferred.iscomplete()) {
         fbo_deferred.bind();
@@ -406,6 +412,7 @@ void Scene::render() {
                 
                 uniform_light_sampler->set_value(lights[i]->get_depth_texture());
             }
+            
             //lighting pass with phong shader
             if(fbo_deferred_phong.iscomplete()) {
                 fbo_deferred_phong.bind();
@@ -471,7 +478,34 @@ void Scene::render() {
             } else {
                 Logger::log(LOG_ERROR)<<"Couldn't bind the deferred rendering FBO for the phong pass"<<std::endl;
             }
+            
         }
+    }
+    
+    // 2-way blur pass
+    uniform_postprocess_colormap->set_value(deferred_result);
+    fbo_postprocess.attach_texture(postprocess_flip1,FBO_COLOR0);
+    glDisable(GL_DEPTH_TEST);
+    if(fbo_postprocess.iscomplete()) {
+        fbo_postprocess.bind();
+        disp->new_draw();
+        fullscreen_quad->set_program("horizontal_blur");
+        draw_object(fullscreen_quad);
+        fbo_postprocess.unbind();
+    } else {
+        Logger::log(LOG_ERROR)<<"Couldn't bind the postprocessing FBO for the horizontal blur pass"<<std::endl;
+    }
+    
+    fbo_postprocess.attach_texture(postprocess_flip2,FBO_COLOR0);
+    uniform_postprocess_colormap->set_value(postprocess_flip1);
+    if(fbo_postprocess.iscomplete()) {
+        fbo_postprocess.bind();
+        disp->new_draw();
+        fullscreen_quad->set_program("vertical_blur");
+        draw_object(fullscreen_quad);
+        fbo_postprocess.unbind();
+    } else {
+        Logger::log(LOG_ERROR)<<"Couldn't bind the postprocessing FBO for the vertical blur pass"<<std::endl;
     }
 
     // draw result of final pass (using fullscreen quad)
@@ -740,7 +774,7 @@ void Scene::draw_object(Object *o) {
 void Scene::display_texture(Display_Texture tex) {
     displayed_texture=tex;
     if(tex==DT_NONE) {
-        uniform_displaytex_tex->set_value(deferred_result);
+        uniform_displaytex_tex->set_value(postprocess_flip2);
         uniform_displaytex_choice->set_value(-1);
     } else if(tex==DT_CASCADED1) {
         uniform_displaytex_arraytex->set_value(lights[0]->get_depth_texture());
